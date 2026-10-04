@@ -1,0 +1,12 @@
+ActionBridge GitHub Actions SDK setup fix
+
+Cause: Android setup requested the missing SDK package tools. Windows built successfully.
+
+1. Extract this ZIP. Enable hidden files/folders if .github is not visible.
+2. Replace .github/workflows/build.yml and .github/workflows/release.yml in your Actionbridge repository with these files.
+3. Commit both changes to main. The Build Android and Windows workflow starts automatically.
+4. Open Actions and download the artifacts after the new run succeeds.
+
+For GitHub web editing, open each workflow file, click Edit, paste the matching replacement file contents, and commit to main. Do not upload this ZIP itself as repository source.
+
+No backend changes or new secrets are needed. These files preserve your app source and signing configuration. YAML and SDK package selection were validated; the corrected workflow has not yet run on GitHub because the connected integration denied write permission.
