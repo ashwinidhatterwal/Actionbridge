@@ -1,0 +1,46 @@
+name: Build Android and Windows
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+permissions:
+  contents: read
+jobs:
+  windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.26.x'
+      - shell: pwsh
+        run: |
+          cd remote/receiver
+          go test ./...
+          go build -buildvcs=false -trimpath -ldflags="-s -w" -o ../../ActionBridge.Remote.exe .
+      - run: dotnet run --project tests/ActionBridge.Tests -c Release
+      - run: dotnet publish windows/ActionBridge.Windows -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true -p:EnableCompressionInSingleFile=true -o output/windows
+      - shell: pwsh
+        run: Copy-Item ActionBridge.Remote.exe output/windows; Copy-Item scripts/Install* output/windows; Copy-Item scripts/Uninstall-Windows.ps1 output/windows
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ActionBridge-Windows-x64
+          path: output/windows
+  android:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: android-actions/setup-android@v3
+      - uses: gradle/actions/setup-gradle@v4
+      - run: chmod +x android/gradlew && cd android && ./gradlew :app:assembleDebug :app:testDebugUnitTest :app:lintDebug
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ActionBridge-Android-test-APK
+          path: android/app/build/outputs/apk/debug/*.apk

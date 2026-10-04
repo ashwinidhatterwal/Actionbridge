@@ -1,0 +1,8 @@
+**/bin/
+**/obj/
+**/build/
+**/.gradle/
+**/local.properties
+dist/
+*.jks
+*.keystore

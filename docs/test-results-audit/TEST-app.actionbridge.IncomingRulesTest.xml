@@ -1,0 +1,10 @@
+<?xml version='1.0' encoding='utf-8'?>
+<testsuite name="app.actionbridge.IncomingRulesTest" tests="4" skipped="0" failures="0" errors="0" timestamp="2026-10-03T22:49:22.447Z" hostname="58de31c71776" time="0.01">
+  <properties />
+  <testcase name="validFileAndZeroByteFile" classname="app.actionbridge.IncomingRulesTest" time="0.006" />
+  <testcase name="receivedNamesCannotTraverse" classname="app.actionbridge.IncomingRulesTest" time="0.002" />
+  <testcase name="invalidMetadataRejected" classname="app.actionbridge.IncomingRulesTest" time="0.0" />
+  <testcase name="linksAndUnicodeBytesBounded" classname="app.actionbridge.IncomingRulesTest" time="0.002" />
+  <system-out />
+  <system-err />
+</testsuite>

@@ -1,0 +1,12 @@
+<?xml version='1.0' encoding='utf-8'?>
+<testsuite name="app.actionbridge.StorageAuditTest" tests="6" skipped="0" failures="0" errors="0" timestamp="2026-10-03T22:49:22.472Z" hostname="58de31c71776" time="0.051">
+  <properties />
+  <testcase name="failedSuccessJournalDoesNotDeleteResumableBody" classname="app.actionbridge.StorageAuditTest" time="0.008" />
+  <testcase name="confirmedRemoteSuccessReleasesPayloadAfterJournal" classname="app.actionbridge.StorageAuditTest" time="0.007" />
+  <testcase name="cancellationSurvivesLateProgress" classname="app.actionbridge.StorageAuditTest" time="0.001" />
+  <testcase name="confirmedPcOutcomeCanArriveAfterCancellation" classname="app.actionbridge.StorageAuditTest" time="0.0" />
+  <testcase name="inboxOwnershipIsSharedBetweenInstances" classname="app.actionbridge.StorageAuditTest" time="0.003" />
+  <testcase name="simultaneousInboxWritesCommitOnlyOneChunk" classname="app.actionbridge.StorageAuditTest" time="0.032" />
+  <system-out />
+  <system-err />
+</testsuite>

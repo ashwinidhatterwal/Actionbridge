@@ -1,0 +1,8 @@
+  ActionBridge.Core -> <audit-workspace>/audit-source/windows/ActionBridge.Core/bin/Debug/net10.0/ActionBridge.Core.dll
+  ActionBridge.Windows -> <audit-workspace>/audit-source/windows/ActionBridge.Windows/bin/Debug/net10.0-windows10.0.19041.0/ActionBridge.dll
+
+Build succeeded.
+    0 Warning(s)
+    0 Error(s)
+
+Time Elapsed 00:00:02.72

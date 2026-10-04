@@ -1,0 +1,17 @@
+Verifies
+Verified using v1 scheme (JAR signing): false
+Verified using v2 scheme (APK Signature Scheme v2): true
+Verified using v3 scheme (APK Signature Scheme v3): false
+Verified using v3.1 scheme (APK Signature Scheme v3.1): false
+Verified using v4 scheme (APK Signature Scheme v4): false
+Verified for SourceStamp: false
+Number of signers: 1
+Signer #1 certificate DN: CN=ActionBridge, OU=App Publishing, O=ActionBridge
+Signer #1 certificate SHA-256 digest: 773095cad28ebaa55f8a15dde62d46aa47047291900732b38cb010bca9b6ec42
+Signer #1 certificate SHA-1 digest: ab8697064249fc5cee4973edc96e15b24bcc7e30
+Signer #1 certificate MD5 digest: 55d9d573063033ad7ebad215c15c1885
+Signer #1 key algorithm: RSA
+Signer #1 key size (bits): 3072
+Signer #1 public key SHA-256 digest: 4e918f3ceb8760fa4de627d10a614ce5bbd1380d58445be33f742dcac8e4d0bb
+Signer #1 public key SHA-1 digest: 8da5b2b21c9f38082ecae65eefdceb71ac007925
+Signer #1 public key MD5 digest: 233dce0232b6f2c4f8e4b7f178626a6f

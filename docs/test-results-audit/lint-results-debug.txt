@@ -1,0 +1,244 @@
+<audit-workspace>/audit-source/android/app/src/main/java/app/actionbridge/PeerStore.kt:51: Warning: Consider using apply() instead; commit writes its data to persistent storage immediately, whereas apply will handle it in the background [ApplySharedPref]
+        prefs.all.keys.filter{it.startsWith("peer-remote-")&&it!="peer-remote-$id"}.forEach{entry->runCatching{val old=read(entry.removePrefix("peer-"))?:return@runCatching;val previous=JSONObject(String(Base64.decode(old.getString("code"),Base64.URL_SAFE or Base64.NO_WRAP or Base64.NO_PADDING),Charsets.UTF_8));if(previous.optString("room")==payload.optString("room")&&previous.optString("service")==payload.optString("service"))prefs.edit().remove(entry).commit()}}
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                          ~~~~~~~~
+
+   Explanation for issues of type "ApplySharedPref":
+   Consider using apply() instead of commit on shared preferences. Whereas
+   commit blocks and writes its data to persistent storage immediately, apply
+   will handle it in the background.
+
+<audit-workspace>/audit-source/android/app/build.gradle.kts:5: Warning: Not targeting the latest versions of Android; compatibility modes apply. Consider testing and updating this version. Consult the android.os.Build.VERSION_CODES javadoc for details. [OldTargetApi]
+    defaultConfig { applicationId = "app.actionbridge"; minSdk = 26; targetSdk = 36; versionCode = 50; versionName = "0.5.0"; buildConfigField("String", "SUPPORT_EMAIL", "\"${System.getenv("SUPPORT_EMAIL") ?: ""}\"") }
+                                                                     ~~~~~~~~~~~~~~
+
+   Explanation for issues of type "OldTargetApi":
+   When your application or sdk runs on a version of Android that is more
+   recent than your targetSdk specifies that it has been tested with, various
+   compatibility modes kick in. This ensures that your application continues
+   to work, but it may look out of place. For example, if the targetSdk is
+   less than 14, your app may get an option button in the UI.
+
+   To fix this issue, set the targetSdk to the highest available value. Then
+   test your app to make sure everything works correctly. You may want to
+   consult the compatibility notes to see what changes apply to each version
+   you are adding support for:
+   https://developer.android.com/reference/android/os/Build.VERSION_CODES.html
+   as well as follow this guide:
+   https://developer.android.com/distribute/best-practices/develop/target-sdk.
+   html
+
+   https://developer.android.com/distribute/best-practices/develop/target-sdk.html
+
+<audit-workspace>/audit-source/android/app/build.gradle.kts:4: Warning: A newer version of compileSdk than 36 is available: 37 [GradleDependency]
+    compileSdk = 36
+    ~~~~~~~~~~~~~~~
+
+   Explanation for issues of type "GradleDependency":
+   This detector looks for usages of libraries where the version you are using
+   is not the current stable release. Using older versions is fine, and there
+   are cases where you deliberately want to stick with an older version.
+   However, you may simply not be aware that a more recent version is
+   available, and that is what this lint check helps find.
+
+<audit-workspace>/audit-source/android/app/src/main/java/app/actionbridge/RemoteEngine.kt:20: Warning: Using setJavaScriptEnabled can introduce XSS vulnerabilities into your application, review carefully [SetJavaScriptEnabled]
+  web.settings.javaScriptEnabled=true;web.settings.allowFileAccess=false;web.settings.allowContentAccess=false;web.settings.domStorageEnabled=false
+  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+   Explanation for issues of type "SetJavaScriptEnabled":
+   Your code should not invoke setJavaScriptEnabled if you are not sure that
+   your app really requires JavaScript support.
+
+   https://goo.gle/SetJavaScriptEnabled
+   https://developer.android.com/training/articles/security-tips
+
+<audit-workspace>/audit-source/android/app/src/main/java/app/actionbridge/BridgeApi.kt:12: Warning: Implementing a custom X509TrustManager is error-prone and likely to be insecure. It is likely to disable certificate validation altogether, and is non-trivial to implement correctly without calling Android's default implementation. [CustomX509TrustManager]
+        init(null,arrayOf(object:X509TrustManager {
+                          ~~~~~~
+
+   Explanation for issues of type "CustomX509TrustManager":
+   This check looks for custom X509TrustManager implementations.
+
+   https://goo.gle/CustomX509TrustManager
+
+<audit-workspace>/audit-source/android/app/src/main/AndroidManifest.xml:11: Warning: The attribute android:allowBackup is deprecated from Android 12 and higher and may be removed in future versions. Consider adding the attribute android:dataExtractionRules specifying an @xml resource which configures cloud backups and device transfers on Android 12 and higher. [DataExtractionRules]
+ <application android:label="ActionBridge" android:icon="@mipmap/ic_launcher" android:roundIcon="@mipmap/ic_launcher" android:theme="@style/AppTheme" android:allowBackup="false" android:supportsRtl="true" android:usesCleartextTraffic="false">
+                                                                                                                                                                           ~~~~~
+
+   Explanation for issues of type "DataExtractionRules":
+   Before Android 12, the attributes android:allowBackup and
+   android:fullBackupContent were used to configure all forms of backup,
+   including cloud backups, device-to-device transfers and adb backup.
+
+   In Android 12 and higher, these attributes have been deprecated and will
+   only apply to cloud backups. You should instead use the attribute
+   android:dataExtractionRules, specifying an @xml resource that configures
+   which files to back up, for cloud backups and for device-to-device
+   transfers, separately. If your minSdkVersion supports older versions,
+   you'll still want to specify an android:fullBackupContent resource if the
+   default behavior is not right for your app.
+
+   https://developer.android.com/about/versions/12/backup-restore#xml-changes
+   https://goo.gle/DataExtractionRules
+
+<audit-workspace>/audit-source/android/app/src/main/res/mipmap-anydpi-v26: Warning: This folder configuration (v26) is unnecessary; minSdkVersion is 26. Merge all the resources in this folder into mipmap-anydpi. [ObsoleteSdkInt]
+
+   Explanation for issues of type "ObsoleteSdkInt":
+   This check flags version checks that are not necessary, because the
+   minSdkVersion (or surrounding known API level) is already at least as high
+   as the version checked for.
+
+   Similarly, it also looks for resources in -vNN folders, such as values-v14
+   where the version qualifier is less than or equal to the minSdkVersion,
+   where the contents should be merged into the best folder.
+
+<audit-workspace>/audit-source/android/app/src/main/java/app/actionbridge/Queue.kt:62: Warning: Consider also using StorageManager#getAllocatableBytes and allocateBytes which will consider clearable cached data [UsableSpace]
+                    val buf=ByteArray(65536);while(true){val n=source.read(buf);if(n<0)break;size+=n;if(size>2147483648L)error("Files must be at most 2 GB.");if(file.parentFile!!.usableSpace<64*1024*1024L)error("Phone storage is almost full.");dest.write(buf,0,n);digest.update(buf,0,n);onProgress(size)};dest.fd.sync()
+                                                                                                                                                                                   ~~~~~~~~~~~
+
+   Explanation for issues of type "UsableSpace":
+   When you need to allocate disk space for large files, consider using the
+   new allocateBytes(FileDescriptor, long) API, which will automatically clear
+   cached files belonging to other apps (as needed) to meet your request.
+
+   When deciding if the device has enough disk space to hold your new data,
+   call getAllocatableBytes(UUID) instead of using getUsableSpace(), since the
+   former will consider any cached data that the system is willing to clear on
+   your behalf.
+
+   Note that these methods require API level 26. If your app is running on
+   older devices, you will probably need to use both APIs, conditionally
+   switching on Build.VERSION.SDK_INT. Lint only looks in the same compilation
+   unit to see if you are already using both APIs, so if it warns even though
+   you are already using the new API, consider moving the calls to the same
+   file or suppressing the warning.
+
+<audit-workspace>/audit-source/android/app/src/main/res/mipmap-hdpi/ic_launcher.png: Warning: Launcher icon used as round icon did not have a circular shape [IconLauncherShape]
+<audit-workspace>/audit-source/android/app/src/main/res/mipmap-mdpi/ic_launcher.png: Warning: Launcher icon used as round icon did not have a circular shape [IconLauncherShape]
+<audit-workspace>/audit-source/android/app/src/main/res/mipmap-xhdpi/ic_launcher.png: Warning: Launcher icon used as round icon did not have a circular shape [IconLauncherShape]
+<audit-workspace>/audit-source/android/app/src/main/res/mipmap-xxhdpi/ic_launcher.png: Warning: Launcher icon used as round icon did not have a circular shape [IconLauncherShape]
+<audit-workspace>/audit-source/android/app/src/main/res/mipmap-xxxhdpi/ic_launcher.png: Warning: Launcher icon used as round icon did not have a circular shape [IconLauncherShape]
+
+   Explanation for issues of type "IconLauncherShape":
+   According to the Android Design Guide
+   (https://d.android.com/r/studio-ui/designer/material/iconography) your
+   launcher icons should "use a distinct silhouette", a "three-dimensional,
+   front view, with a slight perspective as if viewed from above, so that
+   users perceive some depth."
+
+   The unique silhouette implies that your launcher icon should not be a
+   filled square.
+
+<audit-workspace>/audit-source/android/app/src/main/java/app/actionbridge/MainActivity.kt:82: Warning: String literal in setText can not be translated. Use Android resources instead. [SetTextI18n]
+            selectedPeer()?.let{peer->AlertDialog.Builder(this).setMessage("Forget ${peer.name}? You will approve it again on the PC.").setPositiveButton("Forget"){_,_->PeerStore(this).forget(peer.id);remoteEngine.disconnect();status.text="PC forgotten.";scan()}.setNegativeButton("Cancel",null).show()}
+                                                                                                                                                                                                                                                ~~~~~~~~~~~~~
+<audit-workspace>/audit-source/android/app/src/main/java/app/actionbridge/MainActivity.kt:98: Warning: String literal in setText can not be translated. Use Android resources instead. [SetTextI18n]
+        landscape=CheckBox(this).apply{text="Landscape"};color=CheckBox(this).apply{text="Color (if supported)";isChecked=true};advanced.addView(landscape);advanced.addView(color)
+                                             ~~~~~~~~~
+<audit-workspace>/audit-source/android/app/src/main/java/app/actionbridge/MainActivity.kt:98: Warning: String literal in setText can not be translated. Use Android resources instead. [SetTextI18n]
+        landscape=CheckBox(this).apply{text="Landscape"};color=CheckBox(this).apply{text="Color (if supported)";isChecked=true};advanced.addView(landscape);advanced.addView(color)
+                                                                                          ~~~~~~~~~~~~~~~~~~~~
+<audit-workspace>/audit-source/android/app/src/main/java/app/actionbridge/MainActivity.kt:102: Warning: String literal in setText can not be translated. Use Android resources instead. [SetTextI18n]
+        collate=CheckBox(this).apply{text="Collate copies (1,2,3 · 1,2,3)";isChecked=true};advanced.addView(collate)
+                                           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+<audit-workspace>/audit-source/android/app/src/main/java/app/actionbridge/MainActivity.kt:151: Warning: String literal in setText can not be translated. Use Android resources instead. [SetTextI18n]
+    }catch(e:Exception){status.text="Invalid code. In ActionBridge on your PC, click Connect phone."}}
+                                     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+<audit-workspace>/audit-source/android/app/src/main/java/app/actionbridge/MainActivity.kt:152: Warning: String literal in setText can not be translated. Use Android resources instead. [SetTextI18n]
+    private fun scan(){if(busy||scanning)return;scanning=true;scope.launch{try{val store=PeerStore(this@MainActivity);status.text="Finding nearby PCs…";val found=try{Discovery(this@MainActivity).scan()}catch(e:Exception){emptyList()};if(busy)return@launch;discovered=found.map{it.id}.toSet()
+                                                                                                                                   ~~~~~~~~~~~~~~~~~~~
+<audit-workspace>/audit-source/android/app/src/main/java/app/actionbridge/MainActivity.kt:156: Warning: String literal in setText can not be translated. Use Android resources instead. [SetTextI18n]
+        if(peers.isEmpty())status.text="Tap Add computer, then scan the QR code shown on your PC."
+                                        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+<audit-workspace>/audit-source/android/app/src/main/java/app/actionbridge/MainActivity.kt:157: Warning: String literal in setText can not be translated. Use Android resources instead. [SetTextI18n]
+        if(selectionPending){selectionPending=false;val last=previousPC;val index=peers.indexOfFirst{it.id==last};if(index>=0){pc.setSelection(index);action="copy";actionPicker.setSelection(actions.indexOf("copy"));sendNow()}else status.text="Choose and pair your PC, then tap Copy on PC."}
+                                                                                                                                                                                                                                                   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+<audit-workspace>/audit-source/android/app/src/main/java/app/actionbridge/MainActivity.kt:159: Warning: Do not concatenate text displayed with setText. Use resource string with placeholders. [SetTextI18n]
+    private fun showPrinters(data:JSONArray){printerData=data;printer.adapter=ArrayAdapter(this,android.R.layout.simple_spinner_dropdown_item,listOf("Default printer")+(0 until data.length()).map{data.getJSONObject(it).getString("name")});status.text="Connected · ${data.length()} printer(s)"}
+                                                                                                                                                                                                                                                           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+<audit-workspace>/audit-source/android/app/src/main/java/app/actionbridge/MainActivity.kt:159: Warning: String literal in setText can not be translated. Use Android resources instead. [SetTextI18n]
+    private fun showPrinters(data:JSONArray){printerData=data;printer.adapter=ArrayAdapter(this,android.R.layout.simple_spinner_dropdown_item,listOf("Default printer")+(0 until data.length()).map{data.getJSONObject(it).getString("name")});status.text="Connected · ${data.length()} printer(s)"}
+                                                                                                                                                                                                                                                            ~~~~~~~~~~~~
+<audit-workspace>/audit-source/android/app/src/main/java/app/actionbridge/MainActivity.kt:159: Warning: String literal in setText can not be translated. Use Android resources instead. [SetTextI18n]
+    private fun showPrinters(data:JSONArray){printerData=data;printer.adapter=ArrayAdapter(this,android.R.layout.simple_spinner_dropdown_item,listOf("Default printer")+(0 until data.length()).map{data.getJSONObject(it).getString("name")});status.text="Connected · ${data.length()} printer(s)"}
+                                                                                                                                                                                                                                                                                        ~~~~~~~~~~~
+<audit-workspace>/audit-source/android/app/src/main/java/app/actionbridge/MainActivity.kt:161: Warning: String literal in setText can not be translated. Use Android resources instead. [SetTextI18n]
+    private fun retryRemote(j:JSONObject){if(busy)return;setBusy(true);scope.launch{try{val peer=Peer.parse(j.getJSONObject("peer"));waitRemote(peer);remoteEngine.send(listOf(j.getString("id")))}catch(e:Exception){status.text="PC unavailable. It stays saved; try again when online.";setBusy(false)}}}
+                                                                                                                                                                                                                                   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+<audit-workspace>/audit-source/android/app/src/main/java/app/actionbridge/MainActivity.kt:171: Warning: Do not concatenate text displayed with setText. Use resource string with placeholders. [SetTextI18n]
+            store.save(peer,token,false);withContext(Dispatchers.Main){status.text="Tap Allow on ${peer.name} to connect this phone."}
+                                                                                   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+<audit-workspace>/audit-source/android/app/src/main/java/app/actionbridge/MainActivity.kt:171: Warning: String literal in setText can not be translated. Use Android resources instead. [SetTextI18n]
+            store.save(peer,token,false);withContext(Dispatchers.Main){status.text="Tap Allow on ${peer.name} to connect this phone."}
+                                                                                    ~~~~~~~~~~~~~
+<audit-workspace>/audit-source/android/app/src/main/java/app/actionbridge/MainActivity.kt:171: Warning: String literal in setText can not be translated. Use Android resources instead. [SetTextI18n]
+            store.save(peer,token,false);withContext(Dispatchers.Main){status.text="Tap Allow on ${peer.name} to connect this phone."}
+                                                                                                             ~~~~~~~~~~~~~~~~~~~~~~~
+<audit-workspace>/audit-source/android/app/src/main/java/app/actionbridge/MainActivity.kt:174: Warning: String literal in setText can not be translated. Use Android resources instead. [SetTextI18n]
+            try{api.request("/status");store.save(peer,token,true)}catch(e:ApiException){if(e.code!=401)throw e;store.save(peer,token,false);withContext(Dispatchers.Main){status.text="Access removed. Tap Allow on the PC to reconnect."};api.request("/pair","POST",JSONObject().put("clientId",store.clientId()).put("name",Build.MODEL.take(80)).put("token",token));store.save(peer,token,true)}
+                                                                                                                                                                                        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+<audit-workspace>/audit-source/android/app/src/main/java/app/actionbridge/MainActivity.kt:183: Warning: String literal in setText can not be translated. Use Android resources instead. [SetTextI18n]
+        if(busy||receiving){status.text="Finishing a transfer. Try again in a moment.";return}
+                                         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+<audit-workspace>/audit-source/android/app/src/main/java/app/actionbridge/MainActivity.kt:184: Warning: String literal in setText can not be translated. Use Android resources instead. [SetTextI18n]
+        var peer=selectedPeer()?:run{status.text="Tap Add computer to connect your PC.";return}
+                                                  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+<audit-workspace>/audit-source/android/app/src/main/java/app/actionbridge/MainActivity.kt:186: Warning: String literal in setText can not be translated. Use Android resources instead. [SetTextI18n]
+        if(mode in listOf("open","save","print")&&files.isEmpty()){status.text="Choose a file first.";return}
+                                                                                ~~~~~~~~~~~~~~~~~~~~
+<audit-workspace>/audit-source/android/app/src/main/java/app/actionbridge/MainActivity.kt:187: Warning: String literal in setText can not be translated. Use Android resources instead. [SetTextI18n]
+        if(mode in listOf("copy","url")&&(text.isEmpty()||text.length>65536)){status.text="Enter text up to 65,536 characters.";return}
+                                                                                           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+<audit-workspace>/audit-source/android/app/src/main/java/app/actionbridge/MainActivity.kt:188: Warning: String literal in setText can not be translated. Use Android resources instead. [SetTextI18n]
+        if(mode=="url"&&!Rules.webLink(text)){status.text="Enter a complete HTTP or HTTPS web link.";return}
+                                                           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+<audit-workspace>/audit-source/android/app/src/main/java/app/actionbridge/MainActivity.kt:189: Warning: String literal in setText can not be translated. Use Android resources instead. [SetTextI18n]
+        val number=copies.text.toString().toIntOrNull()?:0;if(mode=="print"&&number !in 1..99){status.text="Copies must be between 1 and 99.";return}
+                                                                                                            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+<audit-workspace>/audit-source/android/app/src/main/java/app/actionbridge/MainActivity.kt:202: Warning: Do not concatenate text displayed with setText. Use resource string with placeholders. [SetTextI18n]
+                status.text="Preparing ${index+1} of ${sources.size}…"
+                            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+<audit-workspace>/audit-source/android/app/src/main/java/app/actionbridge/MainActivity.kt:202: Warning: Do not concatenate text displayed with setText. Use resource string with placeholders. [SetTextI18n]
+                status.text="Preparing ${index+1} of ${sources.size}…"
+                                         ~~~~~~~
+<audit-workspace>/audit-source/android/app/src/main/java/app/actionbridge/MainActivity.kt:202: Warning: String literal in setText can not be translated. Use Android resources instead. [SetTextI18n]
+                status.text="Preparing ${index+1} of ${sources.size}…"
+                             ~~~~~~~~~~
+<audit-workspace>/audit-source/android/app/src/main/java/app/actionbridge/MainActivity.kt:202: Warning: String literal in setText can not be translated. Use Android resources instead. [SetTextI18n]
+                status.text="Preparing ${index+1} of ${sources.size}…"
+                                                 ~~~~
+<audit-workspace>/audit-source/android/app/src/main/java/app/actionbridge/MainActivity.kt:204: Warning: Do not concatenate text displayed with setText. Use resource string with placeholders. [SetTextI18n]
+                    val id=Queue.stage(applicationContext,uri,if(uri==null)text else null,peer,mode,options){bytes->if(bytes%(4*1024*1024)<65536)runOnUiThread{if(!isDestroyed)status.text="Preparing · ${bytes/1048576} MB"}}
+                                                                                                                                                                                           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+<audit-workspace>/audit-source/android/app/src/main/java/app/actionbridge/MainActivity.kt:204: Warning: String literal in setText can not be translated. Use Android resources instead. [SetTextI18n]
+                    val id=Queue.stage(applicationContext,uri,if(uri==null)text else null,peer,mode,options){bytes->if(bytes%(4*1024*1024)<65536)runOnUiThread{if(!isDestroyed)status.text="Preparing · ${bytes/1048576} MB"}}
+                                                                                                                                                                                            ~~~~~~~~~~~~
+<audit-workspace>/audit-source/android/app/src/main/java/app/actionbridge/MainActivity.kt:204: Warning: String literal in setText can not be translated. Use Android resources instead. [SetTextI18n]
+                    val id=Queue.stage(applicationContext,uri,if(uri==null)text else null,peer,mode,options){bytes->if(bytes%(4*1024*1024)<65536)runOnUiThread{if(!isDestroyed)status.text="Preparing · ${bytes/1048576} MB"}}
+                                                                                                                                                                                                                        ~~~
+<audit-workspace>/audit-source/android/app/src/main/java/app/actionbridge/MainActivity.kt:209: Warning: String literal in setText can not be translated. Use Android resources instead. [SetTextI18n]
+            status.text=if(remoteMode)"Sending to ${peer.name}. Keep this screen open." else "Sending to ${peer.name}. You can leave this screen.";selected.clear();fileLabel.text="No file selected";input.setText("");refreshHistory()
+                                                                                                                                                                                    ~~~~~~~~~~~~~~~~
+<audit-workspace>/audit-source/android/app/src/main/java/app/actionbridge/MainActivity.kt:216: Warning: String literal in setText can not be translated. Use Android resources instead. [SetTextI18n]
+            if(state in listOf("paused","failed","retrying"))view.addView(button("Retry same transfer"){if(j.optString("transport")=="remote")retryRemote(j) else {Queue.enqueue(this,id);status.text="Retry queued."}})
+                                                                                                                                                                                                       ~~~~~~~~~~~~~
+<audit-workspace>/audit-source/android/app/src/main/java/app/actionbridge/MainActivity.kt:246: Warning: String literal in setText can not be translated. Use Android resources instead. [SetTextI18n]
+            else if(j.getString("kind")=="file"){view.addView(text("Saved · "+if(Build.VERSION.SDK_INT>=29)"Downloads / ActionBridge" else "ActionBridge received files",13f));view.addView(button("Open file"){runCatching{val uri=Uri.parse(j.getString("uri"));val type=android.webkit.MimeTypeMap.getSingleton().getMimeTypeFromExtension(j.getString("name").substringAfterLast('.',"").lowercase())?:"*/*";startActivity(Intent(Intent.ACTION_VIEW).setDataAndType(uri,type).addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION))}.onFailure{status.text="No app available to open this file."}})}
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+<audit-workspace>/audit-source/android/app/src/main/java/app/actionbridge/MainActivity.kt:247: Warning: String literal in setText can not be translated. Use Android resources instead. [SetTextI18n]
+            else{view.addView(text(j.optString("text"),14f).apply{maxLines=6;ellipsize=android.text.TextUtils.TruncateAt.END});view.addView(button("Copy"){(getSystemService(CLIPBOARD_SERVICE) as android.content.ClipboardManager).setPrimaryClip(android.content.ClipData.newPlainText("From PC",j.getString("text")));status.text="Copied. Paste it in any app."});if(j.getString("kind")=="link")view.addView(button("Open link"){startActivity(Intent(Intent.ACTION_VIEW,Uri.parse(j.getString("text"))))})}
+                                                                                                                                                                                                                                                                                                                                       ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+   Explanation for issues of type "SetTextI18n":
+   When calling TextView#setText
+   * Never call Number#toString() to format numbers; it will not handle
+   fraction separators and locale-specific digits properly. Consider using
+   String#format with proper format specifications (%d or %f) instead.
+   * Do not pass a string literal (e.g. "Hello") to display text. Hardcoded
+   text can not be properly translated to other languages. Consider using
+   Android resource strings instead.
+   * Do not build messages by concatenating text chunks. Such messages can not
+   be properly translated.
+
+   https://developer.android.com/guide/topics/resources/localization.html
+
+0 errors, 46 warnings

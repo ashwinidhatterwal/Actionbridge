@@ -1,0 +1,11 @@
+FAIL: outgoing UI failure cannot prevent acknowledgement or body cleanup: UI gone
+FAIL: failed outgoing journal commit remains queued and retries durably: memory says delivered while journal says queued
+FAIL: abandoned outgoing staging cleaned without deleting corrupt-journal payload: orphan policy incorrect
+FAIL: failed upload checkpoint reports only committed offset: uncommitted offset exposed
+FAIL: failed cancellation commit preserves upload state: uncommitted cancellation exposed
+FAIL: failed finish commit remains safely retryable: uncommitted queued state exposed
+FAIL: failed approval persistence cannot grant temporary access: phone granted access despite failed approval save
+FAIL: failed revocation persistence cannot hide still-saved approval: memory and disk trust disagree
+FAIL: large remote clipboard acknowledgement fits one control message: response is 393591 bytes
+FAIL: failed destination rename releases temporary copy and retains resumable upload: unsuccessful copy retained in Downloads
+0 audit checks passed; 10 failed.

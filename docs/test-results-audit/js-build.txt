@@ -1,0 +1,9 @@
+npm warn Unknown env config "http-proxy". This will stop working in the next major version of npm.
+
+> build
+> esbuild app.js --bundle --format=iife --minify --outfile=../../android/app/src/main/assets/remote/app.js
+
+
+  ../../android/app/src/main/assets/remote/app.js  9.7kb
+
+⚡ Done in 3ms

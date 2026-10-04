@@ -1,0 +1,6 @@
+Android: 10 JVM tests passed. Release lint: 0 errors, 45 warnings.
+Windows: 53 core/API/remote dispatcher checks passed; self-contained x64 build completed.
+Go: six race-enabled tests passed.
+Phone JS: two bundled-native transport tests passed, including max-size Hindi text and resume.
+Worker: seven policy tests and local runtime integration passed. Deployment dry-run passed.
+No real-device UI, physical-printer, production relay or cloud deployment test performed here.

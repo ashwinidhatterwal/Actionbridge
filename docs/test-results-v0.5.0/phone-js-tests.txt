@@ -1,0 +1,14 @@
+
+> test
+> node --test *.test.mjs
+
+✔ native main page remote actions preserve print settings and execute retries once (155.414836ms)
+✔ native remote action resumes using the same durable job identity (137.92097ms)
+ℹ tests 2
+ℹ suites 0
+ℹ pass 2
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 390.286013

@@ -1,0 +1,15 @@
+ActionBridge v0.5.0 unified connection privacy notice
+
+Local transfers connect directly over your local network. Windows automatically registers with https://actionbridge-connect.actionbridge.workers.dev for remote access. The phone receives this service address and private credentials through QR pairing or an approved local connection.
+
+The connection service handles device pairing, connection details and temporary relay credentials. It stores hashes of connection credentials and may process network addresses and operational metadata. File names, print settings, text, links and file contents are sent over an encrypted WebRTC channel to the paired PC. A relay may forward encrypted traffic when a direct connection is unavailable. Cloudflare may process network metadata under its own privacy terms.
+
+Completed files and temporary partial transfers are stored on the receiving PC, in Downloads/ActionBridge. Windows journals job metadata, text/link requests, progress and outcomes. The phone retains staged files and activity for retry, with terminal payloads cleaned after seven days. The phone encrypts saved pairing credentials using its Android keystore; Windows protects saved remote credentials for the current Windows user.
+
+There is no advertising or analytics SDK. Optional camera permission scans the PC pairing QR; camera images are not uploaded. Android's file picker grants access to the files you select. Keep pairing QR codes private.
+
+Forget on the phone removes its saved pairing. Disconnect remote access on the PC revokes the remote pairing capability. Uninstalling does not automatically delete received PC files or revoke remote access; disconnect first.
+
+This is a pilot. The publisher must add a public support email, hosted privacy policy and verified service/operator retention details before public distribution.
+
+Two-way transfer additions: selecting Send to PC explicitly passes that selected text to ActionBridge for delivery; the app does not monitor other apps’ clipboards. Windows stages files and text/link requests selected for an approved phone in a local outbox. The phone stores incoming partial files and metadata privately, verifies files, and exports completed files to Downloads/ActionBridge on Android 10+ or app-specific storage on Android 8–9. Completed downloads in shared Downloads remain after uninstall. Received text and links stay in the phone’s local received history and are copied/opened only when requested. Windows deletes staged outgoing file bodies after receipt or cancellation; sent metadata remains locally. No file body or clipboard text is stored by the signaling backend.

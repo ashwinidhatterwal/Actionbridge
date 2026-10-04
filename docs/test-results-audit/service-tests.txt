@@ -1,0 +1,15 @@
+✔ signal envelope excludes file bodies and malformed session IDs (1.003978ms)
+✔ registration is disabled by default and requires operator key (3.497119ms)
+✔ untrusted origins rejected before room access (0.340314ms)
+✔ health permits bundled phone origin and does not expose keys (0.927133ms)
+✔ credentials are random capabilities stored as hashes (4.305312ms)
+✔ automatic enrollment fails closed without admission limits (0.720911ms)
+✔ automatic enrollment has a separate operator kill switch (0.420015ms)
+ℹ tests 7
+ℹ suites 0
+ℹ pass 7
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 82.789301

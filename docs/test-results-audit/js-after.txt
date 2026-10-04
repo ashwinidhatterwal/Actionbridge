@@ -1,0 +1,18 @@
+npm warn Unknown env config "http-proxy". This will stop working in the next major version of npm.
+
+> test
+> node --test *.test.mjs
+
+✔ native main page remote actions preserve print settings and execute retries once (122.793863ms)
+✔ native remote action resumes using the same durable job identity (119.956114ms)
+✔ closed data channel automatically starts a fresh authenticated connection (17.541415ms)
+✔ stalled signaling handshake reconnects after its deadline (0.95867ms)
+✔ delayed ICE response for old PC cannot replace the selected connection (41.46248ms)
+ℹ tests 5
+ℹ suites 0
+ℹ pass 5
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 314.388464

@@ -1,0 +1,59 @@
+✖ closed data channel automatically starts a fresh authenticated connection (523.969523ms)
+✖ stalled signaling handshake reconnects after its deadline (2.786475ms)
+✖ delayed ICE response for old PC cannot replace the selected connection (42.09439ms)
+ℹ tests 3
+ℹ suites 0
+ℹ pass 0
+ℹ fail 3
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 643.482488
+
+✖ failing tests:
+
+test at audit-source/remote/phone/recovery.test.mjs:14:1
+✖ closed data channel automatically starts a fresh authenticated connection (523.969523ms)
+  Error: fixture timed out
+      at until (file://<audit-workspace>/audit-source/remote/phone/recovery.test.mjs:3:106)
+      at async TestContext.<anonymous> (file://<audit-workspace>/audit-source/remote/phone/recovery.test.mjs:14:260)
+      at async Test.run (node:internal/test_runner/test:1389:7)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:387:3)
+
+test at audit-source/remote/phone/recovery.test.mjs:15:1
+✖ stalled signaling handshake reconnects after its deadline (2.786475ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  
+  1 !== 2
+  
+      at TestContext.<anonymous> (file://<audit-workspace>/audit-source/remote/phone/recovery.test.mjs:15:179)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1382:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:960:18)
+      at Test.postRun (node:internal/test_runner/test:1522:19)
+      at Test.run (node:internal/test_runner/test:1447:12)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:387:3) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: 1,
+    expected: 2,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at audit-source/remote/phone/recovery.test.mjs:16:1
+✖ delayed ICE response for old PC cannot replace the selected connection (42.09439ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  
+  2 !== 1
+  
+      at TestContext.<anonymous> (file://<audit-workspace>/audit-source/remote/phone/recovery.test.mjs:16:330)
+      at async Test.run (node:internal/test_runner/test:1389:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:960:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: 2,
+    expected: 1,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }

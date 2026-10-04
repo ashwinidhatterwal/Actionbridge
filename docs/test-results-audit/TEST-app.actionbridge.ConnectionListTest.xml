@@ -1,0 +1,9 @@
+<?xml version='1.0' encoding='utf-8'?>
+<testsuite name="app.actionbridge.ConnectionListTest" tests="3" skipped="0" failures="0" errors="0" timestamp="2026-10-03T22:49:22.430Z" hostname="58de31c71776" time="0.014">
+  <properties />
+  <testcase name="offlineDiscoveryKeepsBothSavedRoutes" classname="app.actionbridge.ConnectionListTest" time="0.005" />
+  <testcase name="otherSavedComputerRemainsWhenOnlyOneIsFound" classname="app.actionbridge.ConnectionListTest" time="0.008" />
+  <testcase name="nearbyAndInternetAreOneComputer" classname="app.actionbridge.ConnectionListTest" time="0.0" />
+  <system-out />
+  <system-err />
+</testsuite>

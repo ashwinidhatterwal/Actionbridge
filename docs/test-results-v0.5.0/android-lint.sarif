@@ -1,0 +1,2201 @@
+{
+    "$schema" : "https://docs.oasis-open.org/sarif/sarif/v2.1.0/errata01/os/schemas/sarif-schema-2.1.0.json",
+    "version" : "2.1.0",
+    "runs" : [
+        {
+            "tool": {
+                "driver": {
+                    "name": "Android Lint",
+                    "fullName": "Android Lint (in gradle)",
+                    "version": "9.4.0",
+                    "semanticVersion": "9.4.0",
+                    "organization": "Google",
+                    "informationUri": "https://developer.android.com/studio/write/lint",
+                    "fullDescription": {
+                        "text": "Static analysis originally for Android source code but now performing general analysis"
+                    },
+                    "language": "en-US",
+                    "rules": [
+                        {
+                            "id": "ApplySharedPref",
+                            "shortDescription": {
+                                "text": "Use apply() on SharedPreferences",
+                                "markdown": "Use `apply()` on `SharedPreferences`"
+                            },
+                            "fullDescription": {
+                                "text": "Consider using apply() instead of commit on shared preferences. Whereas commit blocks and writes its data to persistent storage immediately, apply will handle it in the background.",
+                                "markdown": "Consider using `apply()` instead of `commit` on shared preferences. Whereas `commit` blocks and writes its data to persistent storage immediately, `apply` will handle it in the background."
+                            },
+                            "defaultConfiguration": {
+                                "level": "warning",
+                                "rank": 50
+                            },
+                            "properties": {
+                                "tags": [
+                                    "Correctness"
+                                ]
+                            }
+                        },
+                        {
+                            "id": "CustomX509TrustManager",
+                            "shortDescription": {
+                                "text": "Implements custom TLS trust manager"
+                            },
+                            "fullDescription": {
+                                "text": "This check looks for custom X509TrustManager implementations.",
+                                "markdown": "This check looks for custom `X509TrustManager` implementations."
+                            },
+                            "defaultConfiguration": {
+                                "level": "warning",
+                                "rank": 60
+                            },
+                            "properties": {
+                                "tags": [
+                                    "Security"
+                                ]
+                            }
+                        },
+                        {
+                            "id": "DataExtractionRules",
+                            "shortDescription": {
+                                "text": "Missing data extraction rules"
+                            },
+                            "fullDescription": {
+                                "text": "Before Android 12, the attributes android:allowBackup and android:fullBackupContent were used to configure all forms of backup, including cloud backups, device-to-device transfers and adb backup.\n\nIn Android 12 and higher, these attributes have been deprecated and will only apply to cloud backups. You should instead use the attribute android:dataExtractionRules, specifying an @xml resource that configures which files to back up, for cloud backups and for device-to-device transfers, separately. If your minSdkVersion supports older versions, you'll still want to specify an android:fullBackupContent resource if the default behavior is not right for your app.",
+                                "markdown": "Before Android 12, the attributes `android:allowBackup` and `android:fullBackupContent` were used to configure all forms of backup, including cloud backups, device-to-device transfers and adb backup.\n\nIn Android 12 and higher, these attributes have been deprecated and will only apply to cloud backups. You should instead use the attribute `android:dataExtractionRules`, specifying an `@xml` resource that configures which files to back up, for cloud backups and for device-to-device transfers, separately. If your `minSdkVersion` supports older versions, you'll still want to specify an `android:fullBackupContent` resource if the default behavior is not right for your app."
+                            },
+                            "defaultConfiguration": {
+                                "level": "warning",
+                                "rank": 80
+                            },
+                            "properties": {
+                                "tags": [
+                                    "Security"
+                                ]
+                            }
+                        },
+                        {
+                            "id": "GradleDependency",
+                            "shortDescription": {
+                                "text": "Obsolete Gradle Dependency"
+                            },
+                            "fullDescription": {
+                                "text": "This detector looks for usages of libraries where the version you are using is not the current stable release. Using older versions is fine, and there are cases where you deliberately want to stick with an older version. However, you may simply not be aware that a more recent version is available, and that is what this lint check helps find."
+                            },
+                            "defaultConfiguration": {
+                                "level": "warning",
+                                "rank": 70
+                            },
+                            "properties": {
+                                "tags": [
+                                    "Correctness"
+                                ]
+                            }
+                        },
+                        {
+                            "id": "IconLauncherShape",
+                            "shortDescription": {
+                                "text": "The launcher icon shape should use a distinct silhouette"
+                            },
+                            "fullDescription": {
+                                "text": "According to the Android Design Guide (https://d.android.com/r/studio-ui/designer/material/iconography) your launcher icons should \"use a distinct silhouette\", a \"three-dimensional, front view, with a slight perspective as if viewed from above, so that users perceive some depth.\"\n\nThe unique silhouette implies that your launcher icon should not be a filled square."
+                            },
+                            "defaultConfiguration": {
+                                "level": "warning",
+                                "rank": 50
+                            },
+                            "properties": {
+                                "tags": [
+                                    "Icons",
+                                    "Usability"
+                                ]
+                            }
+                        },
+                        {
+                            "id": "NewerVersionAvailable",
+                            "shortDescription": {
+                                "text": "Newer Library Versions Available"
+                            },
+                            "fullDescription": {
+                                "text": "This detector checks with a central repository to see if there are newer versions available for the dependencies used by this project. This is similar to the GradleDependency check, which checks for newer versions available in the Android SDK tools and libraries, but this works with any MavenCentral dependency, and connects to the library every time, which makes it more flexible but also much slower.",
+                                "markdown": "This detector checks with a central repository to see if there are newer versions available for the dependencies used by this project. This is similar to the `GradleDependency` check, which checks for newer versions available in the Android SDK tools and libraries, but this works with any MavenCentral dependency, and connects to the library every time, which makes it more flexible but also **much** slower."
+                            },
+                            "defaultConfiguration": {
+                                "level": "warning",
+                                "rank": 70
+                            },
+                            "properties": {
+                                "tags": [
+                                    "Correctness"
+                                ]
+                            }
+                        },
+                        {
+                            "id": "ObsoleteSdkInt",
+                            "shortDescription": {
+                                "text": "Obsolete SDK_INT Version Check"
+                            },
+                            "fullDescription": {
+                                "text": "This check flags version checks that are not necessary, because the minSdkVersion (or surrounding known API level) is already at least as high as the version checked for.\n\nSimilarly, it also looks for resources in -vNN folders, such as values-v14 where the version qualifier is less than or equal to the minSdkVersion, where the contents should be merged into the best folder.",
+                                "markdown": "This check flags version checks that are not necessary, because the `minSdkVersion` (or surrounding known API level) is already at least as high as the version checked for.\n\nSimilarly, it also looks for resources in `-vNN` folders, such as `values-v14` where the version qualifier is less than or equal to the `minSdkVersion`, where the contents should be merged into the best folder."
+                            },
+                            "defaultConfiguration": {
+                                "level": "warning",
+                                "rank": 50
+                            },
+                            "properties": {
+                                "tags": [
+                                    "Performance"
+                                ]
+                            }
+                        },
+                        {
+                            "id": "OldTargetApi",
+                            "shortDescription": {
+                                "text": "Target SDK attribute is not targeting latest version"
+                            },
+                            "fullDescription": {
+                                "text": "When your application or sdk runs on a version of Android that is more recent than your targetSdk specifies that it has been tested with, various compatibility modes kick in. This ensures that your application continues to work, but it may look out of place. For example, if the targetSdk is less than 14, your app may get an option button in the UI.\n\nTo fix this issue, set the targetSdk to the highest available value. Then test your app to make sure everything works correctly. You may want to consult the compatibility notes to see what changes apply to each version you are adding support for: https://developer.android.com/reference/android/os/Build.VERSION_CODES.html as well as follow this guide:\nhttps://developer.android.com/distribute/best-practices/develop/target-sdk.html",
+                                "markdown": "When your application or sdk runs on a version of Android that is more recent than your `targetSdk` specifies that it has been tested with, various compatibility modes kick in. This ensures that your application continues to work, but it may look out of place. For example, if the `targetSdk` is less than 14, your app may get an option button in the UI.\n\nTo fix this issue, set the `targetSdk` to the highest available value. Then test your app to make sure everything works correctly. You may want to consult the compatibility notes to see what changes apply to each version you are adding support for: https://developer.android.com/reference/android/os/Build.VERSION_CODES.html as well as follow this guide:\nhttps://developer.android.com/distribute/best-practices/develop/target-sdk.html"
+                            },
+                            "defaultConfiguration": {
+                                "level": "warning",
+                                "rank": 50
+                            },
+                            "properties": {
+                                "tags": [
+                                    "Correctness"
+                                ]
+                            }
+                        },
+                        {
+                            "id": "SetJavaScriptEnabled",
+                            "shortDescription": {
+                                "text": "Using setJavaScriptEnabled",
+                                "markdown": "Using `setJavaScriptEnabled`"
+                            },
+                            "fullDescription": {
+                                "text": "Your code should not invoke setJavaScriptEnabled if you are not sure that your app really requires JavaScript support.",
+                                "markdown": "Your code should not invoke `setJavaScriptEnabled` if you are not sure that your app really requires JavaScript support."
+                            },
+                            "defaultConfiguration": {
+                                "level": "warning",
+                                "rank": 50
+                            },
+                            "properties": {
+                                "tags": [
+                                    "Security"
+                                ]
+                            }
+                        },
+                        {
+                            "id": "SetTextI18n",
+                            "shortDescription": {
+                                "text": "TextView Internationalization"
+                            },
+                            "fullDescription": {
+                                "text": "When calling TextView#setText\n* Never call Number#toString() to format numbers; it will not handle fraction separators and locale-specific digits properly. Consider using String#format with proper format specifications (%d or %f) instead.\n* Do not pass a string literal (e.g. \"Hello\") to display text. Hardcoded text can not be properly translated to other languages. Consider using Android resource strings instead.\n* Do not build messages by concatenating text chunks. Such messages can not be properly translated.",
+                                "markdown": "When calling `TextView#setText`\n* Never call `Number#toString()` to format numbers; it will not handle fraction separators and locale-specific digits properly. Consider using `String#format` with proper format specifications (`%d` or `%f`) instead.\n* Do not pass a string literal (e.g. \"Hello\") to display text. Hardcoded text can not be properly translated to other languages. Consider using Android resource strings instead.\n* Do not build messages by concatenating text chunks. Such messages can not be properly translated."
+                            },
+                            "defaultConfiguration": {
+                                "level": "warning",
+                                "rank": 50
+                            },
+                            "properties": {
+                                "tags": [
+                                    "Internationalization"
+                                ]
+                            }
+                        },
+                        {
+                            "id": "UsableSpace",
+                            "shortDescription": {
+                                "text": "Using getUsableSpace()"
+                            },
+                            "fullDescription": {
+                                "text": "When you need to allocate disk space for large files, consider using the new allocateBytes(FileDescriptor, long) API, which will automatically clear cached files belonging to other apps (as needed) to meet your request.\n\nWhen deciding if the device has enough disk space to hold your new data, call getAllocatableBytes(UUID) instead of using getUsableSpace(), since the former will consider any cached data that the system is willing to clear on your behalf.\n\nNote that these methods require API level 26. If your app is running on older devices, you will probably need to use both APIs, conditionally switching on Build.VERSION.SDK_INT. Lint only looks in the same compilation unit to see if you are already using both APIs, so if it warns even though you are already using the new API, consider moving the calls to the same file or suppressing the warning.",
+                                "markdown": "When you need to allocate disk space for large files, consider using the new `allocateBytes(FileDescriptor, long)` API, which will automatically clear cached files belonging to other apps (as needed) to meet your request.\n\nWhen deciding if the device has enough disk space to hold your new data, call `getAllocatableBytes(UUID)` instead of using `getUsableSpace()`, since the former will consider any cached data that the system is willing to clear on your behalf.\n\nNote that these methods require API level 26. If your app is running on older devices, you will probably need to use both APIs, conditionally switching on `Build.VERSION.SDK_INT`. Lint only looks in the same compilation unit to see if you are already using both APIs, so if it warns even though you are already using the new API, consider moving the calls to the same file or suppressing the warning."
+                            },
+                            "defaultConfiguration": {
+                                "level": "warning",
+                                "rank": 80
+                            },
+                            "properties": {
+                                "tags": [
+                                    "Performance"
+                                ]
+                            }
+                        }
+                    ]
+                }
+            },
+            "originalUriBaseIds": {
+                "%SRCROOT%": {
+                    "uri": "file:///workspace/scratch/6ad8a987abc5/source/android/"
+                }
+            },
+            "results": [
+                {
+                    "ruleId": "ApplySharedPref",
+                    "ruleIndex": 0,
+                    "message": {
+                        "text": "Consider using apply() instead; commit writes its data to persistent storage immediately, whereas apply will handle it in the background",
+                        "markdown": "Consider using `apply()` instead; `commit` writes its data to persistent storage immediately, whereas `apply` will handle it in the background"
+                    },
+                    "locations": [
+                        {
+                            "physicalLocation": {
+                                "artifactLocation": {
+                                    "uriBaseId": "%SRCROOT%",
+                                    "uri": "app/src/main/java/app/actionbridge/PeerStore.kt"
+                                },
+                                "region": {
+                                    "startLine": 51,
+                                    "startColumn": 459,
+                                    "endLine": 51,
+                                    "endColumn": 467,
+                                    "charOffset": 4263,
+                                    "charLength": 8,
+                                    "snippet": {
+                                        "text": "commit()"
+                                    }
+                                },
+                                "contextRegion": {
+                                    "startLine": 49,
+                                    "endLine": 54,
+                                    "snippet": {
+                                        "text": "        check(prefs.edit().putString(\"peer-remote-$id\",Base64.encodeToString(cipher.iv+cipher.doFinal(data.toString().toByteArray()),Base64.NO_WRAP)).commit())\n        // Upgrade a v0.3 room-only entry to the PC's stable local identity.\n        prefs.all.keys.filter{it.startsWith(\"peer-remote-\")&&it!=\"peer-remote-$id\"}.forEach{entry->runCatching{val old=read(entry.removePrefix(\"peer-\"))?:return@runCatching;val previous=JSONObject(String(Base64.decode(old.getString(\"code\"),Base64.URL_SAFE or Base64.NO_WRAP or Base64.NO_PADDING),Charsets.UTF_8));if(previous.optString(\"room\")==payload.optString(\"room\")&&previous.optString(\"service\")==payload.optString(\"service\"))prefs.edit().remove(entry).commit()}}\n        setLast(id);peer\n    }\n"
+                                    }
+                                }
+                            }
+                        }
+                    ],
+                    "fixes": [
+                        {
+                            "description": {
+                                "text": "Replace commit() with apply()"
+                            },
+                            "artifactChanges": [
+                                {
+                                    "artifactLocation": {
+                                        "uriBaseId": "%SRCROOT%",
+                                        "uri": "app/src/main/java/app/actionbridge/PeerStore.kt"
+                                    },
+                                    "replacements": [
+                                        {
+                                            "deletedRegion": {
+                                                "startLine": 51,
+                                                "startColumn": 459,
+                                                "charOffset": 4263,
+                                                "endLine": 51,
+                                                "endColumn": 465,
+                                                "charLength": 6
+                                            },
+                                            "insertedContent": {
+                                                "text": "apply\n"
+                                            }
+                                        }
+                                    ]
+                                }
+                            ]
+                        }
+                    ],
+                    "partialFingerprints": {
+                        "sourceContext/v1": "74c05f18834b6983"
+                    }
+                },
+                {
+                    "ruleId": "OldTargetApi",
+                    "ruleIndex": 7,
+                    "message": {
+                        "text": "Not targeting the latest versions of Android; compatibility modes apply. Consider testing and updating this version. Consult the android.os.Build.VERSION_CODES javadoc for details.",
+                        "markdown": "Not targeting the latest versions of Android; compatibility modes apply. Consider testing and updating this version. Consult the `android.os.Build.VERSION_CODES` javadoc for details."
+                    },
+                    "locations": [
+                        {
+                            "physicalLocation": {
+                                "artifactLocation": {
+                                    "uriBaseId": "%SRCROOT%",
+                                    "uri": "app/build.gradle.kts"
+                                },
+                                "region": {
+                                    "startLine": 5,
+                                    "startColumn": 70,
+                                    "endLine": 5,
+                                    "endColumn": 84,
+                                    "charOffset": 176,
+                                    "charLength": 14,
+                                    "snippet": {
+                                        "text": "targetSdk = 36"
+                                    }
+                                },
+                                "contextRegion": {
+                                    "startLine": 3,
+                                    "endLine": 8,
+                                    "snippet": {
+                                        "text": "    namespace = \"app.actionbridge\"\n    compileSdk = 36\n    defaultConfig { applicationId = \"app.actionbridge\"; minSdk = 26; targetSdk = 36; versionCode = 50; versionName = \"0.5.0\"; buildConfigField(\"String\", \"SUPPORT_EMAIL\", \"\\\"${System.getenv(\"SUPPORT_EMAIL\") ?: \"\"}\\\"\") }\n    compileOptions { sourceCompatibility = JavaVersion.VERSION_17; targetCompatibility = JavaVersion.VERSION_17 }\n    buildFeatures { buildConfig = true }\n"
+                                    }
+                                }
+                            }
+                        }
+                    ],
+                    "fixes": [
+                        {
+                            "description": {
+                                "text": "Update targetSdkVersion to 37"
+                            },
+                            "artifactChanges": [
+                                {
+                                    "artifactLocation": {
+                                        "uriBaseId": "%SRCROOT%",
+                                        "uri": "app/build.gradle.kts"
+                                    },
+                                    "replacements": [
+                                        {
+                                            "deletedRegion": {
+                                                "startLine": 5,
+                                                "startColumn": 82,
+                                                "charOffset": 188,
+                                                "endLine": 5,
+                                                "endColumn": 84,
+                                                "charLength": 2
+                                            },
+                                            "insertedContent": {
+                                                "text": "37\n"
+                                            }
+                                        }
+                                    ]
+                                }
+                            ]
+                        }
+                    ],
+                    "partialFingerprints": {
+                        "sourceContext/v1": "a0763a087cf5edda"
+                    }
+                },
+                {
+                    "ruleId": "GradleDependency",
+                    "ruleIndex": 3,
+                    "message": {
+                        "text": "A newer version of compileSdk than 36 is available: 37",
+                        "markdown": "A newer version of `compileSdk` than 36 is available: 37"
+                    },
+                    "locations": [
+                        {
+                            "physicalLocation": {
+                                "artifactLocation": {
+                                    "uriBaseId": "%SRCROOT%",
+                                    "uri": "app/build.gradle.kts"
+                                },
+                                "region": {
+                                    "startLine": 4,
+                                    "startColumn": 5,
+                                    "endLine": 4,
+                                    "endColumn": 20,
+                                    "charOffset": 91,
+                                    "charLength": 15,
+                                    "snippet": {
+                                        "text": "compileSdk = 36"
+                                    }
+                                },
+                                "contextRegion": {
+                                    "startLine": 2,
+                                    "endLine": 7,
+                                    "snippet": {
+                                        "text": "android {\n    namespace = \"app.actionbridge\"\n    compileSdk = 36\n    defaultConfig { applicationId = \"app.actionbridge\"; minSdk = 26; targetSdk = 36; versionCode = 50; versionName = \"0.5.0\"; buildConfigField(\"String\", \"SUPPORT_EMAIL\", \"\\\"${System.getenv(\"SUPPORT_EMAIL\") ?: \"\"}\\\"\") }\n    compileOptions { sourceCompatibility = JavaVersion.VERSION_17; targetCompatibility = JavaVersion.VERSION_17 }\n"
+                                    }
+                                }
+                            }
+                        }
+                    ],
+                    "fixes": [
+                        {
+                            "description": {
+                                "text": "Set compileSdk to 37"
+                            },
+                            "artifactChanges": [
+                                {
+                                    "artifactLocation": {
+                                        "uriBaseId": "%SRCROOT%",
+                                        "uri": "app/build.gradle.kts"
+                                    },
+                                    "replacements": [
+                                        {
+                                            "deletedRegion": {
+                                                "startLine": 4,
+                                                "startColumn": 18,
+                                                "charOffset": 104,
+                                                "endLine": 4,
+                                                "endColumn": 20,
+                                                "charLength": 2
+                                            },
+                                            "insertedContent": {
+                                                "text": "37\n"
+                                            }
+                                        }
+                                    ]
+                                }
+                            ]
+                        }
+                    ],
+                    "partialFingerprints": {
+                        "sourceContext/v1": "adf8f7584e4ad11e"
+                    }
+                },
+                {
+                    "ruleId": "GradleDependency",
+                    "ruleIndex": 3,
+                    "message": {
+                        "text": "A newer version of androidx.webkit:webkit than 1.14.0 is available: 1.17.1"
+                    },
+                    "locations": [
+                        {
+                            "physicalLocation": {
+                                "artifactLocation": {
+                                    "uriBaseId": "%SRCROOT%",
+                                    "uri": "app/build.gradle.kts"
+                                },
+                                "region": {
+                                    "startLine": 21,
+                                    "startColumn": 20,
+                                    "endLine": 21,
+                                    "endColumn": 51,
+                                    "charOffset": 1036,
+                                    "charLength": 31,
+                                    "snippet": {
+                                        "text": "\"androidx.webkit:webkit:1.14.0\""
+                                    }
+                                },
+                                "contextRegion": {
+                                    "startLine": 19,
+                                    "endLine": 24,
+                                    "snippet": {
+                                        "text": "kotlin { jvmToolchain(17) }\ndependencies {\n    implementation(\"androidx.webkit:webkit:1.14.0\")\n    implementation(\"com.journeyapps:zxing-android-embedded:4.3.0\")\n    implementation(\"androidx.work:work-runtime-ktx:2.10.1\")\n"
+                                    }
+                                }
+                            }
+                        }
+                    ],
+                    "fixes": [
+                        {
+                            "description": {
+                                "text": "Change to 1.17.1"
+                            },
+                            "artifactChanges": [
+                                {
+                                    "artifactLocation": {
+                                        "uriBaseId": "%SRCROOT%",
+                                        "uri": "app/build.gradle.kts"
+                                    },
+                                    "replacements": [
+                                        {
+                                            "deletedRegion": {
+                                                "startLine": 21,
+                                                "startColumn": 44,
+                                                "charOffset": 1060,
+                                                "endLine": 21,
+                                                "endColumn": 50,
+                                                "charLength": 6
+                                            },
+                                            "insertedContent": {
+                                                "text": "1.17.1\n"
+                                            }
+                                        }
+                                    ]
+                                }
+                            ]
+                        }
+                    ],
+                    "partialFingerprints": {
+                        "sourceContext/v1": "4a78ef00f8773211"
+                    }
+                },
+                {
+                    "ruleId": "NewerVersionAvailable",
+                    "ruleIndex": 5,
+                    "message": {
+                        "text": "A newer version of org.json:json than 20240303 is available: 20260814"
+                    },
+                    "locations": [
+                        {
+                            "physicalLocation": {
+                                "artifactLocation": {
+                                    "uriBaseId": "%SRCROOT%",
+                                    "uri": "app/build.gradle.kts"
+                                },
+                                "region": {
+                                    "startLine": 27,
+                                    "startColumn": 24,
+                                    "endLine": 27,
+                                    "endColumn": 48,
+                                    "charOffset": 1402,
+                                    "charLength": 24,
+                                    "snippet": {
+                                        "text": "\"org.json:json:20240303\""
+                                    }
+                                },
+                                "contextRegion": {
+                                    "startLine": 25,
+                                    "endLine": 30,
+                                    "snippet": {
+                                        "text": "    implementation(\"org.jetbrains.kotlinx:kotlinx-coroutines-android:1.10.2\")\n    testImplementation(\"junit:junit:4.13.2\")\n    testImplementation(\"org.json:json:20240303\")\n}\n// Keep the transitive AndroidX families on a consistent generation.\n"
+                                    }
+                                }
+                            }
+                        }
+                    ],
+                    "fixes": [
+                        {
+                            "description": {
+                                "text": "Change to 20260814"
+                            },
+                            "artifactChanges": [
+                                {
+                                    "artifactLocation": {
+                                        "uriBaseId": "%SRCROOT%",
+                                        "uri": "app/build.gradle.kts"
+                                    },
+                                    "replacements": [
+                                        {
+                                            "deletedRegion": {
+                                                "startLine": 27,
+                                                "startColumn": 39,
+                                                "charOffset": 1417,
+                                                "endLine": 27,
+                                                "endColumn": 47,
+                                                "charLength": 8
+                                            },
+                                            "insertedContent": {
+                                                "text": "20260814\n"
+                                            }
+                                        }
+                                    ]
+                                }
+                            ]
+                        }
+                    ],
+                    "partialFingerprints": {
+                        "sourceContext/v1": "ceeac882c4cd2c64"
+                    }
+                },
+                {
+                    "ruleId": "SetJavaScriptEnabled",
+                    "ruleIndex": 8,
+                    "message": {
+                        "text": "Using setJavaScriptEnabled can introduce XSS vulnerabilities into your application, review carefully",
+                        "markdown": "Using `setJavaScriptEnabled` can introduce XSS vulnerabilities into your application, review carefully"
+                    },
+                    "locations": [
+                        {
+                            "physicalLocation": {
+                                "artifactLocation": {
+                                    "uriBaseId": "%SRCROOT%",
+                                    "uri": "app/src/main/java/app/actionbridge/RemoteEngine.kt"
+                                },
+                                "region": {
+                                    "startLine": 20,
+                                    "startColumn": 3,
+                                    "endLine": 20,
+                                    "endColumn": 38,
+                                    "charOffset": 818,
+                                    "charLength": 35,
+                                    "snippet": {
+                                        "text": "web.settings.javaScriptEnabled=true"
+                                    }
+                                },
+                                "contextRegion": {
+                                    "startLine": 18,
+                                    "endLine": 23,
+                                    "snippet": {
+                                        "text": " private var lastProgress=mutableMapOf<String,Int>()\n init {\n  web.settings.javaScriptEnabled=true;web.settings.allowFileAccess=false;web.settings.allowContentAccess=false;web.settings.domStorageEnabled=false\n  web.settings.mixedContentMode=WebSettings.MIXED_CONTENT_NEVER_ALLOW\n  val loader=WebViewAssetLoader.Builder().addPathHandler(\"/assets/\",WebViewAssetLoader.AssetsPathHandler(activity)).build()\n"
+                                    }
+                                }
+                            }
+                        }
+                    ],
+                    "partialFingerprints": {
+                        "sourceContext/v1": "a83044f574b72e5d"
+                    }
+                },
+                {
+                    "ruleId": "CustomX509TrustManager",
+                    "ruleIndex": 1,
+                    "message": {
+                        "text": "Implementing a custom X509TrustManager is error-prone and likely to be insecure. It is likely to disable certificate validation altogether, and is non-trivial to implement correctly without calling Android's default implementation.",
+                        "markdown": "Implementing a custom `X509TrustManager` is error-prone and likely to be insecure. It is likely to disable certificate validation altogether, and is non-trivial to implement correctly without calling Android's default implementation."
+                    },
+                    "locations": [
+                        {
+                            "physicalLocation": {
+                                "artifactLocation": {
+                                    "uriBaseId": "%SRCROOT%",
+                                    "uri": "app/src/main/java/app/actionbridge/BridgeApi.kt"
+                                },
+                                "region": {
+                                    "startLine": 12,
+                                    "startColumn": 27,
+                                    "endLine": 12,
+                                    "endColumn": 33,
+                                    "charOffset": 508,
+                                    "charLength": 6,
+                                    "snippet": {
+                                        "text": "object"
+                                    }
+                                },
+                                "contextRegion": {
+                                    "startLine": 10,
+                                    "endLine": 15,
+                                    "snippet": {
+                                        "text": "class BridgeApi(private val peer:Peer,private val token:String?=null,private val context:android.content.Context?=null) {\n    private val tls=SSLContext.getInstance(\"TLS\").apply {\n        init(null,arrayOf(object:X509TrustManager {\n            override fun getAcceptedIssuers()=emptyArray<X509Certificate>()\n            override fun checkClientTrusted(chain:Array<X509Certificate>,auth:String){throw java.security.cert.CertificateException(\"Not a server\")}\n"
+                                    }
+                                }
+                            }
+                        }
+                    ],
+                    "partialFingerprints": {
+                        "sourceContext/v1": "08ee0dc79da8ae98"
+                    }
+                },
+                {
+                    "ruleId": "DataExtractionRules",
+                    "ruleIndex": 2,
+                    "message": {
+                        "text": "The attribute android:allowBackup is deprecated from Android 12 and higher and may be removed in future versions. Consider adding the attribute android:dataExtractionRules specifying an @xml resource which configures cloud backups and device transfers on Android 12 and higher.",
+                        "markdown": "The attribute `android:allowBackup` is deprecated from Android 12 and higher and may be removed in future versions. Consider adding the attribute `android:dataExtractionRules` specifying an `@xml` resource which configures cloud backups and device transfers on Android 12 and higher."
+                    },
+                    "locations": [
+                        {
+                            "physicalLocation": {
+                                "artifactLocation": {
+                                    "uriBaseId": "%SRCROOT%",
+                                    "uri": "app/src/main/AndroidManifest.xml"
+                                },
+                                "region": {
+                                    "startLine": 11,
+                                    "startColumn": 172,
+                                    "endLine": 11,
+                                    "endColumn": 177,
+                                    "charOffset": 951,
+                                    "charLength": 5,
+                                    "snippet": {
+                                        "text": "false"
+                                    }
+                                },
+                                "contextRegion": {
+                                    "startLine": 9,
+                                    "endLine": 14,
+                                    "snippet": {
+                                        "text": " <uses-permission android:name=\"android.permission.CAMERA\"/>\n <uses-feature android:name=\"android.hardware.camera\" android:required=\"false\"/>\n <application android:label=\"ActionBridge\" android:icon=\"@mipmap/ic_launcher\" android:roundIcon=\"@mipmap/ic_launcher\" android:theme=\"@style/AppTheme\" android:allowBackup=\"false\" android:supportsRtl=\"true\" android:usesCleartextTraffic=\"false\">\n  <activity android:name=\".MainActivity\" android:configChanges=\"orientation|screenSize|keyboardHidden\" android:exported=\"true\">\n   <intent-filter><action android:name=\"android.intent.action.MAIN\"/><category android:name=\"android.intent.category.LAUNCHER\"/></intent-filter>\n"
+                                    }
+                                }
+                            }
+                        }
+                    ],
+                    "fixes": [
+                        {
+                            "description": {
+                                "text": "Create data_extraction_rules.xml"
+                            },
+                            "artifactChanges": [
+                                {
+                                    "artifactLocation": {
+                                        "uriBaseId": "%SRCROOT%",
+                                        "uri": "app/src/main/res/xml/data_extraction_rules.xml"
+                                    },
+                                    "replacements": [
+                                        {
+                                            "deletedRegion": {
+                                                "startLine": 1,
+                                                "startColumn": 1,
+                                                "charOffset": 0
+                                            },
+                                            "insertedContent": {
+                                                "text": "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n<!--\n   Sample data extraction rules file; uncomment and customize as necessary.\n   See https://developer.android.com/about/versions/12/backup-restore#xml-changes\n   for details.\n-->\n<data-extraction-rules>\n    <cloud-backup>\n        <!--\n        TODO: Use <include> and <exclude> to control what is backed up.\n        The domain can be file, database, sharedpref, external or root.\n        Examples:\n\n        <include domain=\"file\" path=\"file_to_include\"/>\n        <exclude domain=\"file\" path=\"file_to_exclude\"/>\n        <include domain=\"file\" path=\"include_folder\"/>\n        <exclude domain=\"file\" path=\"include_folder/file_to_exclude\"/>\n        <exclude domain=\"file\" path=\"exclude_folder\"/>\n        <include domain=\"file\" path=\"exclude_folder/file_to_include\"/>\n\n        <include domain=\"sharedpref\" path=\"include_shared_pref1.xml\"/>\n        <include domain=\"database\" path=\"db_name/file_to_include\"/>\n        <exclude domain=\"database\" path=\"db_name/include_folder/file_to_exclude\"/>\n        <include domain=\"external\" path=\"file_to_include\"/>\n        <exclude domain=\"external\" path=\"file_to_exclude\"/>\n        <include domain=\"root\" path=\"file_to_include\"/>\n        <exclude domain=\"root\" path=\"file_to_exclude\"/>\n        -->\n    </cloud-backup>\n    <!--\n    <device-transfer>\n        <include .../>\n        <exclude .../>\n    </device-transfer>\n    -->\n</data-extraction-rules>\n"
+                                            }
+                                        }
+                                    ]
+                                },
+                                {
+                                    "artifactLocation": {
+                                        "uriBaseId": "%SRCROOT%",
+                                        "uri": "app/src/main/AndroidManifest.xml"
+                                    },
+                                    "replacements": [
+                                        {
+                                            "deletedRegion": {
+                                                "startLine": 11,
+                                                "startColumn": 15,
+                                                "charOffset": 794
+                                            },
+                                            "insertedContent": {
+                                                "text": "android:dataExtractionRules=\"@xml/data_extraction_rules\" \n"
+                                            }
+                                        }
+                                    ]
+                                }
+                            ]
+                        }
+                    ],
+                    "partialFingerprints": {
+                        "sourceContext/v1": "7a00053051e96f4a"
+                    }
+                },
+                {
+                    "ruleId": "ObsoleteSdkInt",
+                    "ruleIndex": 6,
+                    "message": {
+                        "text": "This folder configuration (v26) is unnecessary; minSdkVersion is 26. Merge all the resources in this folder into mipmap-anydpi.",
+                        "markdown": "This folder configuration (`v26`) is unnecessary; `minSdkVersion` is 26. Merge all the resources in this folder into `mipmap-anydpi`."
+                    },
+                    "locations": [
+                        {
+                            "physicalLocation": {
+                                "artifactLocation": {
+                                    "uriBaseId": "%SRCROOT%",
+                                    "uri": "app/src/main/res/mipmap-anydpi-v26"
+                                },
+                                "region": {
+                                    "startLine": 1
+                                }                            }
+                        }
+                    ],
+                    "fixes": [
+                    ],
+                    "partialFingerprints": {
+                    }
+                },
+                {
+                    "ruleId": "UsableSpace",
+                    "ruleIndex": 10,
+                    "message": {
+                        "text": "Consider also using StorageManager#getAllocatableBytes and allocateBytes which will consider clearable cached data",
+                        "markdown": "Consider also using `StorageManager#getAllocatableBytes` and `allocateBytes` which will consider clearable cached data"
+                    },
+                    "locations": [
+                        {
+                            "physicalLocation": {
+                                "artifactLocation": {
+                                    "uriBaseId": "%SRCROOT%",
+                                    "uri": "app/src/main/java/app/actionbridge/Queue.kt"
+                                },
+                                "region": {
+                                    "startLine": 61,
+                                    "startColumn": 180,
+                                    "endLine": 61,
+                                    "endColumn": 191,
+                                    "charOffset": 4779,
+                                    "charLength": 11,
+                                    "snippet": {
+                                        "text": "usableSpace"
+                                    }
+                                },
+                                "contextRegion": {
+                                    "startLine": 59,
+                                    "endLine": 64,
+                                    "snippet": {
+                                        "text": "                val input=c.contentResolver.openInputStream(uri)?:error(\"Cannot read this file.\")\n                input.use{source->java.io.FileOutputStream(file).use {dest->\n                    val buf=ByteArray(65536);while(true){val n=source.read(buf);if(n<0)break;size+=n;if(size>2147483648L)error(\"Files must be at most 2 GB.\");if(file.parentFile!!.usableSpace<64*1024*1024L)error(\"Phone storage is almost full.\");dest.write(buf,0,n);digest.update(buf,0,n);onProgress(size)};dest.fd.sync()\n                }}\n                hash=digest.digest().joinToString(\"\"){\"%02x\".format(it)}\n"
+                                    }
+                                }
+                            }
+                        }
+                    ],
+                    "partialFingerprints": {
+                        "sourceContext/v1": "74dd056b522332b9"
+                    }
+                },
+                {
+                    "ruleId": "IconLauncherShape",
+                    "ruleIndex": 4,
+                    "message": {
+                        "text": "Launcher icon used as round icon did not have a circular shape"
+                    },
+                    "locations": [
+                        {
+                            "physicalLocation": {
+                                "artifactLocation": {
+                                    "uriBaseId": "%SRCROOT%",
+                                    "uri": "app/src/main/res/mipmap-hdpi/ic_launcher.png"
+                                },
+                                "region": {
+                                    "byteOffset": 0
+                                }                            }
+                        }
+                    ],
+                    "partialFingerprints": {
+                    }
+                },
+                {
+                    "ruleId": "IconLauncherShape",
+                    "ruleIndex": 4,
+                    "message": {
+                        "text": "Launcher icon used as round icon did not have a circular shape"
+                    },
+                    "locations": [
+                        {
+                            "physicalLocation": {
+                                "artifactLocation": {
+                                    "uriBaseId": "%SRCROOT%",
+                                    "uri": "app/src/main/res/mipmap-mdpi/ic_launcher.png"
+                                },
+                                "region": {
+                                    "byteOffset": 0
+                                }                            }
+                        }
+                    ],
+                    "partialFingerprints": {
+                    }
+                },
+                {
+                    "ruleId": "IconLauncherShape",
+                    "ruleIndex": 4,
+                    "message": {
+                        "text": "Launcher icon used as round icon did not have a circular shape"
+                    },
+                    "locations": [
+                        {
+                            "physicalLocation": {
+                                "artifactLocation": {
+                                    "uriBaseId": "%SRCROOT%",
+                                    "uri": "app/src/main/res/mipmap-xhdpi/ic_launcher.png"
+                                },
+                                "region": {
+                                    "byteOffset": 0
+                                }                            }
+                        }
+                    ],
+                    "partialFingerprints": {
+                    }
+                },
+                {
+                    "ruleId": "IconLauncherShape",
+                    "ruleIndex": 4,
+                    "message": {
+                        "text": "Launcher icon used as round icon did not have a circular shape"
+                    },
+                    "locations": [
+                        {
+                            "physicalLocation": {
+                                "artifactLocation": {
+                                    "uriBaseId": "%SRCROOT%",
+                                    "uri": "app/src/main/res/mipmap-xxhdpi/ic_launcher.png"
+                                },
+                                "region": {
+                                    "byteOffset": 0
+                                }                            }
+                        }
+                    ],
+                    "partialFingerprints": {
+                    }
+                },
+                {
+                    "ruleId": "IconLauncherShape",
+                    "ruleIndex": 4,
+                    "message": {
+                        "text": "Launcher icon used as round icon did not have a circular shape"
+                    },
+                    "locations": [
+                        {
+                            "physicalLocation": {
+                                "artifactLocation": {
+                                    "uriBaseId": "%SRCROOT%",
+                                    "uri": "app/src/main/res/mipmap-xxxhdpi/ic_launcher.png"
+                                },
+                                "region": {
+                                    "byteOffset": 0
+                                }                            }
+                        }
+                    ],
+                    "partialFingerprints": {
+                    }
+                },
+                {
+                    "ruleId": "SetTextI18n",
+                    "ruleIndex": 9,
+                    "message": {
+                        "text": "String literal in setText can not be translated. Use Android resources instead.",
+                        "markdown": "String literal in `setText` can not be translated. Use Android resources instead."
+                    },
+                    "locations": [
+                        {
+                            "physicalLocation": {
+                                "artifactLocation": {
+                                    "uriBaseId": "%SRCROOT%",
+                                    "uri": "app/src/main/java/app/actionbridge/MainActivity.kt"
+                                },
+                                "region": {
+                                    "startLine": 82,
+                                    "startColumn": 241,
+                                    "endLine": 82,
+                                    "endColumn": 254,
+                                    "charOffset": 6916,
+                                    "charLength": 13,
+                                    "snippet": {
+                                        "text": "PC forgotten."
+                                    }
+                                },
+                                "contextRegion": {
+                                    "startLine": 80,
+                                    "endLine": 85,
+                                    "snippet": {
+                                        "text": "        status=text(\"Choose a saved PC or add a computer.\",13f);connect.addView(status)\n        val row=LinearLayout(this);row.addView(button(\"Refresh\"){scan()},LinearLayout.LayoutParams(0,-2,1f));row.addView(button(\"Add computer\"){addComputer()},LinearLayout.LayoutParams(0,-2,1f));row.addView(button(\"Forget\"){\n            selectedPeer()?.let{peer->AlertDialog.Builder(this).setMessage(\"Forget ${peer.name}? You will approve it again on the PC.\").setPositiveButton(\"Forget\"){_,_->PeerStore(this).forget(peer.id);remoteEngine.disconnect();status.text=\"PC forgotten.\";scan()}.setNegativeButton(\"Cancel\",null).show()}\n        },LinearLayout.LayoutParams(0,-2,1f));connect.addView(row)\n        val payload=card();content.addView(payload);payload.addView(text(\"WHAT WOULD YOU LIKE TO DO?\",13f,true));fileLabel=text(\"No file selected\",13f);payload.addView(fileLabel)\n"
+                                    }
+                                }
+                            }
+                        }
+                    ],
+                    "partialFingerprints": {
+                        "sourceContext/v1": "3742554bfa9ae21c"
+                    }
+                },
+                {
+                    "ruleId": "SetTextI18n",
+                    "ruleIndex": 9,
+                    "message": {
+                        "text": "String literal in setText can not be translated. Use Android resources instead.",
+                        "markdown": "String literal in `setText` can not be translated. Use Android resources instead."
+                    },
+                    "locations": [
+                        {
+                            "physicalLocation": {
+                                "artifactLocation": {
+                                    "uriBaseId": "%SRCROOT%",
+                                    "uri": "app/src/main/java/app/actionbridge/MainActivity.kt"
+                                },
+                                "region": {
+                                    "startLine": 98,
+                                    "startColumn": 46,
+                                    "endLine": 98,
+                                    "endColumn": 55,
+                                    "charOffset": 9625,
+                                    "charLength": 9,
+                                    "snippet": {
+                                        "text": "Landscape"
+                                    }
+                                },
+                                "contextRegion": {
+                                    "startLine": 96,
+                                    "endLine": 101,
+                                    "snippet": {
+                                        "text": "        printPanel.addView(button(\"More print options\"){advanced.visibility=if(advanced.visibility==View.GONE)View.VISIBLE else View.GONE})\n        printPanel.addView(advanced)\n        landscape=CheckBox(this).apply{text=\"Landscape\"};color=CheckBox(this).apply{text=\"Color (if supported)\";isChecked=true};advanced.addView(landscape);advanced.addView(color)\n        fieldLabel(advanced,\"Page scaling\");fit=spinner(listOf(\"Fit to page\",\"Fill page (crop edges)\",\"Actual size\"));advanced.addView(fit)\n        fieldLabel(advanced,\"Two-sided printing\");duplex=spinner(listOf(\"Printer default\",\"One-sided\",\"Two-sided · long edge\",\"Two-sided · short edge\"));advanced.addView(duplex)\n"
+                                    }
+                                }
+                            }
+                        }
+                    ],
+                    "partialFingerprints": {
+                        "sourceContext/v1": "8b1392751c7ea831"
+                    }
+                },
+                {
+                    "ruleId": "SetTextI18n",
+                    "ruleIndex": 9,
+                    "message": {
+                        "text": "String literal in setText can not be translated. Use Android resources instead.",
+                        "markdown": "String literal in `setText` can not be translated. Use Android resources instead."
+                    },
+                    "locations": [
+                        {
+                            "physicalLocation": {
+                                "artifactLocation": {
+                                    "uriBaseId": "%SRCROOT%",
+                                    "uri": "app/src/main/java/app/actionbridge/MainActivity.kt"
+                                },
+                                "region": {
+                                    "startLine": 98,
+                                    "startColumn": 91,
+                                    "endLine": 98,
+                                    "endColumn": 111,
+                                    "charOffset": 9670,
+                                    "charLength": 20,
+                                    "snippet": {
+                                        "text": "Color (if supported)"
+                                    }
+                                },
+                                "contextRegion": {
+                                    "startLine": 96,
+                                    "endLine": 101,
+                                    "snippet": {
+                                        "text": "        printPanel.addView(button(\"More print options\"){advanced.visibility=if(advanced.visibility==View.GONE)View.VISIBLE else View.GONE})\n        printPanel.addView(advanced)\n        landscape=CheckBox(this).apply{text=\"Landscape\"};color=CheckBox(this).apply{text=\"Color (if supported)\";isChecked=true};advanced.addView(landscape);advanced.addView(color)\n        fieldLabel(advanced,\"Page scaling\");fit=spinner(listOf(\"Fit to page\",\"Fill page (crop edges)\",\"Actual size\"));advanced.addView(fit)\n        fieldLabel(advanced,\"Two-sided printing\");duplex=spinner(listOf(\"Printer default\",\"One-sided\",\"Two-sided · long edge\",\"Two-sided · short edge\"));advanced.addView(duplex)\n"
+                                    }
+                                }
+                            }
+                        }
+                    ],
+                    "partialFingerprints": {
+                        "sourceContext/v1": "8b1392751c7ea831"
+                    }
+                },
+                {
+                    "ruleId": "SetTextI18n",
+                    "ruleIndex": 9,
+                    "message": {
+                        "text": "String literal in setText can not be translated. Use Android resources instead.",
+                        "markdown": "String literal in `setText` can not be translated. Use Android resources instead."
+                    },
+                    "locations": [
+                        {
+                            "physicalLocation": {
+                                "artifactLocation": {
+                                    "uriBaseId": "%SRCROOT%",
+                                    "uri": "app/src/main/java/app/actionbridge/MainActivity.kt"
+                                },
+                                "region": {
+                                    "startLine": 102,
+                                    "startColumn": 44,
+                                    "endLine": 102,
+                                    "endColumn": 74,
+                                    "charOffset": 10330,
+                                    "charLength": 30,
+                                    "snippet": {
+                                        "text": "Collate copies (1,2,3 · 1,2,3)"
+                                    }
+                                },
+                                "contextRegion": {
+                                    "startLine": 100,
+                                    "endLine": 105,
+                                    "snippet": {
+                                        "text": "        fieldLabel(advanced,\"Two-sided printing\");duplex=spinner(listOf(\"Printer default\",\"One-sided\",\"Two-sided · long edge\",\"Two-sided · short edge\"));advanced.addView(duplex)\n        fieldLabel(advanced,\"PDF pages\");pageRange=EditText(this).apply{hint=\"All pages, or a range such as 2-5\";inputType=android.text.InputType.TYPE_CLASS_TEXT;isSingleLine=true};advanced.addView(pageRange)\n        collate=CheckBox(this).apply{text=\"Collate copies (1,2,3 · 1,2,3)\";isChecked=true};advanced.addView(collate)\n        advanced.addView(text(\"Fit preserves the full page. Fill may crop edges. Two-sided options depend on your printer.\",12f))\n        advanced.addView(button(\"Refresh printers\"){loadPrinters()})\n"
+                                    }
+                                }
+                            }
+                        }
+                    ],
+                    "partialFingerprints": {
+                        "sourceContext/v1": "c3223b26d65ee171"
+                    }
+                },
+                {
+                    "ruleId": "SetTextI18n",
+                    "ruleIndex": 9,
+                    "message": {
+                        "text": "String literal in setText can not be translated. Use Android resources instead.",
+                        "markdown": "String literal in `setText` can not be translated. Use Android resources instead."
+                    },
+                    "locations": [
+                        {
+                            "physicalLocation": {
+                                "artifactLocation": {
+                                    "uriBaseId": "%SRCROOT%",
+                                    "uri": "app/src/main/java/app/actionbridge/MainActivity.kt"
+                                },
+                                "region": {
+                                    "startLine": 151,
+                                    "startColumn": 38,
+                                    "endLine": 151,
+                                    "endColumn": 100,
+                                    "charOffset": 17981,
+                                    "charLength": 62,
+                                    "snippet": {
+                                        "text": "Invalid code. In ActionBridge on your PC, click Connect phone."
+                                    }
+                                },
+                                "contextRegion": {
+                                    "startLine": 149,
+                                    "endLine": 154,
+                                    "snippet": {
+                                        "text": "        require(u.scheme==\"https\"&&u.host!=null&&u.userInfo==null&&u.query==null&&u.fragment==null&&(u.path.isNullOrEmpty()||u.path==\"/\"));require(payload.getString(\"room\").matches(Regex(\"[a-f0-9]{32}\")));require(payload.optString(\"fingerprint\").isEmpty()||payload.optString(\"fingerprint\").matches(Regex(\"[a-f0-9]{64}\")));for(k in listOf(\"key\",\"secret\"))require(payload.getString(k).matches(Regex(\"[A-Za-z0-9_-]{43}\")))\n        AlertDialog.Builder(this).setTitle(\"Connect ${payload.optString(\"name\",\"your PC\")}?\").setMessage(\"Allow this phone to save, open and print files, copy text, and open links on this PC. Scan only the code shown on your own computer.\").setPositiveButton(\"Connect\"){_,_->PeerStore(this).saveRemote(encoded);scan()}.setNegativeButton(\"Cancel\",null).show()\n    }catch(e:Exception){status.text=\"Invalid code. In ActionBridge on your PC, click Connect phone.\"}}\n    private fun scan(){if(busy||scanning)return;scanning=true;scope.launch{try{val store=PeerStore(this@MainActivity);status.text=\"Finding nearby PCs…\";val found=try{Discovery(this@MainActivity).scan()}catch(e:Exception){emptyList()};if(busy)return@launch;discovered=found.map{it.id}.toSet()\n        val previousPC=store.last();peers=ConnectionList.merge(store.remembered(),store.remotes(),found)\n"
+                                    }
+                                }
+                            }
+                        }
+                    ],
+                    "partialFingerprints": {
+                        "sourceContext/v1": "9ff8d99b5bbaf4f2"
+                    }
+                },
+                {
+                    "ruleId": "SetTextI18n",
+                    "ruleIndex": 9,
+                    "message": {
+                        "text": "String literal in setText can not be translated. Use Android resources instead.",
+                        "markdown": "String literal in `setText` can not be translated. Use Android resources instead."
+                    },
+                    "locations": [
+                        {
+                            "physicalLocation": {
+                                "artifactLocation": {
+                                    "uriBaseId": "%SRCROOT%",
+                                    "uri": "app/src/main/java/app/actionbridge/MainActivity.kt"
+                                },
+                                "region": {
+                                    "startLine": 152,
+                                    "startColumn": 132,
+                                    "endLine": 152,
+                                    "endColumn": 151,
+                                    "charOffset": 18178,
+                                    "charLength": 19,
+                                    "snippet": {
+                                        "text": "Finding nearby PCs…"
+                                    }
+                                },
+                                "contextRegion": {
+                                    "startLine": 150,
+                                    "endLine": 155,
+                                    "snippet": {
+                                        "text": "        AlertDialog.Builder(this).setTitle(\"Connect ${payload.optString(\"name\",\"your PC\")}?\").setMessage(\"Allow this phone to save, open and print files, copy text, and open links on this PC. Scan only the code shown on your own computer.\").setPositiveButton(\"Connect\"){_,_->PeerStore(this).saveRemote(encoded);scan()}.setNegativeButton(\"Cancel\",null).show()\n    }catch(e:Exception){status.text=\"Invalid code. In ActionBridge on your PC, click Connect phone.\"}}\n    private fun scan(){if(busy||scanning)return;scanning=true;scope.launch{try{val store=PeerStore(this@MainActivity);status.text=\"Finding nearby PCs…\";val found=try{Discovery(this@MainActivity).scan()}catch(e:Exception){emptyList()};if(busy)return@launch;discovered=found.map{it.id}.toSet()\n        val previousPC=store.last();peers=ConnectionList.merge(store.remembered(),store.remotes(),found)\n        pc.adapter=ArrayAdapter(this@MainActivity,android.R.layout.simple_spinner_dropdown_item,if(peers.isEmpty())listOf(\"Add your computer\") else peers.map{it.name+when{it.id in discovered->\" · Nearby\";it.host.isEmpty()->\" · Internet\";else->\" · Saved\"}})\n"
+                                    }
+                                }
+                            }
+                        }
+                    ],
+                    "partialFingerprints": {
+                        "sourceContext/v1": "d6e2384531099f23"
+                    }
+                },
+                {
+                    "ruleId": "SetTextI18n",
+                    "ruleIndex": 9,
+                    "message": {
+                        "text": "String literal in setText can not be translated. Use Android resources instead.",
+                        "markdown": "String literal in `setText` can not be translated. Use Android resources instead."
+                    },
+                    "locations": [
+                        {
+                            "physicalLocation": {
+                                "artifactLocation": {
+                                    "uriBaseId": "%SRCROOT%",
+                                    "uri": "app/src/main/java/app/actionbridge/MainActivity.kt"
+                                },
+                                "region": {
+                                    "startLine": 156,
+                                    "startColumn": 41,
+                                    "endLine": 156,
+                                    "endColumn": 98,
+                                    "charOffset": 18827,
+                                    "charLength": 57,
+                                    "snippet": {
+                                        "text": "Tap Add computer, then scan the QR code shown on your PC."
+                                    }
+                                },
+                                "contextRegion": {
+                                    "startLine": 154,
+                                    "endLine": 159,
+                                    "snippet": {
+                                        "text": "        pc.adapter=ArrayAdapter(this@MainActivity,android.R.layout.simple_spinner_dropdown_item,if(peers.isEmpty())listOf(\"Add your computer\") else peers.map{it.name+when{it.id in discovered->\" · Nearby\";it.host.isEmpty()->\" · Internet\";else->\" · Saved\"}})\n        peers.indexOfFirst{it.id==previousPC}.takeIf{it>=0}?.let{pc.setSelection(it)}\n        if(peers.isEmpty())status.text=\"Tap Add computer, then scan the QR code shown on your PC.\"\n        if(selectionPending){selectionPending=false;val last=previousPC;val index=peers.indexOfFirst{it.id==last};if(index>=0){pc.setSelection(index);action=\"copy\";actionPicker.setSelection(actions.indexOf(\"copy\"));sendNow()}else status.text=\"Choose and pair your PC, then tap Copy on PC.\"}\n    }finally{scanning=false}}}\n"
+                                    }
+                                }
+                            }
+                        }
+                    ],
+                    "partialFingerprints": {
+                        "sourceContext/v1": "63fffa9a73d92634"
+                    }
+                },
+                {
+                    "ruleId": "SetTextI18n",
+                    "ruleIndex": 9,
+                    "message": {
+                        "text": "String literal in setText can not be translated. Use Android resources instead.",
+                        "markdown": "String literal in `setText` can not be translated. Use Android resources instead."
+                    },
+                    "locations": [
+                        {
+                            "physicalLocation": {
+                                "artifactLocation": {
+                                    "uriBaseId": "%SRCROOT%",
+                                    "uri": "app/src/main/java/app/actionbridge/MainActivity.kt"
+                                },
+                                "region": {
+                                    "startLine": 157,
+                                    "startColumn": 244,
+                                    "endLine": 157,
+                                    "endColumn": 289,
+                                    "charOffset": 19129,
+                                    "charLength": 45,
+                                    "snippet": {
+                                        "text": "Choose and pair your PC, then tap Copy on PC."
+                                    }
+                                },
+                                "contextRegion": {
+                                    "startLine": 155,
+                                    "endLine": 160,
+                                    "snippet": {
+                                        "text": "        peers.indexOfFirst{it.id==previousPC}.takeIf{it>=0}?.let{pc.setSelection(it)}\n        if(peers.isEmpty())status.text=\"Tap Add computer, then scan the QR code shown on your PC.\"\n        if(selectionPending){selectionPending=false;val last=previousPC;val index=peers.indexOfFirst{it.id==last};if(index>=0){pc.setSelection(index);action=\"copy\";actionPicker.setSelection(actions.indexOf(\"copy\"));sendNow()}else status.text=\"Choose and pair your PC, then tap Copy on PC.\"}\n    }finally{scanning=false}}}\n    private fun showPrinters(data:JSONArray){printerData=data;printer.adapter=ArrayAdapter(this,android.R.layout.simple_spinner_dropdown_item,listOf(\"Default printer\")+(0 until data.length()).map{data.getJSONObject(it).getString(\"name\")});status.text=\"Connected · ${data.length()} printer(s)\"}\n"
+                                    }
+                                }
+                            }
+                        }
+                    ],
+                    "partialFingerprints": {
+                        "sourceContext/v1": "51194d5d9fe5d027"
+                    }
+                },
+                {
+                    "ruleId": "SetTextI18n",
+                    "ruleIndex": 9,
+                    "message": {
+                        "text": "Do not concatenate text displayed with setText. Use resource string with placeholders.",
+                        "markdown": "Do not concatenate text displayed with `setText`. Use resource string with placeholders."
+                    },
+                    "locations": [
+                        {
+                            "physicalLocation": {
+                                "artifactLocation": {
+                                    "uriBaseId": "%SRCROOT%",
+                                    "uri": "app/src/main/java/app/actionbridge/MainActivity.kt"
+                                },
+                                "region": {
+                                    "startLine": 159,
+                                    "startColumn": 252,
+                                    "endLine": 159,
+                                    "endColumn": 293,
+                                    "charOffset": 19459,
+                                    "charLength": 41,
+                                    "snippet": {
+                                        "text": "\"Connected · ${data.length()} printer(s)\""
+                                    }
+                                },
+                                "contextRegion": {
+                                    "startLine": 157,
+                                    "endLine": 162,
+                                    "snippet": {
+                                        "text": "        if(selectionPending){selectionPending=false;val last=previousPC;val index=peers.indexOfFirst{it.id==last};if(index>=0){pc.setSelection(index);action=\"copy\";actionPicker.setSelection(actions.indexOf(\"copy\"));sendNow()}else status.text=\"Choose and pair your PC, then tap Copy on PC.\"}\n    }finally{scanning=false}}}\n    private fun showPrinters(data:JSONArray){printerData=data;printer.adapter=ArrayAdapter(this,android.R.layout.simple_spinner_dropdown_item,listOf(\"Default printer\")+(0 until data.length()).map{data.getJSONObject(it).getString(\"name\")});status.text=\"Connected · ${data.length()} printer(s)\"}\n    private suspend fun waitRemote(peer:Peer){val code=PeerStore(this).remote(peer.id)?.getString(\"code\")?:error(\"Pair this PC by scanning its QR code first.\");remoteEngine.connect(code);withTimeout(35000){while(!remoteReady)delay(150)}}\n    private fun retryRemote(j:JSONObject){if(busy)return;setBusy(true);scope.launch{try{val peer=Peer.parse(j.getJSONObject(\"peer\"));waitRemote(peer);remoteEngine.send(listOf(j.getString(\"id\")))}catch(e:Exception){status.text=\"PC unavailable. It stays saved; try again when online.\";setBusy(false)}}}\n"
+                                    }
+                                }
+                            }
+                        }
+                    ],
+                    "partialFingerprints": {
+                        "sourceContext/v1": "2f4ce684d954205e"
+                    }
+                },
+                {
+                    "ruleId": "SetTextI18n",
+                    "ruleIndex": 9,
+                    "message": {
+                        "text": "String literal in setText can not be translated. Use Android resources instead.",
+                        "markdown": "String literal in `setText` can not be translated. Use Android resources instead."
+                    },
+                    "locations": [
+                        {
+                            "physicalLocation": {
+                                "artifactLocation": {
+                                    "uriBaseId": "%SRCROOT%",
+                                    "uri": "app/src/main/java/app/actionbridge/MainActivity.kt"
+                                },
+                                "region": {
+                                    "startLine": 159,
+                                    "startColumn": 253,
+                                    "endLine": 159,
+                                    "endColumn": 265,
+                                    "charOffset": 19460,
+                                    "charLength": 12,
+                                    "snippet": {
+                                        "text": "Connected · "
+                                    }
+                                },
+                                "contextRegion": {
+                                    "startLine": 157,
+                                    "endLine": 162,
+                                    "snippet": {
+                                        "text": "        if(selectionPending){selectionPending=false;val last=previousPC;val index=peers.indexOfFirst{it.id==last};if(index>=0){pc.setSelection(index);action=\"copy\";actionPicker.setSelection(actions.indexOf(\"copy\"));sendNow()}else status.text=\"Choose and pair your PC, then tap Copy on PC.\"}\n    }finally{scanning=false}}}\n    private fun showPrinters(data:JSONArray){printerData=data;printer.adapter=ArrayAdapter(this,android.R.layout.simple_spinner_dropdown_item,listOf(\"Default printer\")+(0 until data.length()).map{data.getJSONObject(it).getString(\"name\")});status.text=\"Connected · ${data.length()} printer(s)\"}\n    private suspend fun waitRemote(peer:Peer){val code=PeerStore(this).remote(peer.id)?.getString(\"code\")?:error(\"Pair this PC by scanning its QR code first.\");remoteEngine.connect(code);withTimeout(35000){while(!remoteReady)delay(150)}}\n    private fun retryRemote(j:JSONObject){if(busy)return;setBusy(true);scope.launch{try{val peer=Peer.parse(j.getJSONObject(\"peer\"));waitRemote(peer);remoteEngine.send(listOf(j.getString(\"id\")))}catch(e:Exception){status.text=\"PC unavailable. It stays saved; try again when online.\";setBusy(false)}}}\n"
+                                    }
+                                }
+                            }
+                        }
+                    ],
+                    "partialFingerprints": {
+                        "sourceContext/v1": "2f4ce684d954205e"
+                    }
+                },
+                {
+                    "ruleId": "SetTextI18n",
+                    "ruleIndex": 9,
+                    "message": {
+                        "text": "String literal in setText can not be translated. Use Android resources instead.",
+                        "markdown": "String literal in `setText` can not be translated. Use Android resources instead."
+                    },
+                    "locations": [
+                        {
+                            "physicalLocation": {
+                                "artifactLocation": {
+                                    "uriBaseId": "%SRCROOT%",
+                                    "uri": "app/src/main/java/app/actionbridge/MainActivity.kt"
+                                },
+                                "region": {
+                                    "startLine": 159,
+                                    "startColumn": 281,
+                                    "endLine": 159,
+                                    "endColumn": 292,
+                                    "charOffset": 19488,
+                                    "charLength": 11,
+                                    "snippet": {
+                                        "text": " printer(s)"
+                                    }
+                                },
+                                "contextRegion": {
+                                    "startLine": 157,
+                                    "endLine": 162,
+                                    "snippet": {
+                                        "text": "        if(selectionPending){selectionPending=false;val last=previousPC;val index=peers.indexOfFirst{it.id==last};if(index>=0){pc.setSelection(index);action=\"copy\";actionPicker.setSelection(actions.indexOf(\"copy\"));sendNow()}else status.text=\"Choose and pair your PC, then tap Copy on PC.\"}\n    }finally{scanning=false}}}\n    private fun showPrinters(data:JSONArray){printerData=data;printer.adapter=ArrayAdapter(this,android.R.layout.simple_spinner_dropdown_item,listOf(\"Default printer\")+(0 until data.length()).map{data.getJSONObject(it).getString(\"name\")});status.text=\"Connected · ${data.length()} printer(s)\"}\n    private suspend fun waitRemote(peer:Peer){val code=PeerStore(this).remote(peer.id)?.getString(\"code\")?:error(\"Pair this PC by scanning its QR code first.\");remoteEngine.connect(code);withTimeout(35000){while(!remoteReady)delay(150)}}\n    private fun retryRemote(j:JSONObject){if(busy)return;setBusy(true);scope.launch{try{val peer=Peer.parse(j.getJSONObject(\"peer\"));waitRemote(peer);remoteEngine.send(listOf(j.getString(\"id\")))}catch(e:Exception){status.text=\"PC unavailable. It stays saved; try again when online.\";setBusy(false)}}}\n"
+                                    }
+                                }
+                            }
+                        }
+                    ],
+                    "partialFingerprints": {
+                        "sourceContext/v1": "2f4ce684d954205e"
+                    }
+                },
+                {
+                    "ruleId": "SetTextI18n",
+                    "ruleIndex": 9,
+                    "message": {
+                        "text": "String literal in setText can not be translated. Use Android resources instead.",
+                        "markdown": "String literal in `setText` can not be translated. Use Android resources instead."
+                    },
+                    "locations": [
+                        {
+                            "physicalLocation": {
+                                "artifactLocation": {
+                                    "uriBaseId": "%SRCROOT%",
+                                    "uri": "app/src/main/java/app/actionbridge/MainActivity.kt"
+                                },
+                                "region": {
+                                    "startLine": 161,
+                                    "startColumn": 228,
+                                    "endLine": 161,
+                                    "endColumn": 282,
+                                    "charOffset": 19967,
+                                    "charLength": 54,
+                                    "snippet": {
+                                        "text": "PC unavailable. It stays saved; try again when online."
+                                    }
+                                },
+                                "contextRegion": {
+                                    "startLine": 159,
+                                    "endLine": 164,
+                                    "snippet": {
+                                        "text": "    private fun showPrinters(data:JSONArray){printerData=data;printer.adapter=ArrayAdapter(this,android.R.layout.simple_spinner_dropdown_item,listOf(\"Default printer\")+(0 until data.length()).map{data.getJSONObject(it).getString(\"name\")});status.text=\"Connected · ${data.length()} printer(s)\"}\n    private suspend fun waitRemote(peer:Peer){val code=PeerStore(this).remote(peer.id)?.getString(\"code\")?:error(\"Pair this PC by scanning its QR code first.\");remoteEngine.connect(code);withTimeout(35000){while(!remoteReady)delay(150)}}\n    private fun retryRemote(j:JSONObject){if(busy)return;setBusy(true);scope.launch{try{val peer=Peer.parse(j.getJSONObject(\"peer\"));waitRemote(peer);remoteEngine.send(listOf(j.getString(\"id\")))}catch(e:Exception){status.text=\"PC unavailable. It stays saved; try again when online.\";setBusy(false)}}}\n    private suspend fun connected(peer:Peer):BridgeApi=withContext(Dispatchers.IO) {\n        val store=PeerStore(this@MainActivity);val old=store.get(peer.id)\n"
+                                    }
+                                }
+                            }
+                        }
+                    ],
+                    "partialFingerprints": {
+                        "sourceContext/v1": "41211b8917efae12"
+                    }
+                },
+                {
+                    "ruleId": "SetTextI18n",
+                    "ruleIndex": 9,
+                    "message": {
+                        "text": "Do not concatenate text displayed with setText. Use resource string with placeholders.",
+                        "markdown": "Do not concatenate text displayed with `setText`. Use resource string with placeholders."
+                    },
+                    "locations": [
+                        {
+                            "physicalLocation": {
+                                "artifactLocation": {
+                                    "uriBaseId": "%SRCROOT%",
+                                    "uri": "app/src/main/java/app/actionbridge/MainActivity.kt"
+                                },
+                                "region": {
+                                    "startLine": 171,
+                                    "startColumn": 84,
+                                    "endLine": 171,
+                                    "endColumn": 134,
+                                    "charOffset": 20993,
+                                    "charLength": 50,
+                                    "snippet": {
+                                        "text": "\"Tap Allow on ${peer.name} to connect this phone.\""
+                                    }
+                                },
+                                "contextRegion": {
+                                    "startLine": 169,
+                                    "endLine": 174,
+                                    "snippet": {
+                                        "text": "        check(JSONObject(api.hello()).getString(\"id\")==peer.id){\"PC identity mismatch.\"}\n        if(old==null||!old.optBoolean(\"approved\")){\n            store.save(peer,token,false);withContext(Dispatchers.Main){status.text=\"Tap Allow on ${peer.name} to connect this phone.\"}\n            api.request(\"/pair\",\"POST\",JSONObject().put(\"clientId\",store.clientId()).put(\"name\",Build.MODEL.take(80)).put(\"token\",token));store.save(peer,token,true)\n        } else {\n"
+                                    }
+                                }
+                            }
+                        }
+                    ],
+                    "partialFingerprints": {
+                        "sourceContext/v1": "9692b284ca1dd7e1"
+                    }
+                },
+                {
+                    "ruleId": "SetTextI18n",
+                    "ruleIndex": 9,
+                    "message": {
+                        "text": "String literal in setText can not be translated. Use Android resources instead.",
+                        "markdown": "String literal in `setText` can not be translated. Use Android resources instead."
+                    },
+                    "locations": [
+                        {
+                            "physicalLocation": {
+                                "artifactLocation": {
+                                    "uriBaseId": "%SRCROOT%",
+                                    "uri": "app/src/main/java/app/actionbridge/MainActivity.kt"
+                                },
+                                "region": {
+                                    "startLine": 171,
+                                    "startColumn": 85,
+                                    "endLine": 171,
+                                    "endColumn": 98,
+                                    "charOffset": 20994,
+                                    "charLength": 13,
+                                    "snippet": {
+                                        "text": "Tap Allow on "
+                                    }
+                                },
+                                "contextRegion": {
+                                    "startLine": 169,
+                                    "endLine": 174,
+                                    "snippet": {
+                                        "text": "        check(JSONObject(api.hello()).getString(\"id\")==peer.id){\"PC identity mismatch.\"}\n        if(old==null||!old.optBoolean(\"approved\")){\n            store.save(peer,token,false);withContext(Dispatchers.Main){status.text=\"Tap Allow on ${peer.name} to connect this phone.\"}\n            api.request(\"/pair\",\"POST\",JSONObject().put(\"clientId\",store.clientId()).put(\"name\",Build.MODEL.take(80)).put(\"token\",token));store.save(peer,token,true)\n        } else {\n"
+                                    }
+                                }
+                            }
+                        }
+                    ],
+                    "partialFingerprints": {
+                        "sourceContext/v1": "9692b284ca1dd7e1"
+                    }
+                },
+                {
+                    "ruleId": "SetTextI18n",
+                    "ruleIndex": 9,
+                    "message": {
+                        "text": "String literal in setText can not be translated. Use Android resources instead.",
+                        "markdown": "String literal in `setText` can not be translated. Use Android resources instead."
+                    },
+                    "locations": [
+                        {
+                            "physicalLocation": {
+                                "artifactLocation": {
+                                    "uriBaseId": "%SRCROOT%",
+                                    "uri": "app/src/main/java/app/actionbridge/MainActivity.kt"
+                                },
+                                "region": {
+                                    "startLine": 171,
+                                    "startColumn": 110,
+                                    "endLine": 171,
+                                    "endColumn": 133,
+                                    "charOffset": 21019,
+                                    "charLength": 23,
+                                    "snippet": {
+                                        "text": " to connect this phone."
+                                    }
+                                },
+                                "contextRegion": {
+                                    "startLine": 169,
+                                    "endLine": 174,
+                                    "snippet": {
+                                        "text": "        check(JSONObject(api.hello()).getString(\"id\")==peer.id){\"PC identity mismatch.\"}\n        if(old==null||!old.optBoolean(\"approved\")){\n            store.save(peer,token,false);withContext(Dispatchers.Main){status.text=\"Tap Allow on ${peer.name} to connect this phone.\"}\n            api.request(\"/pair\",\"POST\",JSONObject().put(\"clientId\",store.clientId()).put(\"name\",Build.MODEL.take(80)).put(\"token\",token));store.save(peer,token,true)\n        } else {\n"
+                                    }
+                                }
+                            }
+                        }
+                    ],
+                    "partialFingerprints": {
+                        "sourceContext/v1": "9692b284ca1dd7e1"
+                    }
+                },
+                {
+                    "ruleId": "SetTextI18n",
+                    "ruleIndex": 9,
+                    "message": {
+                        "text": "String literal in setText can not be translated. Use Android resources instead.",
+                        "markdown": "String literal in `setText` can not be translated. Use Android resources instead."
+                    },
+                    "locations": [
+                        {
+                            "physicalLocation": {
+                                "artifactLocation": {
+                                    "uriBaseId": "%SRCROOT%",
+                                    "uri": "app/src/main/java/app/actionbridge/MainActivity.kt"
+                                },
+                                "region": {
+                                    "startLine": 174,
+                                    "startColumn": 185,
+                                    "endLine": 174,
+                                    "endColumn": 234,
+                                    "charOffset": 21412,
+                                    "charLength": 49,
+                                    "snippet": {
+                                        "text": "Access removed. Tap Allow on the PC to reconnect."
+                                    }
+                                },
+                                "contextRegion": {
+                                    "startLine": 172,
+                                    "endLine": 177,
+                                    "snippet": {
+                                        "text": "            api.request(\"/pair\",\"POST\",JSONObject().put(\"clientId\",store.clientId()).put(\"name\",Build.MODEL.take(80)).put(\"token\",token));store.save(peer,token,true)\n        } else {\n            try{api.request(\"/status\");store.save(peer,token,true)}catch(e:ApiException){if(e.code!=401)throw e;store.save(peer,token,false);withContext(Dispatchers.Main){status.text=\"Access removed. Tap Allow on the PC to reconnect.\"};api.request(\"/pair\",\"POST\",JSONObject().put(\"clientId\",store.clientId()).put(\"name\",Build.MODEL.take(80)).put(\"token\",token));store.save(peer,token,true)}\n        }\n        // An approved LAN phone receives the same private remote capability as the QR.\n"
+                                    }
+                                }
+                            }
+                        }
+                    ],
+                    "partialFingerprints": {
+                        "sourceContext/v1": "b57f7e0b2893f713"
+                    }
+                },
+                {
+                    "ruleId": "SetTextI18n",
+                    "ruleIndex": 9,
+                    "message": {
+                        "text": "String literal in setText can not be translated. Use Android resources instead.",
+                        "markdown": "String literal in `setText` can not be translated. Use Android resources instead."
+                    },
+                    "locations": [
+                        {
+                            "physicalLocation": {
+                                "artifactLocation": {
+                                    "uriBaseId": "%SRCROOT%",
+                                    "uri": "app/src/main/java/app/actionbridge/MainActivity.kt"
+                                },
+                                "region": {
+                                    "startLine": 183,
+                                    "startColumn": 42,
+                                    "endLine": 183,
+                                    "endColumn": 86,
+                                    "charOffset": 22645,
+                                    "charLength": 44,
+                                    "snippet": {
+                                        "text": "Finishing a transfer. Try again in a moment."
+                                    }
+                                },
+                                "contextRegion": {
+                                    "startLine": 181,
+                                    "endLine": 186,
+                                    "snippet": {
+                                        "text": "    private fun loadPrinters(){val peer=selectedPeer()?:return;if(busy)return;setBusy(true);scope.launch{try{if(peer.host.isEmpty()){waitRemote(peer);remoteEngine.printers()}else{try{val api=connected(peer);showPrinters(withContext(Dispatchers.IO){JSONArray(api.request(\"/printers\"))})}catch(e:Exception){if(PeerStore(this@MainActivity).remote(peer.id)==null)throw e;waitRemote(peer);remoteEngine.printers()}}}catch(e:Exception){status.text=e.message?:\"Could not load printers.\"}finally{setBusy(false)}}}\n    private fun sendNow(){\n        if(busy||receiving){status.text=\"Finishing a transfer. Try again in a moment.\";return}\n        var peer=selectedPeer()?:run{status.text=\"Tap Add computer to connect your PC.\";return}\n        val mode=action;val text=input.text.toString().trim();val files=selected.toList()\n"
+                                    }
+                                }
+                            }
+                        }
+                    ],
+                    "partialFingerprints": {
+                        "sourceContext/v1": "dfc1a7abbb86bae5"
+                    }
+                },
+                {
+                    "ruleId": "SetTextI18n",
+                    "ruleIndex": 9,
+                    "message": {
+                        "text": "String literal in setText can not be translated. Use Android resources instead.",
+                        "markdown": "String literal in `setText` can not be translated. Use Android resources instead."
+                    },
+                    "locations": [
+                        {
+                            "physicalLocation": {
+                                "artifactLocation": {
+                                    "uriBaseId": "%SRCROOT%",
+                                    "uri": "app/src/main/java/app/actionbridge/MainActivity.kt"
+                                },
+                                "region": {
+                                    "startLine": 184,
+                                    "startColumn": 51,
+                                    "endLine": 184,
+                                    "endColumn": 87,
+                                    "charOffset": 22749,
+                                    "charLength": 36,
+                                    "snippet": {
+                                        "text": "Tap Add computer to connect your PC."
+                                    }
+                                },
+                                "contextRegion": {
+                                    "startLine": 182,
+                                    "endLine": 187,
+                                    "snippet": {
+                                        "text": "    private fun sendNow(){\n        if(busy||receiving){status.text=\"Finishing a transfer. Try again in a moment.\";return}\n        var peer=selectedPeer()?:run{status.text=\"Tap Add computer to connect your PC.\";return}\n        val mode=action;val text=input.text.toString().trim();val files=selected.toList()\n        if(mode in listOf(\"open\",\"save\",\"print\")&&files.isEmpty()){status.text=\"Choose a file first.\";return}\n"
+                                    }
+                                }
+                            }
+                        }
+                    ],
+                    "partialFingerprints": {
+                        "sourceContext/v1": "5c5386d53db5df8e"
+                    }
+                },
+                {
+                    "ruleId": "SetTextI18n",
+                    "ruleIndex": 9,
+                    "message": {
+                        "text": "String literal in setText can not be translated. Use Android resources instead.",
+                        "markdown": "String literal in `setText` can not be translated. Use Android resources instead."
+                    },
+                    "locations": [
+                        {
+                            "physicalLocation": {
+                                "artifactLocation": {
+                                    "uriBaseId": "%SRCROOT%",
+                                    "uri": "app/src/main/java/app/actionbridge/MainActivity.kt"
+                                },
+                                "region": {
+                                    "startLine": 186,
+                                    "startColumn": 81,
+                                    "endLine": 186,
+                                    "endColumn": 101,
+                                    "charOffset": 22965,
+                                    "charLength": 20,
+                                    "snippet": {
+                                        "text": "Choose a file first."
+                                    }
+                                },
+                                "contextRegion": {
+                                    "startLine": 184,
+                                    "endLine": 189,
+                                    "snippet": {
+                                        "text": "        var peer=selectedPeer()?:run{status.text=\"Tap Add computer to connect your PC.\";return}\n        val mode=action;val text=input.text.toString().trim();val files=selected.toList()\n        if(mode in listOf(\"open\",\"save\",\"print\")&&files.isEmpty()){status.text=\"Choose a file first.\";return}\n        if(mode in listOf(\"copy\",\"url\")&&(text.isEmpty()||text.length>65536)){status.text=\"Enter text up to 65,536 characters.\";return}\n        if(mode==\"url\"&&!Rules.webLink(text)){status.text=\"Enter a complete HTTP or HTTPS web link.\";return}\n"
+                                    }
+                                }
+                            }
+                        }
+                    ],
+                    "partialFingerprints": {
+                        "sourceContext/v1": "d23d75de812a539a"
+                    }
+                },
+                {
+                    "ruleId": "SetTextI18n",
+                    "ruleIndex": 9,
+                    "message": {
+                        "text": "String literal in setText can not be translated. Use Android resources instead.",
+                        "markdown": "String literal in `setText` can not be translated. Use Android resources instead."
+                    },
+                    "locations": [
+                        {
+                            "physicalLocation": {
+                                "artifactLocation": {
+                                    "uriBaseId": "%SRCROOT%",
+                                    "uri": "app/src/main/java/app/actionbridge/MainActivity.kt"
+                                },
+                                "region": {
+                                    "startLine": 187,
+                                    "startColumn": 92,
+                                    "endLine": 187,
+                                    "endColumn": 127,
+                                    "charOffset": 23086,
+                                    "charLength": 35,
+                                    "snippet": {
+                                        "text": "Enter text up to 65,536 characters."
+                                    }
+                                },
+                                "contextRegion": {
+                                    "startLine": 185,
+                                    "endLine": 190,
+                                    "snippet": {
+                                        "text": "        val mode=action;val text=input.text.toString().trim();val files=selected.toList()\n        if(mode in listOf(\"open\",\"save\",\"print\")&&files.isEmpty()){status.text=\"Choose a file first.\";return}\n        if(mode in listOf(\"copy\",\"url\")&&(text.isEmpty()||text.length>65536)){status.text=\"Enter text up to 65,536 characters.\";return}\n        if(mode==\"url\"&&!Rules.webLink(text)){status.text=\"Enter a complete HTTP or HTTPS web link.\";return}\n        val number=copies.text.toString().toIntOrNull()?:0;if(mode==\"print\"&&number !in 1..99){status.text=\"Copies must be between 1 and 99.\";return}\n"
+                                    }
+                                }
+                            }
+                        }
+                    ],
+                    "partialFingerprints": {
+                        "sourceContext/v1": "4e7bd484643d7f7c"
+                    }
+                },
+                {
+                    "ruleId": "SetTextI18n",
+                    "ruleIndex": 9,
+                    "message": {
+                        "text": "String literal in setText can not be translated. Use Android resources instead.",
+                        "markdown": "String literal in `setText` can not be translated. Use Android resources instead."
+                    },
+                    "locations": [
+                        {
+                            "physicalLocation": {
+                                "artifactLocation": {
+                                    "uriBaseId": "%SRCROOT%",
+                                    "uri": "app/src/main/java/app/actionbridge/MainActivity.kt"
+                                },
+                                "region": {
+                                    "startLine": 188,
+                                    "startColumn": 60,
+                                    "endLine": 188,
+                                    "endColumn": 100,
+                                    "charOffset": 23190,
+                                    "charLength": 40,
+                                    "snippet": {
+                                        "text": "Enter a complete HTTP or HTTPS web link."
+                                    }
+                                },
+                                "contextRegion": {
+                                    "startLine": 186,
+                                    "endLine": 191,
+                                    "snippet": {
+                                        "text": "        if(mode in listOf(\"open\",\"save\",\"print\")&&files.isEmpty()){status.text=\"Choose a file first.\";return}\n        if(mode in listOf(\"copy\",\"url\")&&(text.isEmpty()||text.length>65536)){status.text=\"Enter text up to 65,536 characters.\";return}\n        if(mode==\"url\"&&!Rules.webLink(text)){status.text=\"Enter a complete HTTP or HTTPS web link.\";return}\n        val number=copies.text.toString().toIntOrNull()?:0;if(mode==\"print\"&&number !in 1..99){status.text=\"Copies must be between 1 and 99.\";return}\n        val range=try{PrintOptions.pages(if(mode==\"print\")pageRange.text.toString() else \"\")}catch(e:IllegalArgumentException){status.text=e.message;return}\n"
+                                    }
+                                }
+                            }
+                        }
+                    ],
+                    "partialFingerprints": {
+                        "sourceContext/v1": "f41e489f5fd35d3e"
+                    }
+                },
+                {
+                    "ruleId": "SetTextI18n",
+                    "ruleIndex": 9,
+                    "message": {
+                        "text": "String literal in setText can not be translated. Use Android resources instead.",
+                        "markdown": "String literal in `setText` can not be translated. Use Android resources instead."
+                    },
+                    "locations": [
+                        {
+                            "physicalLocation": {
+                                "artifactLocation": {
+                                    "uriBaseId": "%SRCROOT%",
+                                    "uri": "app/src/main/java/app/actionbridge/MainActivity.kt"
+                                },
+                                "region": {
+                                    "startLine": 189,
+                                    "startColumn": 109,
+                                    "endLine": 189,
+                                    "endColumn": 141,
+                                    "charOffset": 23348,
+                                    "charLength": 32,
+                                    "snippet": {
+                                        "text": "Copies must be between 1 and 99."
+                                    }
+                                },
+                                "contextRegion": {
+                                    "startLine": 187,
+                                    "endLine": 192,
+                                    "snippet": {
+                                        "text": "        if(mode in listOf(\"copy\",\"url\")&&(text.isEmpty()||text.length>65536)){status.text=\"Enter text up to 65,536 characters.\";return}\n        if(mode==\"url\"&&!Rules.webLink(text)){status.text=\"Enter a complete HTTP or HTTPS web link.\";return}\n        val number=copies.text.toString().toIntOrNull()?:0;if(mode==\"print\"&&number !in 1..99){status.text=\"Copies must be between 1 and 99.\";return}\n        val range=try{PrintOptions.pages(if(mode==\"print\")pageRange.text.toString() else \"\")}catch(e:IllegalArgumentException){status.text=e.message;return}\n        val options=JSONObject().put(\"duplex\",listOf(\"default\",\"simplex\",\"long\",\"short\")[duplex.selectedItemPosition.coerceIn(0,3)]).put(\"pageFrom\",range.first).put(\"pageTo\",range.second).put(\"collate\",collate.isChecked).put(\"copies\",if(mode==\"print\")number else 1).put(\"landscape\",landscape.isChecked).put(\"color\",color.isChecked).put(\"paper\",paper.selectedItem?.toString()?:\"Default\").put(\"fit\",listOf(\"fit\",\"fill\",\"actual\")[fit.selectedItemPosition.coerceIn(0,2)])\n"
+                                    }
+                                }
+                            }
+                        }
+                    ],
+                    "partialFingerprints": {
+                        "sourceContext/v1": "846059ad58ebae2c"
+                    }
+                },
+                {
+                    "ruleId": "SetTextI18n",
+                    "ruleIndex": 9,
+                    "message": {
+                        "text": "Do not concatenate text displayed with setText. Use resource string with placeholders.",
+                        "markdown": "Do not concatenate text displayed with `setText`. Use resource string with placeholders."
+                    },
+                    "locations": [
+                        {
+                            "physicalLocation": {
+                                "artifactLocation": {
+                                    "uriBaseId": "%SRCROOT%",
+                                    "uri": "app/src/main/java/app/actionbridge/MainActivity.kt"
+                                },
+                                "region": {
+                                    "startLine": 202,
+                                    "startColumn": 29,
+                                    "endLine": 202,
+                                    "endColumn": 71,
+                                    "charOffset": 24651,
+                                    "charLength": 42,
+                                    "snippet": {
+                                        "text": "\"Preparing ${index+1} of ${sources.size}…\""
+                                    }
+                                },
+                                "contextRegion": {
+                                    "startLine": 200,
+                                    "endLine": 205,
+                                    "snippet": {
+                                        "text": "            val sources=if(mode in listOf(\"copy\",\"url\"))listOf<Uri?>(null)else files\n            sources.forEachIndexed{index,uri->\n                status.text=\"Preparing ${index+1} of ${sources.size}…\"\n                withContext(NonCancellable+Dispatchers.IO){\n                    val id=Queue.stage(applicationContext,uri,if(uri==null)text else null,peer,mode,options){bytes->if(bytes%(4*1024*1024)<65536)runOnUiThread{if(!isDestroyed)status.text=\"Preparing · ${bytes/1048576} MB\"}}\n"
+                                    }
+                                }
+                            }
+                        }
+                    ],
+                    "partialFingerprints": {
+                        "sourceContext/v1": "6a6b6ad151f49cea"
+                    }
+                },
+                {
+                    "ruleId": "SetTextI18n",
+                    "ruleIndex": 9,
+                    "message": {
+                        "text": "Do not concatenate text displayed with setText. Use resource string with placeholders.",
+                        "markdown": "Do not concatenate text displayed with `setText`. Use resource string with placeholders."
+                    },
+                    "locations": [
+                        {
+                            "physicalLocation": {
+                                "artifactLocation": {
+                                    "uriBaseId": "%SRCROOT%",
+                                    "uri": "app/src/main/java/app/actionbridge/MainActivity.kt"
+                                },
+                                "region": {
+                                    "startLine": 202,
+                                    "startColumn": 42,
+                                    "endLine": 202,
+                                    "endColumn": 49,
+                                    "charOffset": 24664,
+                                    "charLength": 7,
+                                    "snippet": {
+                                        "text": "index+1"
+                                    }
+                                },
+                                "contextRegion": {
+                                    "startLine": 200,
+                                    "endLine": 205,
+                                    "snippet": {
+                                        "text": "            val sources=if(mode in listOf(\"copy\",\"url\"))listOf<Uri?>(null)else files\n            sources.forEachIndexed{index,uri->\n                status.text=\"Preparing ${index+1} of ${sources.size}…\"\n                withContext(NonCancellable+Dispatchers.IO){\n                    val id=Queue.stage(applicationContext,uri,if(uri==null)text else null,peer,mode,options){bytes->if(bytes%(4*1024*1024)<65536)runOnUiThread{if(!isDestroyed)status.text=\"Preparing · ${bytes/1048576} MB\"}}\n"
+                                    }
+                                }
+                            }
+                        }
+                    ],
+                    "partialFingerprints": {
+                        "sourceContext/v1": "6a6b6ad151f49cea"
+                    }
+                },
+                {
+                    "ruleId": "SetTextI18n",
+                    "ruleIndex": 9,
+                    "message": {
+                        "text": "String literal in setText can not be translated. Use Android resources instead.",
+                        "markdown": "String literal in `setText` can not be translated. Use Android resources instead."
+                    },
+                    "locations": [
+                        {
+                            "physicalLocation": {
+                                "artifactLocation": {
+                                    "uriBaseId": "%SRCROOT%",
+                                    "uri": "app/src/main/java/app/actionbridge/MainActivity.kt"
+                                },
+                                "region": {
+                                    "startLine": 202,
+                                    "startColumn": 30,
+                                    "endLine": 202,
+                                    "endColumn": 40,
+                                    "charOffset": 24652,
+                                    "charLength": 10,
+                                    "snippet": {
+                                        "text": "Preparing "
+                                    }
+                                },
+                                "contextRegion": {
+                                    "startLine": 200,
+                                    "endLine": 205,
+                                    "snippet": {
+                                        "text": "            val sources=if(mode in listOf(\"copy\",\"url\"))listOf<Uri?>(null)else files\n            sources.forEachIndexed{index,uri->\n                status.text=\"Preparing ${index+1} of ${sources.size}…\"\n                withContext(NonCancellable+Dispatchers.IO){\n                    val id=Queue.stage(applicationContext,uri,if(uri==null)text else null,peer,mode,options){bytes->if(bytes%(4*1024*1024)<65536)runOnUiThread{if(!isDestroyed)status.text=\"Preparing · ${bytes/1048576} MB\"}}\n"
+                                    }
+                                }
+                            }
+                        }
+                    ],
+                    "partialFingerprints": {
+                        "sourceContext/v1": "6a6b6ad151f49cea"
+                    }
+                },
+                {
+                    "ruleId": "SetTextI18n",
+                    "ruleIndex": 9,
+                    "message": {
+                        "text": "String literal in setText can not be translated. Use Android resources instead.",
+                        "markdown": "String literal in `setText` can not be translated. Use Android resources instead."
+                    },
+                    "locations": [
+                        {
+                            "physicalLocation": {
+                                "artifactLocation": {
+                                    "uriBaseId": "%SRCROOT%",
+                                    "uri": "app/src/main/java/app/actionbridge/MainActivity.kt"
+                                },
+                                "region": {
+                                    "startLine": 202,
+                                    "startColumn": 50,
+                                    "endLine": 202,
+                                    "endColumn": 54,
+                                    "charOffset": 24672,
+                                    "charLength": 4,
+                                    "snippet": {
+                                        "text": " of "
+                                    }
+                                },
+                                "contextRegion": {
+                                    "startLine": 200,
+                                    "endLine": 205,
+                                    "snippet": {
+                                        "text": "            val sources=if(mode in listOf(\"copy\",\"url\"))listOf<Uri?>(null)else files\n            sources.forEachIndexed{index,uri->\n                status.text=\"Preparing ${index+1} of ${sources.size}…\"\n                withContext(NonCancellable+Dispatchers.IO){\n                    val id=Queue.stage(applicationContext,uri,if(uri==null)text else null,peer,mode,options){bytes->if(bytes%(4*1024*1024)<65536)runOnUiThread{if(!isDestroyed)status.text=\"Preparing · ${bytes/1048576} MB\"}}\n"
+                                    }
+                                }
+                            }
+                        }
+                    ],
+                    "partialFingerprints": {
+                        "sourceContext/v1": "6a6b6ad151f49cea"
+                    }
+                },
+                {
+                    "ruleId": "SetTextI18n",
+                    "ruleIndex": 9,
+                    "message": {
+                        "text": "Do not concatenate text displayed with setText. Use resource string with placeholders.",
+                        "markdown": "Do not concatenate text displayed with `setText`. Use resource string with placeholders."
+                    },
+                    "locations": [
+                        {
+                            "physicalLocation": {
+                                "artifactLocation": {
+                                    "uriBaseId": "%SRCROOT%",
+                                    "uri": "app/src/main/java/app/actionbridge/MainActivity.kt"
+                                },
+                                "region": {
+                                    "startLine": 204,
+                                    "startColumn": 188,
+                                    "endLine": 204,
+                                    "endColumn": 221,
+                                    "charOffset": 24941,
+                                    "charLength": 33,
+                                    "snippet": {
+                                        "text": "\"Preparing · ${bytes/1048576} MB\""
+                                    }
+                                },
+                                "contextRegion": {
+                                    "startLine": 202,
+                                    "endLine": 207,
+                                    "snippet": {
+                                        "text": "                status.text=\"Preparing ${index+1} of ${sources.size}…\"\n                withContext(NonCancellable+Dispatchers.IO){\n                    val id=Queue.stage(applicationContext,uri,if(uri==null)text else null,peer,mode,options){bytes->if(bytes%(4*1024*1024)<65536)runOnUiThread{if(!isDestroyed)status.text=\"Preparing · ${bytes/1048576} MB\"}}\n                    if(remoteMode){val j=JSONObject(Queue.metadata(applicationContext,id).readText());j.put(\"transport\",\"remote\").put(\"state\",\"paused\").put(\"message\",\"Ready to send. Retry when your PC is connected.\");Queue.write(Queue.metadata(applicationContext,id),j);remoteIds.add(id)}else Queue.enqueue(applicationContext,id)\n                }\n"
+                                    }
+                                }
+                            }
+                        }
+                    ],
+                    "partialFingerprints": {
+                        "sourceContext/v1": "866692c7f1f1b268"
+                    }
+                },
+                {
+                    "ruleId": "SetTextI18n",
+                    "ruleIndex": 9,
+                    "message": {
+                        "text": "String literal in setText can not be translated. Use Android resources instead.",
+                        "markdown": "String literal in `setText` can not be translated. Use Android resources instead."
+                    },
+                    "locations": [
+                        {
+                            "physicalLocation": {
+                                "artifactLocation": {
+                                    "uriBaseId": "%SRCROOT%",
+                                    "uri": "app/src/main/java/app/actionbridge/MainActivity.kt"
+                                },
+                                "region": {
+                                    "startLine": 204,
+                                    "startColumn": 189,
+                                    "endLine": 204,
+                                    "endColumn": 201,
+                                    "charOffset": 24942,
+                                    "charLength": 12,
+                                    "snippet": {
+                                        "text": "Preparing · "
+                                    }
+                                },
+                                "contextRegion": {
+                                    "startLine": 202,
+                                    "endLine": 207,
+                                    "snippet": {
+                                        "text": "                status.text=\"Preparing ${index+1} of ${sources.size}…\"\n                withContext(NonCancellable+Dispatchers.IO){\n                    val id=Queue.stage(applicationContext,uri,if(uri==null)text else null,peer,mode,options){bytes->if(bytes%(4*1024*1024)<65536)runOnUiThread{if(!isDestroyed)status.text=\"Preparing · ${bytes/1048576} MB\"}}\n                    if(remoteMode){val j=JSONObject(Queue.metadata(applicationContext,id).readText());j.put(\"transport\",\"remote\").put(\"state\",\"paused\").put(\"message\",\"Ready to send. Retry when your PC is connected.\");Queue.write(Queue.metadata(applicationContext,id),j);remoteIds.add(id)}else Queue.enqueue(applicationContext,id)\n                }\n"
+                                    }
+                                }
+                            }
+                        }
+                    ],
+                    "partialFingerprints": {
+                        "sourceContext/v1": "866692c7f1f1b268"
+                    }
+                },
+                {
+                    "ruleId": "SetTextI18n",
+                    "ruleIndex": 9,
+                    "message": {
+                        "text": "String literal in setText can not be translated. Use Android resources instead.",
+                        "markdown": "String literal in `setText` can not be translated. Use Android resources instead."
+                    },
+                    "locations": [
+                        {
+                            "physicalLocation": {
+                                "artifactLocation": {
+                                    "uriBaseId": "%SRCROOT%",
+                                    "uri": "app/src/main/java/app/actionbridge/MainActivity.kt"
+                                },
+                                "region": {
+                                    "startLine": 204,
+                                    "startColumn": 217,
+                                    "endLine": 204,
+                                    "endColumn": 220,
+                                    "charOffset": 24970,
+                                    "charLength": 3,
+                                    "snippet": {
+                                        "text": " MB"
+                                    }
+                                },
+                                "contextRegion": {
+                                    "startLine": 202,
+                                    "endLine": 207,
+                                    "snippet": {
+                                        "text": "                status.text=\"Preparing ${index+1} of ${sources.size}…\"\n                withContext(NonCancellable+Dispatchers.IO){\n                    val id=Queue.stage(applicationContext,uri,if(uri==null)text else null,peer,mode,options){bytes->if(bytes%(4*1024*1024)<65536)runOnUiThread{if(!isDestroyed)status.text=\"Preparing · ${bytes/1048576} MB\"}}\n                    if(remoteMode){val j=JSONObject(Queue.metadata(applicationContext,id).readText());j.put(\"transport\",\"remote\").put(\"state\",\"paused\").put(\"message\",\"Ready to send. Retry when your PC is connected.\");Queue.write(Queue.metadata(applicationContext,id),j);remoteIds.add(id)}else Queue.enqueue(applicationContext,id)\n                }\n"
+                                    }
+                                }
+                            }
+                        }
+                    ],
+                    "partialFingerprints": {
+                        "sourceContext/v1": "866692c7f1f1b268"
+                    }
+                },
+                {
+                    "ruleId": "SetTextI18n",
+                    "ruleIndex": 9,
+                    "message": {
+                        "text": "String literal in setText can not be translated. Use Android resources instead.",
+                        "markdown": "String literal in `setText` can not be translated. Use Android resources instead."
+                    },
+                    "locations": [
+                        {
+                            "physicalLocation": {
+                                "artifactLocation": {
+                                    "uriBaseId": "%SRCROOT%",
+                                    "uri": "app/src/main/java/app/actionbridge/MainActivity.kt"
+                                },
+                                "region": {
+                                    "startLine": 209,
+                                    "startColumn": 181,
+                                    "endLine": 209,
+                                    "endColumn": 197,
+                                    "charOffset": 25640,
+                                    "charLength": 16,
+                                    "snippet": {
+                                        "text": "No file selected"
+                                    }
+                                },
+                                "contextRegion": {
+                                    "startLine": 207,
+                                    "endLine": 212,
+                                    "snippet": {
+                                        "text": "            }\n            if(remoteMode){remoteEngine.send(remoteIds);window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)}\n            status.text=if(remoteMode)\"Sending to ${peer.name}. Keep this screen open.\" else \"Sending to ${peer.name}. You can leave this screen.\";selected.clear();fileLabel.text=\"No file selected\";input.setText(\"\");refreshHistory()\n        }catch(e:Exception){status.text=e.message?:\"Could not prepare transfer.\";setBusy(false)}finally{if(peer.host.isNotEmpty())setBusy(false)}}\n    }\n"
+                                    }
+                                }
+                            }
+                        }
+                    ],
+                    "partialFingerprints": {
+                        "sourceContext/v1": "a04912375d102e16"
+                    }
+                },
+                {
+                    "ruleId": "SetTextI18n",
+                    "ruleIndex": 9,
+                    "message": {
+                        "text": "String literal in setText can not be translated. Use Android resources instead.",
+                        "markdown": "String literal in `setText` can not be translated. Use Android resources instead."
+                    },
+                    "locations": [
+                        {
+                            "physicalLocation": {
+                                "artifactLocation": {
+                                    "uriBaseId": "%SRCROOT%",
+                                    "uri": "app/src/main/java/app/actionbridge/MainActivity.kt"
+                                },
+                                "region": {
+                                    "startLine": 216,
+                                    "startColumn": 200,
+                                    "endLine": 216,
+                                    "endColumn": 213,
+                                    "charOffset": 26897,
+                                    "charLength": 13,
+                                    "snippet": {
+                                        "text": "Retry queued."
+                                    }
+                                },
+                                "contextRegion": {
+                                    "startLine": 214,
+                                    "endLine": 219,
+                                    "snippet": {
+                                        "text": "        if(records.isEmpty())history.addView(text(\"Your transfers will appear here.\",13f))\n        records.take(20).forEach{j->val view=card();val r=j.getJSONObject(\"request\");view.addView(text(r.getString(\"name\"),15f,true));view.addView(text(\"${j.optString(\"state\").replaceFirstChar{it.uppercase()}} · ${j.optInt(\"progress\")}%\",13f));view.addView(ProgressBar(this,null,android.R.attr.progressBarStyleHorizontal).apply{max=100;progress=j.optInt(\"progress\");progressTintList=android.content.res.ColorStateList.valueOf(teal)});view.addView(text(j.optString(\"message\"),12f));val state=j.optString(\"state\");val id=j.getString(\"id\")\n            if(state in listOf(\"paused\",\"failed\",\"retrying\"))view.addView(button(\"Retry same transfer\"){if(j.optString(\"transport\")==\"remote\")retryRemote(j) else {Queue.enqueue(this,id);status.text=\"Retry queued.\"}})\n            if(state in listOf(\"queued\",\"sending\",\"retrying\",\"running\"))view.addView(button(\"Cancel\"){if(j.optString(\"transport\")==\"remote\")remoteEngine.cancel(id) else Queue.cancel(this,id)})\n            history.addView(view)\n"
+                                    }
+                                }
+                            }
+                        }
+                    ],
+                    "partialFingerprints": {
+                        "sourceContext/v1": "904b9b954d486f30"
+                    }
+                },
+                {
+                    "ruleId": "SetTextI18n",
+                    "ruleIndex": 9,
+                    "message": {
+                        "text": "String literal in setText can not be translated. Use Android resources instead.",
+                        "markdown": "String literal in `setText` can not be translated. Use Android resources instead."
+                    },
+                    "locations": [
+                        {
+                            "physicalLocation": {
+                                "artifactLocation": {
+                                    "uriBaseId": "%SRCROOT%",
+                                    "uri": "app/src/main/java/app/actionbridge/MainActivity.kt"
+                                },
+                                "region": {
+                                    "startLine": 246,
+                                    "startColumn": 541,
+                                    "endLine": 246,
+                                    "endColumn": 576,
+                                    "charOffset": 29840,
+                                    "charLength": 35,
+                                    "snippet": {
+                                        "text": "No app available to open this file."
+                                    }
+                                },
+                                "contextRegion": {
+                                    "startLine": 244,
+                                    "endLine": 249,
+                                    "snippet": {
+                                        "text": "        records.forEach{j->val view=card();view.addView(text(j.getString(\"name\"),15f,true))\n            if(!j.optBoolean(\"completed\"))view.addView(text(j.optString(\"error\").ifEmpty{\"Receiving · will resume when connected\"},13f))\n            else if(j.getString(\"kind\")==\"file\"){view.addView(text(\"Saved · \"+if(Build.VERSION.SDK_INT>=29)\"Downloads / ActionBridge\" else \"ActionBridge received files\",13f));view.addView(button(\"Open file\"){runCatching{val uri=Uri.parse(j.getString(\"uri\"));val type=android.webkit.MimeTypeMap.getSingleton().getMimeTypeFromExtension(j.getString(\"name\").substringAfterLast('.',\"\").lowercase())?:\"*/*\";startActivity(Intent(Intent.ACTION_VIEW).setDataAndType(uri,type).addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION))}.onFailure{status.text=\"No app available to open this file.\"}})}\n            else{view.addView(text(j.optString(\"text\"),14f).apply{maxLines=6;ellipsize=android.text.TextUtils.TruncateAt.END});view.addView(button(\"Copy\"){(getSystemService(CLIPBOARD_SERVICE) as android.content.ClipboardManager).setPrimaryClip(android.content.ClipData.newPlainText(\"From PC\",j.getString(\"text\")));status.text=\"Copied. Paste it in any app.\"});if(j.getString(\"kind\")==\"link\")view.addView(button(\"Open link\"){startActivity(Intent(Intent.ACTION_VIEW,Uri.parse(j.getString(\"text\"))))})}\n            inbox.addView(view)\n"
+                                    }
+                                }
+                            }
+                        }
+                    ],
+                    "partialFingerprints": {
+                        "sourceContext/v1": "5d11fff5f9b50d15"
+                    }
+                },
+                {
+                    "ruleId": "SetTextI18n",
+                    "ruleIndex": 9,
+                    "message": {
+                        "text": "String literal in setText can not be translated. Use Android resources instead.",
+                        "markdown": "String literal in `setText` can not be translated. Use Android resources instead."
+                    },
+                    "locations": [
+                        {
+                            "physicalLocation": {
+                                "artifactLocation": {
+                                    "uriBaseId": "%SRCROOT%",
+                                    "uri": "app/src/main/java/app/actionbridge/MainActivity.kt"
+                                },
+                                "region": {
+                                    "startLine": 247,
+                                    "startColumn": 328,
+                                    "endLine": 247,
+                                    "endColumn": 356,
+                                    "charOffset": 30208,
+                                    "charLength": 28,
+                                    "snippet": {
+                                        "text": "Copied. Paste it in any app."
+                                    }
+                                },
+                                "contextRegion": {
+                                    "startLine": 245,
+                                    "endLine": 250,
+                                    "snippet": {
+                                        "text": "            if(!j.optBoolean(\"completed\"))view.addView(text(j.optString(\"error\").ifEmpty{\"Receiving · will resume when connected\"},13f))\n            else if(j.getString(\"kind\")==\"file\"){view.addView(text(\"Saved · \"+if(Build.VERSION.SDK_INT>=29)\"Downloads / ActionBridge\" else \"ActionBridge received files\",13f));view.addView(button(\"Open file\"){runCatching{val uri=Uri.parse(j.getString(\"uri\"));val type=android.webkit.MimeTypeMap.getSingleton().getMimeTypeFromExtension(j.getString(\"name\").substringAfterLast('.',\"\").lowercase())?:\"*/*\";startActivity(Intent(Intent.ACTION_VIEW).setDataAndType(uri,type).addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION))}.onFailure{status.text=\"No app available to open this file.\"}})}\n            else{view.addView(text(j.optString(\"text\"),14f).apply{maxLines=6;ellipsize=android.text.TextUtils.TruncateAt.END});view.addView(button(\"Copy\"){(getSystemService(CLIPBOARD_SERVICE) as android.content.ClipboardManager).setPrimaryClip(android.content.ClipData.newPlainText(\"From PC\",j.getString(\"text\")));status.text=\"Copied. Paste it in any app.\"});if(j.getString(\"kind\")==\"link\")view.addView(button(\"Open link\"){startActivity(Intent(Intent.ACTION_VIEW,Uri.parse(j.getString(\"text\"))))})}\n            inbox.addView(view)\n        }\n"
+                                    }
+                                }
+                            }
+                        }
+                    ],
+                    "partialFingerprints": {
+                        "sourceContext/v1": "643bed41491c496d"
+                    }
+                }
+            ]
+        }
+    ]
+}

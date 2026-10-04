@@ -1,0 +1,11 @@
+PASS: outgoing UI failure cannot prevent acknowledgement or body cleanup
+PASS: failed outgoing journal commit remains queued and retries durably
+PASS: abandoned outgoing staging cleaned without deleting corrupt-journal payload
+PASS: failed upload checkpoint reports only committed offset
+PASS: failed cancellation commit preserves upload state
+PASS: failed finish commit remains safely retryable
+PASS: failed approval persistence cannot grant temporary access
+PASS: failed revocation persistence cannot hide still-saved approval
+PASS: large remote clipboard acknowledgement fits one control message
+PASS: failed destination rename releases temporary copy and retains resumable upload
+10 audit checks passed; 0 failed.

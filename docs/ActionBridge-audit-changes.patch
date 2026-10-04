@@ -1,0 +1,611 @@
+--- a/README.md
++++ b/README.md
+@@ -1,4 +1,6 @@
+-# ActionBridge v0.5.0
++# ActionBridge v0.5.0 — Windows/Android audit checkpoint
++
++This checkpoint includes reliability fixes and regression tests from the [Windows/Android code audit](docs/AUDIT-WINDOWS-ANDROID.md). App version numbers remain unchanged. See that report for validation and remaining issues before building a release.
+ 
+ New in v0.5: Android text selection → Send to PC, and Windows Send to phone with files, links and clipboard text. See [update guide](docs/UPDATE-v0.5.0.md). The existing v0.4 backend does not need redeployment.
+ 
+--- a/android/app/build.gradle.kts
++++ b/android/app/build.gradle.kts
+@@ -5,6 +5,7 @@
+     defaultConfig { applicationId = "app.actionbridge"; minSdk = 26; targetSdk = 36; versionCode = 50; versionName = "0.5.0"; buildConfigField("String", "SUPPORT_EMAIL", "\"${System.getenv("SUPPORT_EMAIL") ?: ""}\"") }
+     compileOptions { sourceCompatibility = JavaVersion.VERSION_17; targetCompatibility = JavaVersion.VERSION_17 }
+     buildFeatures { buildConfig = true }
++    testOptions { unitTests.isReturnDefaultValues = true }
+     signingConfigs {
+         create("publish") {
+             val keyPath=System.getenv("UPLOAD_KEYSTORE_PATH")
+--- a/android/app/src/main/assets/remote/app.js
++++ b/android/app/src/main/assets/remote/app.js
+@@ -1,3 +1,3 @@
+-(()=>{var z=e=>document.getElementById(e),O=z("send"),q=e=>Array.from(e,n=>n.toString(16).padStart(2,"0")).join(""),s,f,c,d,k,A=!1,y=!1,C=0,v=[],p=new Map,F,I=[],P=[],x=!1,R=Promise.resolve();function l(e){z("status").textContent=e,window.NativeBridge?.status(e)}function L(e){return new TextDecoder().decode(Uint8Array.from(atob(e.replaceAll("-","+").replaceAll("_","/")),n=>n.charCodeAt(0)))}function B(e){for(let n of[...p.values(),...v])clearTimeout(n.timer),n.reject(e);p.clear(),v=[]}function S(){if(window.NativeBridge?.ready(!1),clearInterval(F),f&&(f.onclose=null,f.close(),f=null),c){let e=c;c=null,e.close()}d=null,A=!1,B(new Error("Connection interrupted. Reconnect to resume.")),O.disabled=!0}function $(e,n=6e4){return new Promise((t,i)=>{let a=setTimeout(()=>{p.delete(e),i(new Error("PC response timed out"))},n);p.set(e,{resolve:t,reject:i,timer:a})})}async function j(e,n,t=k){let i=await crypto.subtle.importKey("raw",new TextEncoder().encode(s.secret),{name:"HMAC",hash:"SHA-256"},!1,["sign"]);return q(new Uint8Array(await crypto.subtle.sign("HMAC",i,new TextEncoder().encode(t+`
++(()=>{var F=e=>document.getElementById(e),Y=F("send"),_=e=>Array.from(e,n=>n.toString(16).padStart(2,"0")).join(""),f,l,s,d,J,I=!1,m=!1,b=0,S=[],g=new Map,Q,E=[],B=[],D=!1,M=Promise.resolve(),p=0,A=!1,O=0;function w(e){F("status").textContent=e,window.NativeBridge?.status(e)}function W(e){return new TextDecoder().decode(Uint8Array.from(atob(e.replaceAll("-","+").replaceAll("_","/")),n=>n.charCodeAt(0)))}function L(e){for(let n of[...g.values(),...S])clearTimeout(n.timer),n.reject(e);g.clear(),S=[]}function N(){if(p++,A=!1,O=0,window.NativeBridge?.ready(!1),clearInterval(Q),l){let n=l;l=null,n.onclose=null,n.close()}let e=s;s=null,d=null,e&&e.close(),I=!1,L(new Error("Connection interrupted. Reconnect to resume.")),Y.disabled=!0}function Z(e,n=6e4){return new Promise((t,i)=>{let a=setTimeout(()=>{g.delete(e),i(new Error("PC response timed out"))},n);g.set(e,{resolve:t,reject:i,timer:a})})}async function K(e,n,t=J,i=f.secret){let a=await crypto.subtle.importKey("raw",new TextEncoder().encode(i),{name:"HMAC",hash:"SHA-256"},!1,["sign"]);return _(new Uint8Array(await crypto.subtle.sign("HMAC",a,new TextEncoder().encode(t+`
+ `+e+`
+-`+n))))}function J(e,n){let t=k;return R=R.then(async()=>{f?.readyState===1&&f.send(JSON.stringify({type:e,session:t,sdp:n,mac:await j(e,n,t)}))}).catch(()=>{}),R}async function H(){if(c||!A)return;l("Connecting to your PC\u2026"),k=q(crypto.getRandomValues(new Uint8Array(16))),x=!1,I=[],P=[];let e=await fetch(s.service+"/rooms/"+s.room+"/ice?role=phone",{headers:{Authorization:"Bearer "+s.key},cache:"no-store"}),n=await e.json();if(!e.ok)throw new Error(n.error||"Service unavailable");c=new RTCPeerConnection({iceServers:n.iceServers});let t=c;c.onicecandidate=a=>{if(a.candidate){let r=JSON.stringify(a.candidate.toJSON());x?J("candidate",r):I.push(r)}},c.onconnectionstatechange=()=>{c===t&&(c.connectionState==="failed"?(S(),l("Connection failed. Tap Reconnect.")):c.connectionState==="connected"&&M())},d=c.createDataChannel(window.NativeBridge?"jobs-v2":"files-v1",{ordered:!0}),d.binaryType="arraybuffer",d.onopen=()=>{O.disabled=y,window.NativeBridge?.ready(!0),M()},d.onclose=()=>{window.NativeBridge?.ready(!1),O.disabled=!0,B(new Error("Connection interrupted. Reconnect, then Send to resume."))},d.onmessage=a=>{if(typeof a.data!="string")return;let r=JSON.parse(a.data);if(r.type==="rpc"){let o=p.get(r.requestId);o&&(clearTimeout(o.timer),p.delete(r.requestId),r.error?o.reject(new Error(r.error)):o.resolve(r.result));return}if(r.type==="error"){B(new Error(r.error)),l(r.error);return}if(r.type==="ack"){C=r.offset;let o=[];for(let m of v)C>=m.target?(clearTimeout(m.timer),m.resolve()):o.push(m);v=o;return}let w=r.type==="saved"&&p.has("ready")?"ready":r.type,u=p.get(w);u&&(clearTimeout(u.timer),p.delete(w),u.resolve(r))};let i=await c.createOffer();await c.setLocalDescription(i),await J("offer",i.sdp),x=!0;for(let a of I)await J("candidate",a);I=[]}async function M(){let e="Connected";try{let n=await c.getStats();for(let t of n.values())if(t.type==="transport"&&t.selectedCandidatePairId){let i=n.get(t.selectedCandidatePairId),a=n.get(i?.localCandidateId),r=n.get(i?.remoteCandidateId);e=a?.candidateType==="relay"||r?.candidateType==="relay"?"Connected \xB7 encrypted relay":"Connected \xB7 direct transfer"}}catch{}l(e)}function b(){S();try{if(!s)throw new Error("Scan your PC pairing QR code.");l("Finding your PC\u2026"),f=new WebSocket(s.service.replace(/^https:/,"wss:")+"/rooms/"+s.room+"/ws?role=phone",["ab1","key."+s.key]),f.onopen=()=>{F=setInterval(()=>{f?.readyState===1&&f.send("ping")},45e3)};let e=Promise.resolve();f.onmessage=n=>{n.data!=="pong"&&(e=e.then(async()=>{let t=JSON.parse(n.data);if(t.type==="presence"){A=t.online,A?await H():(c&&(c.close(),c=null,d=null,window.NativeBridge?.ready(!1),B(new Error("PC disconnected. Retry when it is awake."))),l("PC is offline. It stays saved; reconnect when it is awake."));return}if(!(t.session!==k||t.mac!==await j(t.type,t.sdp,t.session))){if(t.type==="answer"){await c.setRemoteDescription({type:"answer",sdp:t.sdp});for(let i of P)await c.addIceCandidate(i);P=[]}else if(t.type==="candidate"){let i=JSON.parse(t.sdp);c.remoteDescription?await c.addIceCandidate(i):P.push(i)}}}).catch(t=>l(t.message)))},f.onclose=()=>{S(),l("Service disconnected. Tap Reconnect.")},f.onerror=()=>l("Cannot reach service. Check your internet.")}catch(e){l(e.message)}}function U(e){return C>=e?Promise.resolve():new Promise((n,t)=>{let i={target:e,resolve:n,reject:t};i.timer=setTimeout(()=>{v=v.filter(a=>a!==i),t(new Error("Transfer stalled. Reconnect to resume."))},45e3),v.push(i)})}window.addEventListener("beforeunload",S);try{s=JSON.parse(L(location.hash.slice(1)));let e=new URL(s.service);if(e.protocol!=="https:"||e.username||e.password||e.search||e.hash||e.pathname!=="/"||!/^[a-f0-9]{32}$/.test(s.room)||!/^[A-Za-z0-9_-]{43}$/.test(s.key)||!/^[A-Za-z0-9_-]{43}$/.test(s.secret))throw new Error("Invalid pairing");s.service=e.origin,z("name").textContent=s.name||"Your PC",b()}catch{l("Scan the remote pairing QR code in ActionBridge.")}var N,T=new Set;function g(e,n={}){if(d?.readyState!=="open")return Promise.reject(new Error("Your PC is not connected yet."));let t=crypto.randomUUID(),i=$(t,18e4);try{let a=JSON.stringify({type:"rpc",requestId:t,method:e,...n}),r=new TextEncoder().encode(a);if(r.length<=32e3)d.send(a);else{let w=Math.ceil(r.length/24e3);for(let u=0;u<w;u++){let o=btoa(String.fromCharCode(...r.subarray(u*24e3,(u+1)*24e3)));d.send(JSON.stringify({type:"fragment",requestId:t,index:u,total:w,data:o}))}}}catch(a){let r=p.get(t);r&&(clearTimeout(r.timer),p.delete(t),r.reject(a))}return i}function h(e,n,t,i=0){window.NativeBridge?.job(e,n,t,Math.max(0,Math.min(100,Math.round(i))))}async function Y(e){let n=e.id;T.delete(n);let t=await g("create",{job:e});if(t.state==="uploading"&&e.action!=="copy"&&e.action!=="url"){let i=$("ready");d.send(JSON.stringify({type:"upload",jobId:n}));let r=(await i).offset;if(C=r,!Number.isSafeInteger(r)||r<0||r>e.size)throw new Error("Invalid resume offset");for(h(n,"sending","Sending to your PC",100*r/Math.max(e.size,1));r<e.size;){if(T.has(n))throw new Error("Cancelled on this phone. Check PC activity for any action already started.");if(d?.readyState!=="open")throw new Error("Connection interrupted. Retry this transfer to resume.");(r-C>=524288||d.bufferedAmount>1048576)&&await U(r);let w=window.NativeBridge.read(n,r,Math.min(32768,e.size-r));if(!w)throw new Error("Could not read the staged file.");let u=Uint8Array.from(atob(w),o=>o.charCodeAt(0));d.send(u.buffer),r+=u.length,h(n,"sending","Sending to your PC",100*C/Math.max(e.size,1)),await new Promise(o=>setTimeout(o,0))}await U(r)}for((t.state==="uploading"||t.state==="queued")&&(t=await g("finish",{jobId:n}));t.state==="queued"||t.state==="running";)h(n,"running","Your PC is completing the action",100),await new Promise(i=>setTimeout(i,800)),t=await g("status",{jobId:n});h(n,t.state,t.message||"Action completed",100),t.state==="completed"||t.state==="submitted"?l(e.action==="save"?"Saved on PC":t.message||"Action completed"):l(t.message||t.state)}window.ActionBridge={connect(e){N||(N=setInterval(()=>{s&&!y&&(!f||f.readyState===3)&&b()},8e3)),S(),s=JSON.parse(L(e)),s.service=new URL(s.service).origin,b()},async printers(){try{let e=await g("printers");window.NativeBridge.printers(JSON.stringify(e))}catch(e){l(e.message)}},async send(e){if(y||E){l("Finishing a received file. Try Send again in a moment."),window.NativeBridge?.busy(!1);return}y=!0,window.NativeBridge?.busy(!0);for(let n=0;n<e.length;n++){let t=e[n];try{await Y(t)}catch(i){h(t.id,T.has(t.id)?"cancelled":"paused",i.message);for(let a of e.slice(n+1))h(a.id,"paused","Waiting. Retry when your PC is connected.");l(i.message);break}}y=!1,window.NativeBridge?.busy(!1)},async cancel(e){T.add(e);try{let n=await g("cancel",{jobId:e});h(e,n.state,n.message||"Cancelled",100)}catch(n){l(n.message)}},reconnect(){b()},dispose(){clearInterval(N),N=null,S()}};window.NativeBridge&&(N=setInterval(()=>{s&&!y&&(!f||f.readyState===3)&&b()},8e3));var E=!1,D=0;async function _(){if(!window.NativeBridge||y||E||Date.now()<D||d?.readyState!=="open")return;E=!0;let e=d,n=s;try{let t=await g("outbox");for(let i of t){if(d!==e||s!==n||y)break;let a=window.NativeBridge.incomingBegin(JSON.stringify(i),n.id||n.room);if(a==="error")throw new Error("Could not prepare received file.");if(a!=="done"){let r=Number(a);if(!Number.isSafeInteger(r)||r<0||r>i.size)throw new Error("Invalid download offset");for(;r<i.size;){if(d!==e||s!==n||y)return;let w=[];for(let o=0;o<16&&r+o*16384<i.size;o++)w.push(r+o*16384);let u=await Promise.all(w.map(o=>g("download",{itemId:i.id,offset:o,count:16384})));if(d!==e||s!==n)return;for(let o of u){if(o.offset!==r||!o.data)throw new Error("Invalid received chunk");let m=Number(window.NativeBridge.incomingAppend(i.id,r,o.data));if(!Number.isSafeInteger(m)||m<=r||m>i.size)throw new Error("Could not save received chunk");r=m}}if(!window.NativeBridge.incomingFinish(i.id))throw new Error("Could not finish received file")}await g("received",{itemId:i.id})}}catch(t){D=Date.now()+3e4,/Unsupported action|Update the PC app/.test(t.message)||l("Receiving paused: "+t.message)}finally{E=!1}}var Q=window.NativeBridge?setInterval(_,3e3):null;})();
++`+n))))}function U(e,n){let t=J,i=p,a=l,r=f.secret;return M=M.then(async()=>{if(i!==p||a!==l||a?.readyState!==1)return;let u=await K(e,n,t,r);i===p&&a===l&&a.readyState===1&&a.send(JSON.stringify({type:e,session:t,sdp:n,mac:u}))}).catch(()=>{}),M}async function V(){if(s||!I||A)return;let e=p,n=f;A=!0,O=Date.now();try{w("Connecting to your PC\u2026"),J=_(crypto.getRandomValues(new Uint8Array(16))),D=!1,E=[],B=[];let t=await fetch(n.service+"/rooms/"+n.room+"/ice?role=phone",{headers:{Authorization:"Bearer "+n.key},cache:"no-store"}),i=await t.json();if(e!==p||n!==f)return;if(!t.ok)throw new Error(i.error||"Service unavailable");s=new RTCPeerConnection({iceServers:i.iceServers});let a=s;s.onicecandidate=c=>{if(s===a&&c.candidate){let o=JSON.stringify(c.candidate.toJSON());D?U("candidate",o):E.push(o)}},s.onconnectionstatechange=()=>{s===a&&(s.connectionState==="failed"?(N(),w("Connection failed. Reconnecting\u2026")):s.connectionState==="connected"&&$())},d=s.createDataChannel(window.NativeBridge?"jobs-v2":"files-v1",{ordered:!0});let r=d;d.binaryType="arraybuffer",d.onopen=()=>{d!==r||s!==a||(Y.disabled=m,window.NativeBridge?.ready(!0),$())},d.onclose=()=>{d!==r||s!==a||(N(),w("Connection interrupted. Reconnecting; retry the transfer to resume."))},d.onmessage=c=>{if(d!==r||s!==a||typeof c.data!="string")return;let o=JSON.parse(c.data);if(o.type==="rpc"){let v=g.get(o.requestId);v&&(clearTimeout(v.timer),g.delete(o.requestId),o.error?v.reject(new Error(o.error)):v.resolve(o.result));return}if(o.type==="error"){L(new Error(o.error)),w(o.error);return}if(o.type==="ack"){b=o.offset;let v=[];for(let k of S)b>=k.target?(clearTimeout(k.timer),k.resolve()):v.push(k);S=v;return}let h=o.type==="saved"&&g.has("ready")?"ready":o.type,z=g.get(h);z&&(clearTimeout(z.timer),g.delete(h),z.resolve(o))};let u=await s.createOffer();if(e!==p||s!==a||(await a.setLocalDescription(u),e!==p||s!==a)||(await U("offer",u.sdp),e!==p||s!==a))return;D=!0;for(let c of E)await U("candidate",c);E=[]}finally{e===p&&(A=!1)}}async function $(){let e=s;if(!e)return;let n="Connected";try{let t=await e.getStats();for(let i of t.values())if(i.type==="transport"&&i.selectedCandidatePairId){let a=t.get(i.selectedCandidatePairId),r=t.get(a?.localCandidateId),u=t.get(a?.remoteCandidateId);n=r?.candidateType==="relay"||u?.candidateType==="relay"?"Connected \xB7 encrypted relay":"Connected \xB7 direct transfer"}}catch{}s===e&&w(n)}function x(){N();try{if(!f)throw new Error("Scan your PC pairing QR code.");O=Date.now(),w("Finding your PC\u2026");let e=p,n=f;l=new WebSocket(f.service.replace(/^https:/,"wss:")+"/rooms/"+f.room+"/ws?role=phone",["ab1","key."+f.key]);let t=l;l.onopen=()=>{t===l&&(Q=setInterval(()=>{t===l&&t.readyState===1&&t.send("ping")},45e3))};let i=Promise.resolve();l.onmessage=a=>{t!==l||a.data==="pong"||(i=i.then(async()=>{if(t!==l||e!==p)return;let r=JSON.parse(a.data);if(r.type==="presence"){if(I=r.online,I)await V();else{let c=s;s=null,d=null,c&&c.close(),window.NativeBridge?.ready(!1),L(new Error("PC disconnected. Retry when it is awake.")),w("PC is offline. It stays saved; reconnect when it is awake.")}return}if(r.session!==J||r.mac!==await K(r.type,r.sdp,r.session,n.secret)||t!==l||e!==p||!s)return;let u=s;if(r.type==="answer"){if(await u.setRemoteDescription({type:"answer",sdp:r.sdp}),s!==u)return;for(let c of B)await u.addIceCandidate(c);B=[]}else if(r.type==="candidate"){let c=JSON.parse(r.sdp);u.remoteDescription?await u.addIceCandidate(c):B.push(c)}}).catch(r=>{t===l&&w(r.message)}))},l.onclose=()=>{t===l&&(N(),w("Service disconnected. Reconnecting\u2026"))},l.onerror=()=>{t===l&&w("Cannot reach service. Check your internet.")}}catch(e){w(e.message)}}function q(){if(!(!f||m)){if(d?.readyState==="open"){window.NativeBridge?.ready(!0);return}(!l||l.readyState===3||(l.readyState===0||I)&&Date.now()-O>35e3||I&&!A&&(!s||s.connectionState==="failed"||s.connectionState==="closed"||d?.readyState==="closed"))&&x()}}function j(e){return b>=e?Promise.resolve():new Promise((n,t)=>{let i={target:e,resolve:n,reject:t};i.timer=setTimeout(()=>{S=S.filter(a=>a!==i),t(new Error("Transfer stalled. Reconnect to resume."))},45e3),S.push(i)})}window.addEventListener("beforeunload",N);try{f=JSON.parse(W(location.hash.slice(1)));let e=new URL(f.service);if(e.protocol!=="https:"||e.username||e.password||e.search||e.hash||e.pathname!=="/"||!/^[a-f0-9]{32}$/.test(f.room)||!/^[A-Za-z0-9_-]{43}$/.test(f.key)||!/^[A-Za-z0-9_-]{43}$/.test(f.secret))throw new Error("Invalid pairing");f.service=e.origin,F("name").textContent=f.name||"Your PC",x()}catch{w("Scan the remote pairing QR code in ActionBridge.")}var P,R=new Set;function y(e,n={}){if(d?.readyState!=="open")return Promise.reject(new Error("Your PC is not connected yet."));let t=crypto.randomUUID(),i=Z(t,18e4);try{let a=JSON.stringify({type:"rpc",requestId:t,method:e,...n}),r=new TextEncoder().encode(a);if(r.length<=32e3)d.send(a);else{let u=Math.ceil(r.length/24e3);for(let c=0;c<u;c++){let o=btoa(String.fromCharCode(...r.subarray(c*24e3,(c+1)*24e3)));d.send(JSON.stringify({type:"fragment",requestId:t,index:c,total:u,data:o}))}}}catch(a){let r=g.get(t);r&&(clearTimeout(r.timer),g.delete(t),r.reject(a))}return i}function C(e,n,t,i=0){window.NativeBridge?.job(e,n,t,Math.max(0,Math.min(100,Math.round(i))))}async function G(e){let n=e.id;R.delete(n);let t=await y("create",{job:e});if(t.state==="uploading"&&e.action!=="copy"&&e.action!=="url"){let i=Z("ready");d.send(JSON.stringify({type:"upload",jobId:n}));let r=(await i).offset;if(b=r,!Number.isSafeInteger(r)||r<0||r>e.size)throw new Error("Invalid resume offset");for(C(n,"sending","Sending to your PC",100*r/Math.max(e.size,1));r<e.size;){if(R.has(n))throw new Error("Cancelled on this phone. Check PC activity for any action already started.");if(d?.readyState!=="open")throw new Error("Connection interrupted. Retry this transfer to resume.");(r-b>=524288||d.bufferedAmount>1048576)&&await j(r);let u=window.NativeBridge.read(n,r,Math.min(32768,e.size-r));if(!u)throw new Error("Could not read the staged file.");let c=Uint8Array.from(atob(u),o=>o.charCodeAt(0));d.send(c.buffer),r+=c.length,C(n,"sending","Sending to your PC",100*b/Math.max(e.size,1)),await new Promise(o=>setTimeout(o,0))}await j(r)}for((t.state==="uploading"||t.state==="queued")&&(t=await y("finish",{jobId:n}));t.state==="queued"||t.state==="running";)C(n,"running","Your PC is completing the action",100),await new Promise(i=>setTimeout(i,800)),t=await y("status",{jobId:n});C(n,t.state,t.message||"Action completed",100),t.state==="completed"||t.state==="submitted"?w(e.action==="save"?"Saved on PC":t.message||"Action completed"):w(t.message||t.state)}window.ActionBridge={connect(e){P||(P=setInterval(()=>{q()},8e3)),N(),f=JSON.parse(W(e)),f.service=new URL(f.service).origin,x()},async printers(){try{let e=await y("printers");window.NativeBridge.printers(JSON.stringify(e))}catch(e){w(e.message)}},async send(e){if(m||T){w("Finishing a received file. Try Send again in a moment."),window.NativeBridge?.busy(!1);return}m=!0,window.NativeBridge?.busy(!0);for(let n=0;n<e.length;n++){let t=e[n];try{await G(t)}catch(i){C(t.id,R.has(t.id)?"cancelled":"paused",i.message);for(let a of e.slice(n+1))C(a.id,"paused","Waiting. Retry when your PC is connected.");w(i.message);break}}m=!1,window.NativeBridge?.busy(!1)},async cancel(e){R.add(e);try{let n=await y("cancel",{jobId:e});C(e,n.state,n.message||"Cancelled",100)}catch(n){w(n.message)}},ensureConnected:q,reconnect(){x()},dispose(){clearInterval(P),P=null,N()}};window.NativeBridge&&(P=setInterval(()=>{q()},8e3));var T=!1,H=0;async function X(){if(!window.NativeBridge||m||T||Date.now()<H||d?.readyState!=="open")return;T=!0;let e=d,n=f;try{let t=await y("outbox");for(let i of t){if(d!==e||f!==n||m)break;let a=window.NativeBridge.incomingBegin(JSON.stringify(i),n.id||n.room);if(a==="error")throw new Error("Could not prepare received file.");if(a!=="done"){let r=Number(a);if(!Number.isSafeInteger(r)||r<0||r>i.size)throw new Error("Invalid download offset");for(;r<i.size;){if(d!==e||f!==n||m)return;let u=[];for(let o=0;o<16&&r+o*16384<i.size;o++)u.push(r+o*16384);let c=await Promise.all(u.map(o=>y("download",{itemId:i.id,offset:o,count:16384})));if(d!==e||f!==n)return;for(let o of c){if(o.offset!==r||!o.data)throw new Error("Invalid received chunk");let h=Number(window.NativeBridge.incomingAppend(i.id,r,o.data));if(!Number.isSafeInteger(h)||h<=r||h>i.size)throw new Error("Could not save received chunk");r=h}}if(!window.NativeBridge.incomingFinish(i.id))throw new Error("Could not finish received file")}await y("received",{itemId:i.id})}}catch(t){H=Date.now()+3e4,/Unsupported action|Update the PC app/.test(t.message)||w("Receiving paused: "+t.message)}finally{T=!1}}var ee=window.NativeBridge?setInterval(X,3e3):null;})();
+--- a/android/app/src/main/java/app/actionbridge/Incoming.kt
++++ b/android/app/src/main/java/app/actionbridge/Incoming.kt
+@@ -4,7 +4,7 @@
+ import android.net.Uri
+ import android.os.Build
+ import android.provider.MediaStore
+-import android.util.Base64
++import java.util.Base64
+ import androidx.core.content.FileProvider
+ import org.json.JSONObject
+ import java.io.File
+@@ -14,24 +14,25 @@
+ 
+ /** Authenticated transport calls this store. IDs, bounds and hashes are checked here too. */
+ class Incoming(private val context:Context) {
++ companion object {private val lock=Any()}
+  private val root=File(context.filesDir,"inbox").apply{mkdirs()}
+  private fun id(j:JSONObject):String=j.getString("id").also{require(UUID.fromString(it).toString()==it)}
+  private fun meta(id:String)=File(root,"$id.json")
+  private fun payload(id:String)=File(root,"$id.payload")
+- @Synchronized fun begin(value:String,pc:String):String {
++ fun begin(value:String,pc:String):String = synchronized(lock) {
+   val j=JSONObject(value);val id=id(j);val kind=j.getString("kind");val size=j.getLong("size")
+   IncomingRules.validate(j)
+   if(meta(id).exists()){val old=JSONObject(meta(id).readText());require(old.getString("pc")==pc&&old.getLong("size")==size&&old.optString("sha256")==j.optString("sha256")&&old.getString("kind")==kind&&old.optString("text")==j.optString("text"));if(old.optBoolean("completed")){payload(id).delete();return "done"}}
+   else {j.put("pc",pc).put("completed",false).put("receivedAt",System.currentTimeMillis());Queue.write(meta(id),j)}
+   val n=if(payload(id).exists())payload(id).length() else 0L;require(n<=size);return n.toString()
+  }
+- @Synchronized fun append(id:String,offset:Long,encoded:String):Long {
++ fun append(id:String,offset:Long,encoded:String):Long = synchronized(lock) {
+   require(UUID.fromString(id).toString()==id&&encoded.length<=350000)
+   val j=JSONObject(meta(id).readText());require(!j.optBoolean("completed")&&j.getString("kind")=="file")
+-  val bytes=Base64.decode(encoded,Base64.NO_WRAP);require(bytes.size in 1..262144&&offset>=0&&offset+bytes.size<=j.getLong("size"))
++  val bytes=Base64.getDecoder().decode(encoded);require(bytes.size in 1..262144&&offset>=0&&offset+bytes.size<=j.getLong("size"))
+   RandomAccessFile(payload(id),"rw").use{f->require(f.length()==offset);f.seek(offset);f.write(bytes);f.fd.sync();return f.length()}
+  }
+- @Synchronized fun finish(id:String):Boolean {
++ fun finish(id:String):Boolean = synchronized(lock) {
+   require(UUID.fromString(id).toString()==id);val j=JSONObject(meta(id).readText());if(j.optBoolean("completed"))return false
+   if(j.getString("kind")=="file"){
+    val f=payload(id);if(!f.exists())f.createNewFile();require(f.length()==j.getLong("size"))
+@@ -40,9 +41,13 @@
+    val name=IncomingRules.safeName(j.getString("name"))
+    if(Build.VERSION.SDK_INT>=29){
+     val resolver=context.contentResolver;var uri=j.optString("uri").takeIf{it.isNotEmpty()}?.let(Uri::parse)
+-    if(uri!=null&&runCatching{resolver.query(uri,arrayOf(MediaStore.Downloads.IS_PENDING),null,null,null)?.use{it.moveToFirst()&&it.getInt(0)==0}?:false}.getOrDefault(false)){j.put("completed",true);Queue.write(meta(id),j);f.delete();return true}
++    if(uri!=null){
++     val pending=resolver.query(uri,arrayOf(MediaStore.Downloads.IS_PENDING),null,null,null)?.use{if(it.moveToFirst())it.getInt(0) else -1}?:error("Could not inspect the received download. Retry when storage is available.")
++     if(pending==0){j.put("completed",true);Queue.write(meta(id),j);f.delete();return true}
++     if(pending==-1){j.remove("uri");Queue.write(meta(id),j);uri=null}
++    }
+     if(uri==null){val values=ContentValues().apply{put(MediaStore.Downloads.DISPLAY_NAME,name);put(MediaStore.Downloads.MIME_TYPE,"application/octet-stream");put(MediaStore.Downloads.RELATIVE_PATH,"Download/ActionBridge");put(MediaStore.Downloads.IS_PENDING,1)};uri=resolver.insert(MediaStore.Downloads.EXTERNAL_CONTENT_URI,values)?:error("Could not save received file");j.put("uri",uri.toString());Queue.write(meta(id),j)}
+-    resolver.openOutputStream(uri,"wt")!!.use{out->f.inputStream().use{it.copyTo(out)}};resolver.update(uri,ContentValues().apply{put(MediaStore.Downloads.IS_PENDING,0)},null,null)
++    resolver.openOutputStream(uri,"wt")!!.use{out->f.inputStream().use{it.copyTo(out)}};check(resolver.update(uri,ContentValues().apply{put(MediaStore.Downloads.IS_PENDING,0)},null,null)>0){"Download publication was not confirmed. Retry to finish saving."}
+    }else{
+     val destination=File(context.getExternalFilesDir(null),"Received").apply{mkdirs()};val saved=File(destination,"${id.take(8)}-$name");f.copyTo(saved,overwrite=true);j.put("uri",FileProvider.getUriForFile(context,"${context.packageName}.received",saved).toString())
+    }
+@@ -50,6 +55,6 @@
+   }
+   j.remove("error");j.put("completed",true);Queue.write(meta(id),j);payload(id).delete();return true
+  }
+- @Synchronized fun failure(id:String,message:String){runCatching{require(UUID.fromString(id).toString()==id);val j=JSONObject(meta(id).readText());j.put("error",message.take(300));Queue.write(meta(id),j)}}
+- fun list():List<JSONObject> = synchronized(this){root.listFiles()?.filter{it.extension=="json"}?.mapNotNull{runCatching{JSONObject(it.readText())}.getOrNull()}?.sortedByDescending{it.optLong("receivedAt")}?.take(30)?:emptyList()}
++ fun failure(id:String,message:String)=synchronized(lock){runCatching{require(UUID.fromString(id).toString()==id);val j=JSONObject(meta(id).readText());j.put("error",message.take(300));Queue.write(meta(id),j)}}
++ fun list():List<JSONObject> = synchronized(lock){root.listFiles()?.filter{it.extension=="json"}?.mapNotNull{runCatching{JSONObject(it.readText())}.getOrNull()}?.sortedByDescending{it.optLong("receivedAt")}?.take(30)?:emptyList()}
+ }
+--- a/android/app/src/main/java/app/actionbridge/Queue.kt
++++ b/android/app/src/main/java/app/actionbridge/Queue.kt
+@@ -18,7 +18,8 @@
+     }
+     fun state(c:Context,id:String,state:String,message:String,progress:Int=0) = synchronized(lock) {
+         val file=metadata(c,id);if(!file.exists())return@synchronized
+-        val json=JSONObject(file.readText());json.put("state",state).put("message",message).put("progress",progress);write(file,json)
++        val json=JSONObject(file.readText());if(TransferStateRules.ignoreUpdate(json.optString("state"),state))return@synchronized;json.put("state",state).put("message",message).put("progress",progress);write(file,json)
++        if(TransferStateRules.releasePayload(state))File(directory(c),"$id.payload").delete()
+     }
+     fun list(c:Context):List<JSONObject> = synchronized(lock){directory(c).listFiles()?.filter{it.extension=="json"}?.sortedByDescending{it.lastModified()}?.take(50)?.mapNotNull{runCatching{JSONObject(it.readText())}.getOrNull()}?:emptyList()}
+     fun enqueue(c:Context,id:String) {
+--- a/android/app/src/main/java/app/actionbridge/RemoteEngine.kt
++++ b/android/app/src/main/java/app/actionbridge/RemoteEngine.kt
+@@ -11,7 +11,7 @@
+ class RemoteEngine(private val activity:Activity,private val onStatus:(String)->Unit,private val onReady:(Boolean)->Unit,private val onPrinters:(JSONArray)->Unit,private val onBusy:(Boolean)->Unit) {
+  val web=WebView(activity)
+  private var loaded=false
+- private var connected=false
++ @Volatile private var connected=false
+  private var code:String?=null
+  private val allowed=java.util.concurrent.ConcurrentHashMap.newKeySet<String>()
+  private var active=emptyList<String>()
+@@ -27,7 +27,7 @@
+   web.addJavascriptInterface(Callbacks(),"NativeBridge")
+   web.loadUrl("https://appassets.androidplatform.net/assets/remote/index.html")
+  }
+- fun connect(value:String){if(code==value&&loaded){onReady(connected);return};code=value;if(loaded)js("ActionBridge.connect(${JSONObject.quote(value)})")}
++ fun connect(value:String){if(code==value&&loaded){onReady(connected);if(!connected)js("ActionBridge.ensureConnected()");return};connected=false;onReady(false);code=value;if(loaded)js("ActionBridge.connect(${JSONObject.quote(value)})")}
+  fun reconnect(){js("ActionBridge.reconnect()")}
+  fun disconnect(){code=null;connected=false;js("ActionBridge.dispose()");onReady(false)}
+  fun printers(){js("ActionBridge.printers()")}
+--- /dev/null
++++ b/android/app/src/main/java/app/actionbridge/TransferStateRules.kt
+@@ -0,0 +1,7 @@
++package app.actionbridge
++object TransferStateRules {
++    // Cancellation must survive late progress/retry callbacks. Confirmed PC
++    // outcomes may still arrive for an action already started before Cancel.
++    fun ignoreUpdate(current:String,next:String)=current=="cancelled" && next in setOf("queued","sending","retrying","paused","running","failed")
++    fun releasePayload(state:String)=state in setOf("completed","submitted")
++}
+--- /dev/null
++++ b/android/app/src/test/java/app/actionbridge/StorageAuditTest.kt
+@@ -0,0 +1,22 @@
++package app.actionbridge
++import android.content.ContextWrapper
++import org.json.JSONObject
++import org.junit.Test
++import org.junit.Assert.*
++import java.io.File
++import java.nio.file.Files
++import java.util.UUID
++import java.util.Base64
++import java.util.concurrent.CountDownLatch
++import java.util.concurrent.Executors
++import java.util.concurrent.TimeUnit
++import java.util.concurrent.atomic.AtomicInteger
++class StorageAuditTest {
++ private fun fixture(run:(ContextWrapper,File)->Unit){val root=Files.createTempDirectory("ab-storage-").toFile();val context=object:ContextWrapper(null){override fun getFilesDir()=root};try{run(context,root)}finally{root.deleteRecursively()}}
++ @Test fun cancellationSurvivesLateProgress(){fixture{c,_->val id=UUID.randomUUID().toString();Queue.write(Queue.metadata(c,id),JSONObject().put("id",id).put("state","cancelled"));Queue.state(c,id,"sending","late progress",50);assertEquals("cancelled",JSONObject(Queue.metadata(c,id).readText()).getString("state"));Queue.state(c,id,"paused","late disconnect");assertEquals("cancelled",JSONObject(Queue.metadata(c,id).readText()).getString("state"))}}
++ @Test fun confirmedRemoteSuccessReleasesPayloadAfterJournal(){fixture{c,_->val id=UUID.randomUUID().toString();Queue.write(Queue.metadata(c,id),JSONObject().put("id",id).put("state","sending"));val payload=File(Queue.directory(c),"$id.payload");payload.writeText("body");Queue.state(c,id,"submitted","accepted",100);assertFalse(payload.exists());assertEquals("submitted",JSONObject(Queue.metadata(c,id).readText()).getString("state"))}}
++ @Test fun failedSuccessJournalDoesNotDeleteResumableBody(){fixture{c,_->val id=UUID.randomUUID().toString();val meta=Queue.metadata(c,id);Queue.write(meta,JSONObject().put("id",id).put("state","sending"));val payload=File(Queue.directory(c),"$id.payload");payload.writeText("body");File(meta.path+".new").mkdir();assertTrue(runCatching{Queue.state(c,id,"completed","done",100)}.isFailure);assertTrue(payload.exists());assertEquals("sending",JSONObject(meta.readText()).getString("state"))}}
++ @Test fun confirmedPcOutcomeCanArriveAfterCancellation(){assertFalse(TransferStateRules.ignoreUpdate("cancelled","submitted"));assertFalse(TransferStateRules.ignoreUpdate("cancelled","uncertain"));assertTrue(TransferStateRules.ignoreUpdate("cancelled","retrying"))}
++ @Test fun inboxOwnershipIsSharedBetweenInstances(){fixture{c,_->val j=JSONObject().put("id",UUID.randomUUID().toString()).put("kind","text").put("name","Text").put("size",0).put("text","Hello");val first=Incoming(c);val second=Incoming(c);assertEquals("0",first.begin(j.toString(),"pc-a"));assertTrue(runCatching{second.begin(j.toString(),"pc-b")}.isFailure);assertTrue(first.finish(j.getString("id")));assertEquals("done",second.begin(j.toString(),"pc-a"));assertFalse(second.finish(j.getString("id")))}}
++ @Test fun simultaneousInboxWritesCommitOnlyOneChunk(){fixture{c,root->val id=UUID.randomUUID().toString();val size=262144;val j=JSONObject().put("id",id).put("kind","file").put("name","test.txt").put("size",size).put("sha256","a".repeat(64));Incoming(c).begin(j.toString(),"pc");val pool=Executors.newFixedThreadPool(12);val ready=CountDownLatch(12);val start=CountDownLatch(1);val done=CountDownLatch(12);val successes=AtomicInteger();val data=Base64.getEncoder().encodeToString(ByteArray(size){7});repeat(12){pool.submit{val store=Incoming(c);ready.countDown();start.await();if(runCatching{store.append(id,0,data)}.isSuccess)successes.incrementAndGet();done.countDown()}};assertTrue(ready.await(5,TimeUnit.SECONDS));start.countDown();assertTrue(done.await(10,TimeUnit.SECONDS));pool.shutdownNow();assertEquals(1,successes.get());assertEquals(size.toLong(),File(root,"inbox/$id.payload").length())}}
++}
+--- a/remote/phone/app.js
++++ b/remote/phone/app.js
+@@ -1,24 +1,47 @@
+ const $=id=>document.getElementById(id),button=$('send');
+ const hex=b=>Array.from(b,x=>x.toString(16).padStart(2,'0')).join('');
+-let c,ws,pc,dc,sid,online=false,busy=false,ack=0,waiters=[],pending=new Map(),heartbeat,local=[],remote=[],offered=false,chain=Promise.resolve();
++let c,ws,pc,dc,sid,online=false,busy=false,ack=0,waiters=[],pending=new Map(),heartbeat,local=[],remote=[],offered=false,chain=Promise.resolve(),epoch=0,negotiating=false,startedAt=0;
+ function text(s){$('status').textContent=s;window.NativeBridge?.status(s)}
+ function decode(s){return new TextDecoder().decode(Uint8Array.from(atob(s.replaceAll('-','+').replaceAll('_','/')),x=>x.charCodeAt(0)))}
+ function rejectAll(e){for(const p of [...pending.values(),...waiters]){clearTimeout(p.timer);p.reject(e)}pending.clear();waiters=[]}
+-function drop(){window.NativeBridge?.ready(false);clearInterval(heartbeat);if(ws){ws.onclose=null;ws.close();ws=null}if(pc){const old=pc;pc=null;old.close()}dc=null;online=false;rejectAll(new Error('Connection interrupted. Reconnect to resume.'));button.disabled=true}
++function drop(){epoch++;negotiating=false;startedAt=0;window.NativeBridge?.ready(false);clearInterval(heartbeat);
++ if(ws){const socket=ws;ws=null;socket.onclose=null;socket.close()}
++ const old=pc;pc=null;dc=null;if(old)old.close();online=false;rejectAll(new Error('Connection interrupted. Reconnect to resume.'));button.disabled=true}
+ function wait(type,timeout=60000){return new Promise((resolve,reject)=>{const timer=setTimeout(()=>{pending.delete(type);reject(new Error('PC response timed out'))},timeout);pending.set(type,{resolve,reject,timer})})}
+-async function mac(type,sdp,id=sid){const key=await crypto.subtle.importKey('raw',new TextEncoder().encode(c.secret),{name:'HMAC',hash:'SHA-256'},false,['sign']);return hex(new Uint8Array(await crypto.subtle.sign('HMAC',key,new TextEncoder().encode(id+'\n'+type+'\n'+sdp))))}
+-function signal(type,sdp){const id=sid;chain=chain.then(async()=>{if(ws?.readyState===1)ws.send(JSON.stringify({type,session:id,sdp,mac:await mac(type,sdp,id)}))}).catch(()=>{});return chain}
+-async function negotiate(){if(pc||!online)return;text('Connecting to your PC…');sid=hex(crypto.getRandomValues(new Uint8Array(16)));offered=false;local=[];remote=[];
+- const r=await fetch(c.service+'/rooms/'+c.room+'/ice?role=phone',{headers:{Authorization:'Bearer '+c.key},cache:'no-store'}),ice=await r.json();if(!r.ok)throw new Error(ice.error||'Service unavailable');
++async function mac(type,sdp,id=sid,secret=c.secret){const key=await crypto.subtle.importKey('raw',new TextEncoder().encode(secret),{name:'HMAC',hash:'SHA-256'},false,['sign']);return hex(new Uint8Array(await crypto.subtle.sign('HMAC',key,new TextEncoder().encode(id+'\n'+type+'\n'+sdp))))}
++function signal(type,sdp){const id=sid,generation=epoch,socket=ws,secret=c.secret;chain=chain.then(async()=>{
++ if(generation!==epoch||socket!==ws||socket?.readyState!==1)return;const signature=await mac(type,sdp,id,secret);
++ if(generation===epoch&&socket===ws&&socket.readyState===1)socket.send(JSON.stringify({type,session:id,sdp,mac:signature}));}).catch(()=>{});return chain}
++async function negotiate(){if(pc||!online||negotiating)return;const generation=epoch,config=c;negotiating=true;startedAt=Date.now();
++ try{text('Connecting to your PC…');sid=hex(crypto.getRandomValues(new Uint8Array(16)));offered=false;local=[];remote=[];
++ const r=await fetch(config.service+'/rooms/'+config.room+'/ice?role=phone',{headers:{Authorization:'Bearer '+config.key},cache:'no-store'}),ice=await r.json();
++ if(generation!==epoch||config!==c)return;if(!r.ok)throw new Error(ice.error||'Service unavailable');
+  pc=new RTCPeerConnection({iceServers:ice.iceServers});const peer=pc;
+- pc.onicecandidate=e=>{if(e.candidate){const s=JSON.stringify(e.candidate.toJSON());if(offered)signal('candidate',s);else local.push(s)}};
+- pc.onconnectionstatechange=()=>{if(pc!==peer)return;if(pc.connectionState==='failed'){drop();text('Connection failed. Tap Reconnect.')}else if(pc.connectionState==='connected')route()};
+- dc=pc.createDataChannel(window.NativeBridge?'jobs-v2':'files-v1',{ordered:true});dc.binaryType='arraybuffer';dc.onopen=()=>{button.disabled=busy;window.NativeBridge?.ready(true);route()};dc.onclose=()=>{window.NativeBridge?.ready(false);button.disabled=true;rejectAll(new Error('Connection interrupted. Reconnect, then Send to resume.'))};
+- dc.onmessage=e=>{if(typeof e.data!=='string')return;const m=JSON.parse(e.data);if(m.type==='rpc'){const p=pending.get(m.requestId);if(p){clearTimeout(p.timer);pending.delete(m.requestId);if(m.error)p.reject(new Error(m.error));else p.resolve(m.result)}return}if(m.type==='error'){rejectAll(new Error(m.error));text(m.error);return}if(m.type==='ack'){ack=m.offset;const rest=[];for(const p of waiters){if(ack>=p.target){clearTimeout(p.timer);p.resolve()}else rest.push(p)}waiters=rest;return}const type=m.type==='saved'&&pending.has('ready')?'ready':m.type,p=pending.get(type);if(p){clearTimeout(p.timer);pending.delete(type);p.resolve(m)}};
+- const offer=await pc.createOffer();await pc.setLocalDescription(offer);await signal('offer',offer.sdp);offered=true;for(const s of local)await signal('candidate',s);local=[];
++ pc.onicecandidate=e=>{if(pc!==peer)return;if(e.candidate){const candidate=JSON.stringify(e.candidate.toJSON());if(offered)signal('candidate',candidate);else local.push(candidate)}};
++ pc.onconnectionstatechange=()=>{if(pc!==peer)return;if(pc.connectionState==='failed'){drop();text('Connection failed. Reconnecting…')}else if(pc.connectionState==='connected')route()};
++ dc=pc.createDataChannel(window.NativeBridge?'jobs-v2':'files-v1',{ordered:true});const channel=dc;dc.binaryType='arraybuffer';
++ dc.onopen=()=>{if(dc!==channel||pc!==peer)return;button.disabled=busy;window.NativeBridge?.ready(true);route()};
++ dc.onclose=()=>{if(dc!==channel||pc!==peer)return;drop();text('Connection interrupted. Reconnecting; retry the transfer to resume.')};
++ dc.onmessage=e=>{if(dc!==channel||pc!==peer||typeof e.data!=='string')return;const m=JSON.parse(e.data);if(m.type==='rpc'){const p=pending.get(m.requestId);if(p){clearTimeout(p.timer);pending.delete(m.requestId);if(m.error)p.reject(new Error(m.error));else p.resolve(m.result)}return}if(m.type==='error'){rejectAll(new Error(m.error));text(m.error);return}if(m.type==='ack'){ack=m.offset;const rest=[];for(const p of waiters){if(ack>=p.target){clearTimeout(p.timer);p.resolve()}else rest.push(p)}waiters=rest;return}const type=m.type==='saved'&&pending.has('ready')?'ready':m.type,p=pending.get(type);if(p){clearTimeout(p.timer);pending.delete(type);p.resolve(m)}};
++ const offer=await pc.createOffer();if(generation!==epoch||pc!==peer)return;await peer.setLocalDescription(offer);if(generation!==epoch||pc!==peer)return;
++ await signal('offer',offer.sdp);if(generation!==epoch||pc!==peer)return;offered=true;for(const candidate of local)await signal('candidate',candidate);local=[];
++ }finally{if(generation===epoch)negotiating=false}
+ }
+-async function route(){let label='Connected';try{const stats=await pc.getStats();for(const s of stats.values())if(s.type==='transport'&&s.selectedCandidatePairId){const pair=stats.get(s.selectedCandidatePairId),a=stats.get(pair?.localCandidateId),b=stats.get(pair?.remoteCandidateId);label=a?.candidateType==='relay'||b?.candidateType==='relay'?'Connected · encrypted relay':'Connected · direct transfer'}}catch{}text(label)}
+-function connect(){drop();try{if(!c)throw new Error('Scan your PC pairing QR code.');text('Finding your PC…');ws=new WebSocket(c.service.replace(/^https:/,'wss:')+'/rooms/'+c.room+'/ws?role=phone',['ab1','key.'+c.key]);ws.onopen=()=>{heartbeat=setInterval(()=>{if(ws?.readyState===1)ws.send('ping')},45000)};let incoming=Promise.resolve();ws.onmessage=e=>{if(e.data==='pong')return;incoming=incoming.then(async()=>{const m=JSON.parse(e.data);if(m.type==='presence'){online=m.online;if(online)await negotiate();else {if(pc){pc.close();pc=null;dc=null;window.NativeBridge?.ready(false);rejectAll(new Error('PC disconnected. Retry when it is awake.'))}text('PC is offline. It stays saved; reconnect when it is awake.');}return}if(m.session!==sid||m.mac!==await mac(m.type,m.sdp,m.session))return;if(m.type==='answer'){await pc.setRemoteDescription({type:'answer',sdp:m.sdp});for(const x of remote)await pc.addIceCandidate(x);remote=[]}else if(m.type==='candidate'){const x=JSON.parse(m.sdp);if(pc.remoteDescription)await pc.addIceCandidate(x);else remote.push(x)}}).catch(e=>text(e.message))};ws.onclose=()=>{drop();text('Service disconnected. Tap Reconnect.')};ws.onerror=()=>text('Cannot reach service. Check your internet.')}catch(e){text(e.message)}}
++async function route(){const peer=pc;if(!peer)return;let label='Connected';try{const stats=await peer.getStats();for(const s of stats.values())if(s.type==='transport'&&s.selectedCandidatePairId){const pair=stats.get(s.selectedCandidatePairId),a=stats.get(pair?.localCandidateId),b=stats.get(pair?.remoteCandidateId);label=a?.candidateType==='relay'||b?.candidateType==='relay'?'Connected · encrypted relay':'Connected · direct transfer'}}catch{}if(pc===peer)text(label)}
++function connect(){drop();try{if(!c)throw new Error('Scan your PC pairing QR code.');startedAt=Date.now();text('Finding your PC…');const generation=epoch,config=c;
++ ws=new WebSocket(c.service.replace(/^https:/,'wss:')+'/rooms/'+c.room+'/ws?role=phone',['ab1','key.'+c.key]);const socket=ws;
++ ws.onopen=()=>{if(socket!==ws)return;heartbeat=setInterval(()=>{if(socket===ws&&socket.readyState===1)socket.send('ping')},45000)};
++ let incoming=Promise.resolve();ws.onmessage=e=>{if(socket!==ws||e.data==='pong')return;incoming=incoming.then(async()=>{
++ if(socket!==ws||generation!==epoch)return;const m=JSON.parse(e.data);
++ if(m.type==='presence'){online=m.online;if(online)await negotiate();else {const peer=pc;pc=null;dc=null;if(peer)peer.close();window.NativeBridge?.ready(false);rejectAll(new Error('PC disconnected. Retry when it is awake.'));text('PC is offline. It stays saved; reconnect when it is awake.');}return}
++ if(m.session!==sid||m.mac!==await mac(m.type,m.sdp,m.session,config.secret)||socket!==ws||generation!==epoch||!pc)return;const peer=pc;
++ if(m.type==='answer'){await peer.setRemoteDescription({type:'answer',sdp:m.sdp});if(pc!==peer)return;for(const x of remote)await peer.addIceCandidate(x);remote=[]}
++ else if(m.type==='candidate'){const x=JSON.parse(m.sdp);if(peer.remoteDescription)await peer.addIceCandidate(x);else remote.push(x)}
++ }).catch(e=>{if(socket===ws)text(e.message)})};
++ ws.onclose=()=>{if(socket!==ws)return;drop();text('Service disconnected. Reconnecting…')};ws.onerror=()=>{if(socket===ws)text('Cannot reach service. Check your internet.')};
++ }catch(e){text(e.message)}}
++function ensureConnected(){if(!c||busy)return;if(dc?.readyState==='open'){window.NativeBridge?.ready(true);return}
++ if(!ws||ws.readyState===3||((ws.readyState===0||online)&&Date.now()-startedAt>35000)|| (online&&!negotiating&&(!pc||pc.connectionState==='failed'||pc.connectionState==='closed'||dc?.readyState==='closed')))connect()}
+ function waitAck(target){if(ack>=target)return Promise.resolve();return new Promise((resolve,reject)=>{const p={target,resolve,reject};p.timer=setTimeout(()=>{waiters=waiters.filter(x=>x!==p);reject(new Error('Transfer stalled. Reconnect to resume.'))},45000);waiters.push(p)})}
+ window.addEventListener('beforeunload',drop);
+ try{c=JSON.parse(decode(location.hash.slice(1)));const u=new URL(c.service);if(u.protocol!=='https:'||u.username||u.password||u.search||u.hash||u.pathname!=='/'||!/^[a-f0-9]{32}$/.test(c.room)||!/^[A-Za-z0-9_-]{43}$/.test(c.key)||!/^[A-Za-z0-9_-]{43}$/.test(c.secret))throw new Error('Invalid pairing');c.service=u.origin;$('name').textContent=c.name||'Your PC';connect()}catch{text('Scan the remote pairing QR code in ActionBridge.')}
+@@ -46,13 +69,13 @@
+  if(j.state==='completed'||j.state==='submitted')text(job.action==='save'?'Saved on PC':j.message||'Action completed');else text(j.message||j.state);
+ }
+ window.ActionBridge={
+- connect(code){if(!retryTimer)retryTimer=setInterval(()=>{if(c&&!busy&&(!ws||ws.readyState===3))connect()},8000);drop();c=JSON.parse(decode(code));c.service=new URL(c.service).origin;connect()},
++ connect(code){if(!retryTimer)retryTimer=setInterval(()=>{ensureConnected()},8000);drop();c=JSON.parse(decode(code));c.service=new URL(c.service).origin;connect()},
+  async printers(){try{const data=await rpc('printers');window.NativeBridge.printers(JSON.stringify(data))}catch(e){text(e.message)}},
+  async send(jobs){if(busy||receiving){text("Finishing a received file. Try Send again in a moment.");window.NativeBridge?.busy(false);return}busy=true;window.NativeBridge?.busy(true);for(let i=0;i<jobs.length;i++){const job=jobs[i];try{await sendJob(job)}catch(e){nativeState(job.id,cancelled.has(job.id)?'cancelled':'paused',e.message);for(const other of jobs.slice(i+1))nativeState(other.id,'paused','Waiting. Retry when your PC is connected.');text(e.message);break}}busy=false;window.NativeBridge?.busy(false)},
+  async cancel(id){cancelled.add(id);try{const j=await rpc('cancel',{jobId:id});nativeState(id,j.state,j.message||'Cancelled',100)}catch(e){text(e.message)}},
+- reconnect(){connect()},dispose(){clearInterval(retryTimer);retryTimer=null;drop()}
++ ensureConnected,reconnect(){connect()},dispose(){clearInterval(retryTimer);retryTimer=null;drop()}
+ };
+-if(window.NativeBridge)retryTimer=setInterval(()=>{if(c&&!busy&&(!ws||ws.readyState===3))connect()},8000);
++if(window.NativeBridge)retryTimer=setInterval(()=>{ensureConnected()},8000);
+ 
+ let receiving=false,nextReceiveAt=0;
+ async function receiveFromPC(){
+--- /dev/null
++++ b/remote/phone/recovery.test.mjs
+@@ -0,0 +1,16 @@
++import {test} from 'node:test';import assert from 'node:assert/strict';import vm from 'node:vm';import {readFile} from 'node:fs/promises';import {webcrypto,createHmac} from 'node:crypto';
++const source=await readFile(process.env.AUDIT_JS_SOURCE || new URL('app.js',import.meta.url),'utf8');
++const until=async fn=>{for(let i=0;i<100;i++){if(fn())return;await new Promise(r=>setTimeout(r,5))}throw Error('fixture timed out')};
++function fixture({delayIce=false,stalled=false}={}){
++ const config={id:'a',service:'https://a.example',room:'a'.repeat(32),key:'k'.repeat(43),secret:'s'.repeat(43)},next={...config,id:'b',service:'https://b.example',room:'b'.repeat(32),secret:'t'.repeat(43)};
++ const elements=Object.fromEntries(['send','status','name'].map(id=>[id,{disabled:false,textContent:''}]));let now=1000,ready=false,retry,resolveIce;const sockets=[],peers=[];class Clock extends Date{static now(){return now}}
++ class Channel{constructor(){this.readyState='connecting'}send(){} }
++ class Peer{constructor(options){this.origin=options.iceServers[0].urls;this.connectionState='connecting';this.channel=new Channel();peers.push(this)}createDataChannel(){return this.channel}async createOffer(){return{type:'offer',sdp:'offer'}}async setLocalDescription(){}async setRemoteDescription(){this.connectionState='connected';this.channel.readyState='open';this.channel.onopen()}async getStats(){return new Map()}close(){this.channel.readyState='closed';this.channel.onclose?.()}}
++ class Socket{constructor(url){this.url=url;this.readyState=stalled?0:1;sockets.push(this);if(!stalled)queueMicrotask(()=>{this.onopen?.();this.onmessage?.({data:JSON.stringify({type:'presence',online:true})})})}send(value){if(value==='ping')return;const m=JSON.parse(value);if(m.type==='offer'){const secret=this.url.startsWith('wss://b.')?next.secret:config.secret;const sdp='answer';const mac=createHmac('sha256',secret).update(m.session+'\nanswer\n'+sdp).digest('hex');queueMicrotask(()=>this.onmessage?.({data:JSON.stringify({type:'answer',session:m.session,sdp,mac})}))}}close(){this.readyState=3}}
++ const window={NativeBridge:{ready:v=>ready=v,status(){},job(){},busy(){}},addEventListener(){}};
++ const context=vm.createContext({window,document:{getElementById:id=>elements[id]},Date:Clock,crypto:webcrypto,TextEncoder,TextDecoder,Uint8Array,atob,btoa,URL,WebSocket:Socket,RTCPeerConnection:Peer,location:{hash:'#'+Buffer.from(JSON.stringify(config)).toString('base64url')},fetch:async url=>{if(delayIce&&url.startsWith(config.service)){return new Promise(resolve=>resolveIce=()=>resolve({ok:true,json:async()=>({iceServers:[{urls:'a'}]})}))}return{ok:true,json:async()=>({iceServers:[{urls:'b'}]})}},setTimeout,clearTimeout,setInterval:(fn,ms)=>{if(ms===8000)retry=fn;return 0},clearInterval(){},console});vm.runInContext(source,context);
++ return {window,sockets,peers,next,isReady:()=>ready,retry:()=>retry(),advance:ms=>now+=ms,hasDelayedIce:()=>!!resolveIce,finishOldIce:()=>resolveIce()};
++}
++test('closed data channel automatically starts a fresh authenticated connection',async()=>{const f=fixture();try{await until(f.isReady);const first=f.peers[0];first.channel.readyState='closed';first.channel.onclose();assert.equal(f.isReady(),false);f.retry();await until(()=>f.sockets.length===2&&f.isReady());assert.notEqual(f.peers[1],first)}finally{f.window.ActionBridge.dispose()}});
++test('stalled signaling handshake reconnects after its deadline',async()=>{const f=fixture({stalled:true});try{assert.equal(f.sockets.length,1);f.advance(36000);f.retry();assert.equal(f.sockets.length,2)}finally{f.window.ActionBridge.dispose()}});
++test('delayed ICE response for old PC cannot replace the selected connection',async()=>{const f=fixture({delayIce:true});try{await until(f.hasDelayedIce);f.window.ActionBridge.connect(Buffer.from(JSON.stringify(f.next)).toString('base64url'));await until(f.isReady);f.finishOldIce();await new Promise(r=>setTimeout(r,30));assert.equal(f.peers.length,1);assert.equal(f.peers[0].origin,'b');assert.equal(f.isReady(),true)}finally{f.window.ActionBridge.dispose()}});
+--- /dev/null
++++ b/tests/ActionBridge.Audit/ActionBridge.Audit.csproj
+@@ -0,0 +1 @@
++<Project Sdk="Microsoft.NET.Sdk"><PropertyGroup><OutputType>Exe</OutputType><TargetFramework>net10.0</TargetFramework><ImplicitUsings>enable</ImplicitUsings><Nullable>enable</Nullable><CoreProject Condition="'$(CoreProject)'==''">../../windows/ActionBridge.Core/ActionBridge.Core.csproj</CoreProject></PropertyGroup><ItemGroup><ProjectReference Include="$(CoreProject)" /></ItemGroup></Project>
+--- /dev/null
++++ b/tests/ActionBridge.Audit/Program.cs
+@@ -0,0 +1,20 @@
++using ActionBridge.Core;
++using System.Text.Json;
++using System.Security.Cryptography;
++var passed=0;var failed=0;
++async Task Test(string name,Func<string,Task> test){var root=Path.Combine(Path.GetTempPath(),"ab-audit-"+Guid.NewGuid());Directory.CreateDirectory(root);try{await test(root);passed++;Console.WriteLine("PASS: "+name);}catch(Exception ex){failed++;Console.WriteLine("FAIL: "+name+": "+ex.Message);}finally{Directory.Delete(root,true);}}
++void Check(bool condition,string message){if(!condition)throw new Exception(message);}
++async Task FailedWrite(Func<Task> run){try{await run();throw new Exception("Expected journal write failure.");}catch(IOException){}catch(UnauthorizedAccessException){}}
++var bytes=new byte[]{1,2,3};JobRequest Request()=>new(Guid.NewGuid().ToString(),"file.txt",3,Convert.ToHexString(SHA256.HashData(bytes)).ToLowerInvariant(),"save");
++await Test("outgoing UI failure cannot prevent acknowledgement or body cleanup",async root=>{var outbox=new Outbox(root);var file=Path.Combine(root,"source");await File.WriteAllBytesAsync(file,bytes);var item=await outbox.Stage("phone",file);outbox.Changed+=()=>throw new Exception("UI gone");outbox.Acknowledge(item.Id,"phone");Check(!File.Exists(Path.Combine(root,item.Id+".payload")),"body retained");});
++await Test("failed outgoing journal commit remains queued and retries durably",async root=>{var outbox=new Outbox(root);var file=Path.Combine(root,"source");await File.WriteAllBytesAsync(file,bytes);var item=await outbox.Stage("phone",file);var blocker=Path.Combine(root,item.Id+".json.new");Directory.CreateDirectory(blocker);await FailedWrite(()=>Task.Run(()=>outbox.Acknowledge(item.Id,"phone")));Check(outbox.History().Single().State=="queued","memory says delivered while journal says queued");Directory.Delete(blocker);outbox.Acknowledge(item.Id,"phone");Check(new Outbox(root).History().Single().State=="delivered"&&!File.Exists(Path.Combine(root,item.Id+".payload")),"retry did not persist/remove body");});
++await Test("abandoned outgoing staging cleaned without deleting corrupt-journal payload",async root=>{var orphan=Guid.NewGuid().ToString();var damaged=Guid.NewGuid().ToString();await File.WriteAllBytesAsync(Path.Combine(root,orphan+".payload"),bytes);await File.WriteAllBytesAsync(Path.Combine(root,damaged+".payload"),bytes);await File.WriteAllTextAsync(Path.Combine(root,damaged+".json"),"bad journal");_ =new Outbox(root);Check(!File.Exists(Path.Combine(root,orphan+".payload"))&&File.Exists(Path.Combine(root,damaged+".payload")),"orphan policy incorrect");});
++await Test("failed upload checkpoint reports only committed offset",async root=>{var t=new Transfers(root,Path.Combine(root,"files"),new Sink());var r=Request();await t.Create(r,"phone");Directory.CreateDirectory(Path.Combine(root,r.Id+".json.new"));await FailedWrite(()=>t.Append(r.Id,"phone",0,new MemoryStream(bytes),3,CancellationToken.None));Check(t.Get(r.Id,"phone").Offset==0&&new FileInfo(Path.Combine(root,r.Id+".part")).Length==0,"uncommitted offset exposed");});
++await Test("failed cancellation commit preserves upload state",async root=>{var t=new Transfers(root,Path.Combine(root,"files"),new Sink());var r=Request();await t.Create(r,"phone");Directory.CreateDirectory(Path.Combine(root,r.Id+".json.new"));await FailedWrite(()=>t.Cancel(r.Id,"phone"));Check(t.Get(r.Id,"phone").State=="uploading","uncommitted cancellation exposed");});
++await Test("failed finish commit remains safely retryable",async root=>{var t=new Transfers(root,Path.Combine(root,"files"),new Sink());var r=Request();await t.Create(r,"phone");await t.Append(r.Id,"phone",0,new MemoryStream(bytes),3,CancellationToken.None);Directory.CreateDirectory(Path.Combine(root,r.Id+".json.new"));await FailedWrite(()=>t.Finish(r.Id,"phone"));Check(t.Get(r.Id,"phone").State=="uploading","uncommitted queued state exposed");});
++await Test("failed approval persistence cannot grant temporary access",async root=>{var trust=new TrustStore(root);var p=new PairRequest(Guid.NewGuid().ToString(),"Phone",new string('a',64));Directory.CreateDirectory(Path.Combine(root,"phones.json.new"));await FailedWrite(()=>Task.Run(()=>trust.Approve(p)));Check(trust.Authenticate(p.Token)==null,"phone granted access despite failed approval save");});
++await Test("failed revocation persistence cannot hide still-saved approval",async root=>{var trust=new TrustStore(root);var p=new PairRequest(Guid.NewGuid().ToString(),"Phone",new string('b',64));trust.Approve(p);Directory.CreateDirectory(Path.Combine(root,"phones.json.new"));await FailedWrite(()=>Task.Run(()=>trust.Revoke(p.ClientId)));Check(trust.Authenticate(p.Token)==p.ClientId,"memory and disk trust disagree");});
++await Test("large remote clipboard acknowledgement fits one control message",async root=>{var t=new Transfers(root,Path.Combine(root,"files"),new Sink());var remote=new RemoteJobs(t,new Sink(),"room");var r=new JobRequest(Guid.NewGuid().ToString(),"Text",0,"","copy",Text:new string('क',65536));var response=await remote.Dispatch(JsonSerializer.SerializeToElement(new{method="create",job=r},Wire.Json));var encoded=JsonSerializer.SerializeToUtf8Bytes(response,Wire.JsonCompact);Check(encoded.Length<32000,"response is "+encoded.Length+" bytes");});
++await Test("failed destination rename releases temporary copy and retains resumable upload",async root=>{var t=new Transfers(root,Path.Combine(root,"files"),new Sink());var r=Request();var j=await t.Create(r,"phone");await t.Append(r.Id,"phone",0,new MemoryStream(bytes),3,CancellationToken.None);var dest=t.Destination(j);Directory.CreateDirectory(dest);await FailedWrite(()=>t.Finish(r.Id,"phone"));Check(!File.Exists(dest+".incoming"),"unsuccessful copy retained in Downloads");Check(t.Get(r.Id,"phone").State=="uploading"&&File.Exists(Path.Combine(root,r.Id+".part")),"source no longer resumable");});
++Console.WriteLine($"{passed} audit checks passed; {failed} failed.");return failed==0?0:1;
++sealed class Sink:IActionSink{public Task ExecuteAsync(JobRequest r,string? file)=>Task.CompletedTask;public IReadOnlyList<PrintChoice> Printers()=>[];}
+--- a/tests/ActionBridge.Tests/Program.cs
++++ b/tests/ActionBridge.Tests/Program.cs
+@@ -131,6 +131,13 @@
+  Assert((await reverseClient.GetAsync($"/v1/outbox/{packet.Id}?offset=0&count=16384")).IsSuccessStatusCode,"HTTPS phone downloads outgoing content");
+  Assert((await reverseClient.PostAsJsonAsync($"/v1/outbox/{packet.Id}/ack",new{})).IsSuccessStatusCode,"HTTPS receive acknowledgement completes outgoing file");
+ }
++// Audit: raster limits include height, and approval notifications follow commit.
++var tall=PrintGeometry.PdfRaster(100,100000);Assert(tall.Height<=5000&&tall.Width<=5000,"very tall PDF raster is bounded in both dimensions");
++var normal=PrintGeometry.PdfRaster(793.7,1122.5);Assert(normal.Dpi<=301&&normal.Width<5000&&normal.Height<5000,"ordinary PDF keeps approximately 300 DPI");
++await Throws<ArgumentException>(()=>Task.Run(()=>PrintGeometry.PdfRaster(double.NaN,100)),"invalid PDF geometry rejected");
++var notificationTrust=new TrustStore(Path.Combine(root,"notify-trust"));var observed=false;var notifyPhone=new PairRequest(Guid.NewGuid().ToString(),"Phone",new string('e',64));
++notificationTrust.Changed+=()=>{observed=notificationTrust.Authenticate(notifyPhone.Token)==notifyPhone.ClientId;throw new Exception("UI unavailable");};notificationTrust.Approve(notifyPhone);Assert(observed&&notificationTrust.Authenticate(notifyPhone.Token)==notifyPhone.ClientId,"phone UI notification follows durable approval and cannot interrupt it");
++await Throws<ArgumentException>(()=>Task.Run(()=>notificationTrust.Approve(notifyPhone with{Name=null!})),"missing pairing name rejected without server error");
+ Console.WriteLine($"\n{passes} checks passed.");
+ // Test directory is temporary; no user content.
+ Directory.Delete(root,true);
+--- a/windows/ActionBridge.Core/BridgeServer.cs
++++ b/windows/ActionBridge.Core/BridgeServer.cs
+@@ -36,7 +36,7 @@
+         });
+         app.MapGet("/v1/hello",()=>new {version=1,id,name,fingerprint=Fingerprint,maxFile=Wire.MaxFile,chunkSize=Wire.ChunkSize});
+         app.MapPost("/v1/pair",async (PairRequest request,HttpContext c)=> {
+-            if(!Guid.TryParse(request.ClientId,out _) || request.Name.Length is <1 or >80 || request.Token.Length!=64 || !request.Token.All(Uri.IsHexDigit)) return Results.BadRequest(new{error="Invalid phone identity."});
++            if(!Guid.TryParse(request.ClientId,out _) || string.IsNullOrEmpty(request.Name) || string.IsNullOrEmpty(request.Token) || request.Name.Length is <1 or >80 || request.Token.Length!=64 || !request.Token.All(Uri.IsHexDigit)) return Results.BadRequest(new{error="Invalid phone identity."});
+             if(trust.AlreadyApproved(request)) return Results.Ok(new{approved=true});
+             var ip=c.Connection.RemoteIpAddress!.ToString();
+             if(pairTimes.TryGetValue(ip,out var last) && DateTime.UtcNow-last<TimeSpan.FromSeconds(10)) return Results.Json(new{error="Please wait before requesting approval again."},statusCode:429);
+--- a/windows/ActionBridge.Core/Outbox.cs
++++ b/windows/ActionBridge.Core/Outbox.cs
+@@ -6,8 +6,9 @@
+ public sealed class Outbox {
+  readonly string root;readonly object gate=new();readonly Dictionary<string,Outgoing> items=new();
+  public event Action? Changed;
+- public Outbox(string root){this.root=root;Directory.CreateDirectory(root);foreach(var p in Directory.GetFiles(root,"*.json")){try{var item=JsonSerializer.Deserialize<Outgoing>(File.ReadAllText(p),Wire.Json)!;items[item.Id]=item;}catch{}}}
+- void Save(Outgoing item){items[item.Id]=item;Wire.AtomicJson(Path.Combine(root,item.Id+".json"),item);Changed?.Invoke();}
++ public Outbox(string root){this.root=root;Directory.CreateDirectory(root);foreach(var p in Directory.GetFiles(root,"*.json")){try{var item=JsonSerializer.Deserialize<Outgoing>(File.ReadAllText(p),Wire.Json)!;items[item.Id]=item;}catch{}}foreach(var payload in Directory.GetFiles(root,"*.payload")){var id=Path.GetFileNameWithoutExtension(payload);if(Guid.TryParseExact(id,"D",out _)&&!items.ContainsKey(id)&&!File.Exists(Path.Combine(root,id+".json")))File.Delete(payload);}}
++ void Notify(){try{Changed?.Invoke();}catch{/* UI observers cannot interrupt durable delivery. */}}
++ void Save(Outgoing item){Wire.AtomicJson(Path.Combine(root,item.Id+".json"),item);items[item.Id]=item;Notify();}
+  public Outgoing[] History(){lock(gate)return items.Values.OrderByDescending(x=>x.Updated).Take(100).ToArray();}
+  public Outgoing[] List(string recipient){lock(gate)return items.Values.Where(x=>x.Recipient==recipient&&x.State=="queued").OrderBy(x=>x.Updated).Take(1).ToArray();}
+  public async Task<Outgoing> Stage(string recipient,string? file,string? text=null,string kind="file"){
+@@ -24,7 +25,7 @@
+   var item=new Outgoing(id,recipient,name,kind,size,hash,text,"queued",DateTime.UtcNow);lock(gate)Save(item);return item;
+  }
+  Outgoing Get(string id,string recipient){if(!Guid.TryParseExact(id,"D",out var uuid)||id!=uuid.ToString())throw new ArgumentException("Invalid transfer ID.");if(!items.TryGetValue(id,out var item)||item.Recipient!=recipient)throw new KeyNotFoundException("Transfer unavailable.");return item;}
+- public object Read(string id,string recipient,long offset,int count){lock(gate){var item=Get(id,recipient);if(item.Kind!="file"||item.State!="queued"||count is <1 or >262144||offset<0||offset>item.Size)throw new ArgumentException("Invalid download request.");using var input=File.OpenRead(Path.Combine(root,id+".payload"));input.Position=offset;var bytes=new byte[(int)Math.Min(count,item.Size-offset)];input.ReadExactly(bytes);items[id]=item with{Offset=Math.Max(item.Offset,offset+bytes.Length)};if(offset+bytes.Length-item.Offset>=16384)Changed?.Invoke();return new{offset,data=Convert.ToBase64String(bytes)};}}
++ public object Read(string id,string recipient,long offset,int count){lock(gate){var item=Get(id,recipient);if(item.Kind!="file"||item.State!="queued"||count is <1 or >262144||offset<0||offset>item.Size)throw new ArgumentException("Invalid download request.");using var input=File.OpenRead(Path.Combine(root,id+".payload"));input.Position=offset;var bytes=new byte[(int)Math.Min(count,item.Size-offset)];input.ReadExactly(bytes);items[id]=item with{Offset=Math.Max(item.Offset,offset+bytes.Length)};if(offset+bytes.Length-item.Offset>=16384)Notify();return new{offset,data=Convert.ToBase64String(bytes)};}}
+  public object Acknowledge(string id,string recipient){lock(gate){var item=Get(id,recipient);if(item.State=="cancelled")throw new InvalidOperationException("Transfer cancelled.");if(item.State!="delivered"){Save(item with{State="delivered",Offset=item.Size,Updated=DateTime.UtcNow});File.Delete(Path.Combine(root,id+".payload"));}return new{delivered=true};}}
+  public void Cancel(string id){lock(gate){if(items.TryGetValue(id,out var item)&&item.State=="queued"){Save(item with{State="cancelled",Updated=DateTime.UtcNow});File.Delete(Path.Combine(root,id+".payload"));}}}
+ }
+--- /dev/null
++++ b/windows/ActionBridge.Core/PrintGeometry.cs
+@@ -0,0 +1,9 @@
++namespace ActionBridge.Core;
++public static class PrintGeometry {
++    public static (uint Width,uint Height,float Dpi) PdfRaster(double width,double height) {
++        if(!double.IsFinite(width)||!double.IsFinite(height)||width<=0||height<=0)throw new ArgumentException("PDF page dimensions are invalid.");
++        var scale=Math.Min(300d/96,5000d/Math.Max(width,height));
++        var w=(uint)Math.Clamp(Math.Round(width*scale),1,5000);var h=(uint)Math.Clamp(Math.Round(height*scale),1,5000);
++        return (w,h,(float)(w*96d/width));
++    }
++}
+--- a/windows/ActionBridge.Core/RemoteJobs.cs
++++ b/windows/ActionBridge.Core/RemoteJobs.cs
+@@ -3,24 +3,25 @@
+ // Only operations already exposed to an approved LAN phone are available remotely.
+ public sealed class RemoteJobs(Transfers transfers,IActionSink sink,string room,Outbox? outbox=null) {
+     readonly string client="remote:"+room;
++    static object Status(Job j)=>new{request=new{id=j.Request.Id,size=j.Request.Size,action=j.Request.Action},j.Offset,j.State,message=j.Message};
+     public async Task<object> Dispatch(JsonElement message) {
+         var method=message.GetProperty("method").GetString();
+         if(method=="outbox")return outbox?.List(client)??[];
+         if(method=="download"){var count=message.GetProperty("count").GetInt32();if(count is <1 or >16384)throw new ArgumentException("Remote download chunk too large.");return outbox?.Read(message.GetProperty("itemId").GetString()!,client,message.GetProperty("offset").GetInt64(),message.GetProperty("count").GetInt32())??throw new InvalidOperationException("Update the PC app.");}
+         if(method=="received")return outbox?.Acknowledge(message.GetProperty("itemId").GetString()!,client)??throw new InvalidOperationException("Update the PC app.");
+         if(method=="printers")return sink.Printers();
+-        if(method=="create")return await transfers.Create(message.GetProperty("job").Deserialize<JobRequest>(Wire.Json)??throw new ArgumentException("Missing job"),client);
++        if(method=="create")return Status(await transfers.Create(message.GetProperty("job").Deserialize<JobRequest>(Wire.Json)??throw new ArgumentException("Missing job"),client));
+         if(method is not ("status" or "finish" or "cancel" or "append"))throw new ArgumentException("Unsupported remote action.");
+         var id=message.GetProperty("jobId").GetString()??"";
+         switch(method) {
+-            case "status":return transfers.Get(id,client);
+-            case "finish":return await transfers.Finish(id,client);
+-            case "cancel":return await transfers.Cancel(id,client);
++            case "status":return Status(transfers.Get(id,client));
++            case "finish":return Status(await transfers.Finish(id,client));
++            case "cancel":return Status(await transfers.Cancel(id,client));
+             case "append":
+                 var encoded=message.GetProperty("data").GetString()??"";
+                 if(encoded.Length>360000)throw new ArgumentException("Remote chunk too large.");
+                 var data=Convert.FromBase64String(encoded);if(data.Length>262144)throw new ArgumentException("Remote chunk too large.");
+-                return await transfers.Append(id,client,message.GetProperty("offset").GetInt64(),new MemoryStream(data,false),data.Length,CancellationToken.None);
++                return Status(await transfers.Append(id,client,message.GetProperty("offset").GetInt64(),new MemoryStream(data,false),data.Length,CancellationToken.None));
+             default:throw new ArgumentException("Unsupported remote action.");
+         }
+     }
+--- a/windows/ActionBridge.Core/Transfers.cs
++++ b/windows/ActionBridge.Core/Transfers.cs
+@@ -26,7 +26,9 @@
+     }
+     string Part(Job j) => Path.Combine(folder, j.Request.Id + ".part");
+     public string Destination(Job j) => Path.Combine(downloads, j.Request.Id + "-" + Wire.SafeName(j.Request.Name));
+-    void Save(Job j) { j.Updated=DateTime.UtcNow; Wire.AtomicJson(Path.Combine(folder,j.Request.Id+".json"),j); }
++    void Save(Job j) { var snapshot=Copy(j);snapshot.Updated=DateTime.UtcNow;Wire.AtomicJson(Path.Combine(folder,j.Request.Id+".json"),snapshot);j.Updated=snapshot.Updated; }
++    static Job Copy(Job j)=>new(){Request=j.Request,ClientId=j.ClientId,Offset=j.Offset,State=j.State,Message=j.Message,Updated=j.Updated};
++    void Commit(Job j,Job next){Save(next);j.Offset=next.Offset;j.State=next.State;j.Message=next.Message;j.Updated=next.Updated;}
+     void Notify(Job j) { try { Changed?.Invoke(j); } catch { /* UI observers cannot break durable jobs. */ } }
+     SemaphoreSlim Gate(string id) => gates.GetOrAdd(id,_=>new(1,1));
+     public Job Get(string id,string client) {
+@@ -56,7 +58,7 @@
+             try {
+                 var buffer=new byte[65536]; long remaining=length;
+                 while(remaining>0) { var n=await body.ReadAsync(buffer.AsMemory(0,(int)Math.Min(buffer.Length,remaining)),ct); if(n==0) throw new EndOfStreamException(); await file.WriteAsync(buffer.AsMemory(0,n),ct); remaining-=n; }
+-                file.Flush(true); j.Offset+=length; Save(j); Notify(j); return j;
++                file.Flush(true); var next=Copy(j);next.Offset+=length;Commit(j,next);Notify(j); return j;
+             } catch { file.SetLength(offset); file.Flush(true); throw; }
+         } finally { g.Release(); }
+     }
+@@ -77,16 +79,22 @@
+                     if (!File.Exists(dest)) {
+                         // Final rename occurs on the destination volume, including redirected Downloads.
+                         var staging=dest+".incoming";
+-                        using (var source=File.OpenRead(src)) using (var output=new FileStream(staging,FileMode.Create,FileAccess.Write,FileShare.None,65536,true)) {
+-                            await source.CopyToAsync(output); output.Flush(true);
++                        try {
++                            using (var source=File.OpenRead(src)) using (var output=new FileStream(staging,FileMode.Create,FileAccess.Write,FileShare.None,65536,true)) {
++                                await source.CopyToAsync(output); output.Flush(true);
++                            }
++                            File.Move(staging,dest,false);
++                        } catch {
++                            // Preserve the resumable source, but release an unsuccessful destination copy.
++                            try { File.Delete(staging); } catch { }
++                            throw;
+                         }
+-                        File.Move(staging,dest,false);
+                     } else {
+                         using var existing=File.OpenRead(dest);
+                         if(Convert.ToHexString(await SHA256.HashDataAsync(existing)).ToLowerInvariant()!=j.Request.Sha256.ToLowerInvariant()) throw new InvalidDataException("Destination file changed. Send again.");
+                     }
+                 }
+-                j.State="queued"; Save(j); if(File.Exists(Part(j))) File.Delete(Part(j));
++                var next=Copy(j);next.State="queued";Commit(j,next); if(File.Exists(Part(j))) File.Delete(Part(j));
+             }
+             if(j.State=="queued") _=Run(j);
+             return j;
+@@ -97,7 +105,7 @@
+         try {
+             var j=Get(id,client);
+             if(j.State is "uploading" or "queued") {
+-                j.State="cancelled";j.Message="Cancelled before the PC action started.";Save(j);
++                var next=Copy(j);next.State="cancelled";next.Message="Cancelled before the PC action started.";Commit(j,next);
+                 if(File.Exists(Part(j)))File.Delete(Part(j));Notify(j);
+             }
+             return j;
+@@ -108,12 +116,13 @@
+         try {
+             // Serialize cancellation and the durable transition before starting a side effect.
+             var gate=Gate(j.Request.Id); await gate.WaitAsync();
+-            try { if(j.State!="queued") return; j.State="running"; Save(j); }
++            try { if(j.State!="queued") return; var next=Copy(j);next.State="running";Commit(j,next); }
+             finally { gate.Release(); }
+             Notify(j);
+-            try { await sink.ExecuteAsync(j.Request,j.Request.Action is "copy" or "url" ? null : Destination(j)); j.State=j.Request.Action=="print" ? "submitted" : "completed"; j.Message=j.Request.Action=="print" ? "Submitted to Windows printer queue; physical printing is not confirmed." : "Action completed."; }
+-            catch(Exception ex) { j.State=j.Request.Action=="print" ? "uncertain" : "failed"; j.Message=ex.Message; }
+-            Save(j); Notify(j);
++            var result=Copy(j);
++            try { await sink.ExecuteAsync(j.Request,j.Request.Action is "copy" or "url" ? null : Destination(j)); result.State=j.Request.Action=="print" ? "submitted" : "completed"; result.Message=j.Request.Action=="print" ? "Submitted to Windows printer queue; physical printing is not confirmed." : "Action completed."; }
++            catch(Exception ex) { result.State=j.Request.Action=="print" ? "uncertain" : "failed"; result.Message=ex.Message; }
++            Commit(j,result); Notify(j);
+         } finally { actionGate.Release(); }
+     }
+ }
+--- a/windows/ActionBridge.Core/TrustStore.cs
++++ b/windows/ActionBridge.Core/TrustStore.cs
+@@ -9,6 +9,8 @@
+         Directory.CreateDirectory(folder); path = Path.Combine(folder, "phones.json");
+         phones = File.Exists(path) ? JsonSerializer.Deserialize<Dictionary<string, Phone>>(File.ReadAllText(path), Wire.Json) ?? new() : new();
+     }
++    public event Action? Changed;
++    void Notify(){try{Changed?.Invoke();}catch{/* UI observers cannot change the approval result. */}}
+     public Phone[] List() { lock(gate) return phones.Values.ToArray(); }
+     public string? Authenticate(string token) {
+         if (token.Length != 64 || !token.All(Uri.IsHexDigit)) return null;
+@@ -17,11 +19,12 @@
+     }
+     public bool AlreadyApproved(PairRequest r) => Authenticate(r.Token) == r.ClientId;
+     public void Approve(PairRequest r) {
+-        if (!Guid.TryParse(r.ClientId, out _) || r.Token.Length != 64 || !r.Token.All(Uri.IsHexDigit) || r.Name.Length is < 1 or > 80) throw new ArgumentException("Invalid phone identity.");
++        if (!Guid.TryParse(r.ClientId, out _) || string.IsNullOrEmpty(r.Name) || string.IsNullOrEmpty(r.Token) || r.Token.Length != 64 || !r.Token.All(Uri.IsHexDigit) || r.Name.Length is < 1 or > 80) throw new ArgumentException("Invalid phone identity.");
+         lock(gate) {
+             if (phones.Count >= 32 && !phones.ContainsKey(r.ClientId)) throw new InvalidOperationException("Device limit reached. Remove an old phone.");
+-            phones[r.ClientId] = new(r.ClientId, r.Name, Wire.Hash(r.Token)); Wire.AtomicJson(path, phones);
++            var next=new Dictionary<string,Phone>(phones){[r.ClientId]=new(r.ClientId,r.Name,Wire.Hash(r.Token))};Wire.AtomicJson(path,next);phones[r.ClientId]=next[r.ClientId];
+         }
++        Notify();
+     }
+-    public void Revoke(string id) { lock(gate) { phones.Remove(id); Wire.AtomicJson(path, phones); } }
++    public void Revoke(string id) { lock(gate) { var next=new Dictionary<string,Phone>(phones);next.Remove(id);Wire.AtomicJson(path,next);phones.Remove(id); } Notify(); }
+ }
+--- a/windows/ActionBridge.Windows/BridgeForm.cs
++++ b/windows/ActionBridge.Windows/BridgeForm.cs
+@@ -20,7 +20,7 @@
+         Text="ActionBridge 0.5.0 · Phone ↔ PC";Size=new(1000,700);MinimumSize=new(800,560);Font=new("Segoe UI",10);Icon=Icon.ExtractAssociatedIcon(Environment.ProcessPath!)??SystemIcons.Application;tray.Icon=Icon;BackColor=Color.FromArgb(244,248,248);
+         var header=new TableLayoutPanel{Dock=DockStyle.Top,Height=135,Padding=new(20),ColumnCount=2,RowCount=1};header.ColumnStyles.Add(new ColumnStyle(SizeType.Percent,100));header.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute,190));var identity=new FlowLayoutPanel{Dock=DockStyle.Fill,FlowDirection=FlowDirection.TopDown,WrapContents=false};header.Controls.Add(identity,0,0);
+         identity.Controls.Add(new Label{Text="ActionBridge",ForeColor=Color.FromArgb(18,126,118),Font=new("Segoe UI",19,FontStyle.Bold),AutoSize=true});identity.Controls.Add(status);identity.Controls.Add(remoteStatus);Controls.Add(header);
+-        var pairPhone=new Button{Text="＋ Connect phone",Width=170,Height=44,Anchor=AnchorStyles.Top|AnchorStyles.Right,FlatStyle=FlatStyle.Flat,BackColor=Color.FromArgb(18,126,118),ForeColor=Color.White,Location=new(Width-220,28)};header.Controls.Add(pairPhone,1,0);pairPhone.Anchor=AnchorStyles.Right;identity.SizeChanged+=(s,e)=>remoteStatus.MaximumSize=new(Math.Max(200,identity.Width-15),0);pairPhone.Click+=async(s,e)=>{if(remote==null)return;try{await EnsureRemote();if(remote.Config!=null)remote.ShowPairing(this);}catch(Exception ex){MessageBox.Show(this,ex.Message,"Connect phone");}};
++        var pairPhone=new Button{Text="＋ Connect phone",Width=170,Height=44,Anchor=AnchorStyles.Top|AnchorStyles.Right,FlatStyle=FlatStyle.Flat,BackColor=Color.FromArgb(18,126,118),ForeColor=Color.White,Location=new(Width-220,28)};header.Controls.Add(pairPhone,1,0);pairPhone.Anchor=AnchorStyles.Right;identity.SizeChanged+=(s,e)=>remoteStatus.MaximumSize=new(Math.Max(200,identity.Width-15),0);pairPhone.Click+=async(s,e)=>{if(remote==null)return;try{await EnsureRemote(true);if(remote.Config!=null)remote.ShowPairing(this);}catch(Exception ex){MessageBox.Show(this,ex.Message,"Connect phone");}};
+         var tabs=new TabControl{Dock=DockStyle.Fill};var activity=new TabPage("Activity");var devices=new TabPage("Devices");var settings=new TabPage("Preferences");var sendPage=new TabPage("Send to phone");tabs.TabPages.AddRange([activity,sendPage,devices,settings]);Controls.Add(tabs);tabs.BringToFront();
+         var sendControls=new FlowLayoutPanel{Dock=DockStyle.Top,Height=220,Padding=new(20),FlowDirection=FlowDirection.TopDown,WrapContents=false};sendPage.Controls.Add(sent);sendPage.Controls.Add(sendControls);
+         sendControls.Controls.Add(new Label{Text="Send files or a link to your phone",AutoSize=true,Font=new("Segoe UI",14,FontStyle.Bold)});sendControls.Controls.Add(sendTarget);
+@@ -45,10 +45,10 @@
+         startup.CheckedChanged+=(s,e)=>{using var key=Registry.CurrentUser.CreateSubKey(@"Software\Microsoft\Windows\CurrentVersion\Run");if(startup.Checked) key.SetValue("ActionBridge","\""+Environment.ProcessPath+"\" --tray");else key.DeleteValue("ActionBridge",false);};panel.Controls.Add(startup);
+         panel.Controls.Add(new Label{AutoSize=true,MaximumSize=new(720,0),Text="Files are saved in Downloads\\ActionBridge. Only approved phones can transfer or request actions. PDF and image printing uses your installed Windows printers.\n\nIf a job says 'uncertain', check the printer before sending again.\n\nThe app discovers PCs over local Wi-Fi or Ethernet. Guest Wi-Fi may block devices from communicating."});
+         var connectionPanel=new FlowLayoutPanel{Dock=DockStyle.Bottom,Height=60,Padding=new(12),WrapContents=false};devices.Controls.Add(connectionPanel);
+-        var pair=new Button{Text="Connect phone · QR code",Width=230,Height=38};connectionPanel.Controls.Add(pair);pair.Click+=async(s,e)=>{if(remote==null)return;try{await EnsureRemote();if(remote.Config!=null)remote.ShowPairing(this);}catch(Exception ex){MessageBox.Show(this,ex.Message,"Connect phone");}};
++        var pair=new Button{Text="Connect phone · QR code",Width=230,Height=38};connectionPanel.Controls.Add(pair);pair.Click+=async(s,e)=>{if(remote==null)return;try{await EnsureRemote(true);if(remote.Config!=null)remote.ShowPairing(this);}catch(Exception ex){MessageBox.Show(this,ex.Message,"Connect phone");}};
+         var disable=new Button{Text="Remove remote phone access",Width=250,Height=38};connectionPanel.Controls.Add(disable);disable.Click+=async(s,e)=>{if(remote==null||MessageBox.Show(this,"Revoke the current QR code and remove remote phone access? You can connect a phone again afterward.","Remove access",MessageBoxButtons.YesNo)!=DialogResult.Yes)return;try{await remote.Disconnect();RefreshSendTargets();}catch(Exception ex){MessageBox.Show(this,ex.Message);}};
+         panel.Controls.Add(new Label{AutoSize=true,MaximumSize=new(700,0),Text="Internet access sets up automatically. Connect your phone by scanning this PC’s QR code. The same Save, Open, Print, Copy and Link actions work nearby and remotely. Keep this PC awake. Closing this window keeps ActionBridge in the system tray."});
+-        remoteRetry.Tick+=(s,e)=>{if(remote?.Config!=null)remote.Start();};remoteRetry.Start();
++        remoteRetry.Tick+=async(s,e)=>{if(remote?.Enabled==true){if(remote.Config!=null)remote.Start();else await EnsureRemote();}};remoteRetry.Start();
+         activityTimer.Tick+=(s,e)=>{if(historyDirty){historyDirty=false;RefreshHistory();RefreshSent();}};activityTimer.Start();
+         Polish(this);
+         var menu=new ContextMenuStrip();menu.Items.Add("Open ActionBridge",null,(s,e)=>ShowWindow());menu.Items.Add("Received files",null,(s,e)=>Process.Start(new ProcessStartInfo(received){UseShellExecute=true}));menu.Items.Add("Quit",null,async(s,e)=>{exiting=true;remote?.Stop();if(server!=null)await server.DisposeAsync();tray.Visible=false;Close();});tray.ContextMenuStrip=menu;tray.DoubleClick+=(s,e)=>ShowWindow();
+@@ -57,11 +57,11 @@
+     }
+     sealed record SendPhone(string Id,string Label){public override string ToString()=>Label;}
+     sealed record SentItem(Outgoing Item){public override string ToString()=>$"{Item.Updated.ToLocalTime():g} · {Item.Name} · {Item.State} · {Item.Offset:N0} / {Item.Size:N0} bytes";}
+-    void RefreshSendTargets(){var selected=(sendTarget.SelectedItem as SendPhone)?.Id;sendTarget.Items.Clear();if(remote?.Config!=null)sendTarget.Items.Add(new SendPhone("remote:"+remote.Config.Room,"Phone paired by QR · Internet or nearby"));if(trust!=null)foreach(var p in trust.List())sendTarget.Items.Add(new SendPhone(p.ClientId,p.Name+" · Local pairing"));var index=Enumerable.Range(0,sendTarget.Items.Count).FirstOrDefault(i=>(sendTarget.Items[i] as SendPhone)?.Id==selected,-1);if(sendTarget.Items.Count>0)sendTarget.SelectedIndex=index>=0?index:0;}
++    void RefreshSendTargets(){var selected=(sendTarget.SelectedItem as SendPhone)?.Id;sendTarget.Items.Clear();if(remote?.Enabled==true&&remote.Config!=null)sendTarget.Items.Add(new SendPhone("remote:"+remote.Config.Room,"Phone paired by QR · Internet or nearby"));if(trust!=null)foreach(var p in trust.List())sendTarget.Items.Add(new SendPhone(p.ClientId,p.Name+" · Local pairing"));var index=Enumerable.Range(0,sendTarget.Items.Count).FirstOrDefault(i=>(sendTarget.Items[i] as SendPhone)?.Id==selected,-1);if(sendTarget.Items.Count>0)sendTarget.SelectedIndex=index>=0?index:0;}
+     void RefreshSent(){if(outbox==null)return;var selected=(sent.SelectedItem as SentItem)?.Item.Id;sent.BeginUpdate();sent.Items.Clear();foreach(var item in outbox.History())sent.Items.Add(new SentItem(item));for(var i=0;i<sent.Items.Count;i++)if(((SentItem)sent.Items[i]).Item.Id==selected)sent.SelectedIndex=i;sent.EndUpdate();}
+     async Task QueueFiles(string[] files,Button button){if(outbox==null||sendTarget.SelectedItem is not SendPhone phone){MessageBox.Show(this,"Pair a phone first.");return;}if(!button.Enabled)return;button.Enabled=false;try{if(files.Length>20)throw new ArgumentException("Send up to 20 files at once.");foreach(var file in files){if(!File.Exists(file))throw new ArgumentException("Choose files rather than folders.");await outbox.Stage(phone.Id,file);}RefreshSent();}catch(Exception ex){MessageBox.Show(this,ex.Message,"Could not send");}finally{button.Enabled=true;}}
+     static void Polish(Control parent){foreach(Control child in parent.Controls){if(child is Button button){button.FlatStyle=FlatStyle.Flat;button.FlatAppearance.BorderSize=0;button.Cursor=Cursors.Hand;if(button.ForeColor!=Color.White){button.BackColor=Color.FromArgb(228,244,241);button.ForeColor=Color.FromArgb(18,126,118);}}if(child is TabPage)child.BackColor=Color.White;Polish(child);}}
+-    async Task EnsureRemote(){if(remote==null||enrolling||remote.Config!=null)return;enrolling=true;remoteStatus.Text="Setting up internet access…";try{await remote.Configure();remoteStatus.Text="Internet access ready · Connect phone to pair";RefreshSendTargets();}catch(Exception ex){remoteStatus.Text="Internet access unavailable · "+ex.Message;}finally{enrolling=false;}}
++    async Task EnsureRemote(bool enable=false){if(remote==null||enrolling||(!enable&&!remote.Enabled)||remote.Config!=null&&remote.Enabled)return;enrolling=true;remoteStatus.Text="Setting up internet access…";try{if(enable&&!remote.Enabled&&remote.Config!=null)await remote.Disconnect();await remote.Configure();remoteStatus.Text="Internet access ready · Connect phone to pair";RefreshSendTargets();}catch(Exception ex){remoteStatus.Text="Internet access unavailable · "+ex.Message;}finally{enrolling=false;}}
+     void ShowWindow(){Show();WindowState=FormWindowState.Normal;Activate();}
+     void RefreshPhones(){phones.Items.Clear();if(trust!=null)phones.Items.AddRange(trust.List());RefreshSendTargets();}
+     void RefreshHistory(){var selected=history.SelectedItems.Count>0?(history.SelectedItems[0].Tag as Job)?.Request.Id:null;if(transfers==null)return;history.BeginUpdate();history.Items.Clear();foreach(var j in transfers.History())history.Items.Add(new ListViewItem([j.Updated.ToLocalTime().ToString("g"),j.Request.Name+" · "+j.Request.Action,j.ClientId.StartsWith("remote:")?"Internet":"Local",j.State,j.Message??$"{j.Offset:N0} / {j.Request.Size:N0} bytes"]){Tag=j,ForeColor=j.State is "failed" or "uncertain"?Color.FromArgb(167,72,44):Color.FromArgb(29,43,57)});foreach(ListViewItem item in history.Items)if(item.Tag is Job j&&j.Request.Id==selected)item.Selected=true;emptyActivity.Visible=history.Items.Count==0;history.EndUpdate();}
+@@ -84,16 +84,16 @@
+             if(!File.Exists(certPath)) File.WriteAllBytes(certPath,ProtectedData.Protect(ServerIdentity.CreatePfx(),null,DataProtectionScope.CurrentUser));
+             var cert=ServerIdentity.Load(ProtectedData.Unprotect(File.ReadAllBytes(certPath),null,DataProtectionScope.CurrentUser));
+             var idPath=Path.Combine(root,"pc-id.txt");var id=File.Exists(idPath)?File.ReadAllText(idPath):Guid.NewGuid().ToString();File.WriteAllText(idPath,id);
+-            trust=new(root);var sink=new WindowsActions(this);transfers=new(Path.Combine(root,"jobs"),received,sink);
++            trust=new(root);trust.Changed+=()=>{if(!IsDisposed&&IsHandleCreated)BeginInvoke(()=>RefreshPhones());};var sink=new WindowsActions(this);transfers=new(Path.Combine(root,"jobs"),received,sink);
+             transfers.Changed+=j=>{if(!IsDisposed&&IsHandleCreated)BeginInvoke(()=>historyDirty=true);};
+             outbox=new(Path.Combine(root,"outbox"));outbox.Changed+=()=>{if(!IsDisposed&&IsHandleCreated)BeginInvoke(()=>historyDirty=true);};
+-            server=new(id,Environment.MachineName,cert,trust,transfers,sink,Approve,()=>remote?.Config!=null?remote.PairingCode():null,outbox);await server.StartAsync();
++            server=new(id,Environment.MachineName,cert,trust,transfers,sink,Approve,()=>remote?.Enabled==true&&remote.Config!=null?remote.PairingCode():null,outbox);await server.StartAsync();
+             using(var handler=new HttpClientHandler{ServerCertificateCustomValidationCallback=(_,remote,_,_)=>remote!=null&&SHA256.HashData(remote.RawData).SequenceEqual(SHA256.HashData(cert.RawData))})
+             using(var probe=new HttpClient(handler){Timeout=TimeSpan.FromSeconds(8)}) {
+                 (await probe.GetAsync($"https://127.0.0.1:{Wire.ApiPort}/v1/hello")).EnsureSuccessStatusCode();
+             }
+             status.Text=Environment.MachineName+" · Ready for local transfers";RefreshHistory();RefreshPhones();
+-            remote.Attach(transfers,sink,id,server.Fingerprint,outbox);remote.Start();if(remote.Config==null)_=EnsureRemote();
++            remote.Attach(transfers,sink,id,server.Fingerprint,outbox);if(remote.Enabled){remote.Start();if(remote.Config==null)_=EnsureRemote();}else remoteStatus.Text="Internet access is off · Connect phone to enable";
+             if(Environment.GetCommandLineArgs().Contains("--tray"))Hide();
+         } catch(Exception ex){
+             if(server!=null){await server.DisposeAsync();server=null;}
+--- a/windows/ActionBridge.Windows/RemoteConnection.cs
++++ b/windows/ActionBridge.Windows/RemoteConnection.cs
+@@ -8,37 +8,41 @@
+ namespace ActionBridge.Windows;
+ public sealed class RemoteConnection:IDisposable {
+     public const string DefaultService="https://actionbridge-connect.actionbridge.workers.dev";
+-    readonly string path,folder;Process? helper;readonly SemaphoreSlim pipeGate=new(1,1);RemoteJobs? jobs;Outbox? outbox;string pcId="",fingerprint="";
++    readonly string path,folder;readonly SemaphoreSlim configGate=new(1,1);Process? helper;readonly SemaphoreSlim pipeGate=new(1,1);RemoteJobs? jobs;Outbox? outbox;string pcId="",fingerprint="";
+     public event Action<string>? Changed;
+     public RemoteConfig? Config {get;private set;}
+     public RemoteConnection(string root,string received){path=Path.Combine(root,"remote.dat");folder=Path.Combine(received,"Remote");if(File.Exists(path))try{Config=JsonSerializer.Deserialize<RemoteConfig>(ProtectedData.Unprotect(File.ReadAllBytes(path),null,DataProtectionScope.CurrentUser));}catch{Changed?.Invoke("Remote settings could not be read. Configure again.");}}
++    public bool Enabled=>!File.Exists(path+".disabled");
++    static void Store(string target,byte[] bytes){using(var f=new FileStream(target+".new",FileMode.Create,FileAccess.Write,FileShare.None)){f.Write(bytes);f.Flush(true);}File.Move(target+".new",target,true);}
+     static string Key()=>Convert.ToBase64String(RandomNumberGenerator.GetBytes(32)).TrimEnd('=').Replace('+','-').Replace('/','_');
+     public async Task Configure(string service=DefaultService,string setupKey=""){
++        await configGate.WaitAsync();try {
+         if(Config!=null)throw new InvalidOperationException("Disconnect the existing remote connection first.");
+         if(!Uri.TryCreate(service.Trim(),UriKind.Absolute,out var uri)||uri.Scheme!="https"||uri.UserInfo!=""||uri.AbsolutePath!="/"||uri.Query!=""||uri.Fragment!="")throw new ArgumentException("Enter the HTTPS service address, such as https://actionbridge-connect.example.workers.dev");
+-        service=uri.GetLeftPart(UriPartial.Authority);using var client=new HttpClient{Timeout=TimeSpan.FromSeconds(20)};var automatic=string.IsNullOrWhiteSpace(setupKey);
++        service=uri.GetLeftPart(UriPartial.Authority);using var client=new HttpClient(new HttpClientHandler{AllowAutoRedirect=false}){Timeout=TimeSpan.FromSeconds(20)};var automatic=string.IsNullOrWhiteSpace(setupKey);
+         string pcKey="",phoneKey="";
+         if(automatic){var seedPath=path+".enroll";
+             if(File.Exists(seedPath)){var seeds=JsonSerializer.Deserialize<string[]>(ProtectedData.Unprotect(File.ReadAllBytes(seedPath),null,DataProtectionScope.CurrentUser))!;pcKey=seeds[0];phoneKey=seeds[1];}
+-            else{pcKey=Key();phoneKey=Key();Directory.CreateDirectory(Path.GetDirectoryName(path)!);File.WriteAllBytes(seedPath,ProtectedData.Protect(JsonSerializer.SerializeToUtf8Bytes(new[]{pcKey,phoneKey}),null,DataProtectionScope.CurrentUser));}}
++            else{pcKey=Key();phoneKey=Key();Directory.CreateDirectory(Path.GetDirectoryName(path)!);Store(seedPath,ProtectedData.Protect(JsonSerializer.SerializeToUtf8Bytes(new[]{pcKey,phoneKey}),null,DataProtectionScope.CurrentUser));}}
+         using var request=new HttpRequestMessage(HttpMethod.Post,service+(automatic?"/enroll":"/rooms"));if(!automatic)request.Headers.Authorization=new AuthenticationHeaderValue("Bearer",setupKey.Trim());request.Content=new StringContent(automatic?JsonSerializer.Serialize(new{pcKey,phoneKey}):"{}",Encoding.UTF8,"application/json");using var result=await client.SendAsync(request);if(!result.IsSuccessStatusCode)throw new InvalidOperationException(automatic?"Remote setup is temporarily unavailable. Check your internet and retry. The service owner must deploy the v0.4 backend first.":"Service refused setup. Check the setup key and registration setting.");using var body=JsonDocument.Parse(await result.Content.ReadAsStringAsync());var value=body.RootElement;
+-        Config=new(service,value.GetProperty("room").GetString()!,automatic?pcKey:value.GetProperty("pcKey").GetString()!,automatic?phoneKey:value.GetProperty("phoneKey").GetString()!,Key(),folder);
+-        Directory.CreateDirectory(Path.GetDirectoryName(path)!);File.WriteAllBytes(path,ProtectedData.Protect(JsonSerializer.SerializeToUtf8Bytes(Config),null,DataProtectionScope.CurrentUser));Start();
++        var configured=new RemoteConfig(service,value.GetProperty("room").GetString()!,automatic?pcKey:value.GetProperty("pcKey").GetString()!,automatic?phoneKey:value.GetProperty("phoneKey").GetString()!,Key(),folder);
++        Directory.CreateDirectory(Path.GetDirectoryName(path)!);Store(path,ProtectedData.Protect(JsonSerializer.SerializeToUtf8Bytes(configured),null,DataProtectionScope.CurrentUser));Config=configured;File.Delete(path+".disabled");Start();
++        }finally{configGate.Release();}
+     }
+     public void Attach(Transfers transfers,IActionSink sink,string id,string pin,Outbox? outgoing=null){pcId=id;fingerprint=pin;outbox=outgoing;if(Config!=null)jobs=new(transfers,sink,Config.Room,outbox);_transfers=transfers;_sink=sink;}
+     Transfers? _transfers;IActionSink? _sink;
+-    public void Start(){if(Config!=null&&_transfers!=null&&_sink!=null)jobs=new(_transfers,_sink,Config.Room,outbox);if(Config==null||helper is {HasExited:false})return;var exe=Path.Combine(AppContext.BaseDirectory,"ActionBridge.Remote.exe");if(!File.Exists(exe)){Changed?.Invoke("Remote receiver component is missing.");return;}
++    public void Start(){if(!Enabled)return;if(Config!=null&&_transfers!=null&&_sink!=null)jobs=new(_transfers,_sink,Config.Room,outbox);if(Config==null||helper is {HasExited:false})return;var exe=Path.Combine(AppContext.BaseDirectory,"ActionBridge.Remote.exe");if(!File.Exists(exe)){Changed?.Invoke("Remote receiver component is missing.");return;}
+         helper?.Dispose();
+         helper=new Process{StartInfo=new(exe){UseShellExecute=false,CreateNoWindow=true,RedirectStandardInput=true,RedirectStandardOutput=true,RedirectStandardError=true},EnableRaisingEvents=true};
+-        var process=helper;
+-        helper.OutputDataReceived+=async(s,e)=>{if(e.Data==null)return;try{using var j=JsonDocument.Parse(e.Data);var m=j.RootElement;if(m.TryGetProperty("rpcId",out var rpc)){object result;try{if(jobs==null)throw new InvalidOperationException("PC receiver is starting. Reconnect shortly.");result=new{rpcId=rpc.GetString(),result=await jobs.Dispatch(m)};}catch(Exception ex){result=new{rpcId=rpc.GetString(),error=ex is ArgumentException or InvalidOperationException or IOException or KeyNotFoundException?ex.Message:"PC could not complete this action."};}
++        var process=helper;var dispatcher=jobs;
++        helper.OutputDataReceived+=async(s,e)=>{if(e.Data==null)return;try{using var j=JsonDocument.Parse(e.Data);var m=j.RootElement;if(m.TryGetProperty("rpcId",out var rpc)){object result;try{if(dispatcher==null)throw new InvalidOperationException("PC receiver is starting. Reconnect shortly.");result=new{rpcId=rpc.GetString(),result=await dispatcher.Dispatch(m)};}catch(Exception ex){result=new{rpcId=rpc.GetString(),error=ex is ArgumentException or InvalidOperationException or IOException or KeyNotFoundException?ex.Message:"PC could not complete this action."};}
+                 await pipeGate.WaitAsync();try{if(!process.HasExited){await process.StandardInput.WriteLineAsync(JsonSerializer.Serialize(result,Wire.JsonCompact));await process.StandardInput.FlushAsync();}}finally{pipeGate.Release();}
+             }else Changed?.Invoke(m.GetProperty("detail").GetString()??"Remote connected");}catch{}};
+         helper.Exited+=(s,e)=>Changed?.Invoke("Remote receiver stopped. Reopen the app to reconnect.");helper.Start();helper.BeginOutputReadLine();helper.StandardInput.WriteLine(JsonSerializer.Serialize(new{service=Config.Service,room=Config.Room,pcKey=Config.PcKey,secret=Config.Secret,folder=Config.Folder,parent=Environment.ProcessId,jobs=true}));helper.StandardInput.Flush();helper.BeginErrorReadLine();
+     }
+     public string PairingCode(){if(Config==null)throw new InvalidOperationException("Set up remote access first.");var payload=JsonSerializer.SerializeToUtf8Bytes(new{v=2,id=pcId,fingerprint,service=Config.Service,room=Config.Room,key=Config.PhoneKey,secret=Config.Secret,name=Environment.MachineName});return "abremote:"+Convert.ToBase64String(payload).TrimEnd('=').Replace('+','-').Replace('/','_');}
+     public void ShowPairing(Form owner){using var generator=new QRCodeGenerator();using var data=generator.CreateQrCode(PairingCode(),QRCodeGenerator.ECCLevel.M);using var qr=new QRCode(data);var dialog=new Form{Text="Connect your phone",Size=new(500,600),StartPosition=FormStartPosition.CenterParent};dialog.Controls.Add(new PictureBox{Dock=DockStyle.Fill,Image=qr.GetGraphic(6),SizeMode=PictureBoxSizeMode.Zoom});dialog.Controls.Add(new Label{Dock=DockStyle.Top,Height=95,Padding=new(18),Text="On the phone: Add computer → Scan QR code.\nKeep this pairing code private: it grants file and action access to this PC."});var copy=new Button{Text="Copy pairing code (manual entry)",Dock=DockStyle.Bottom,Height=44};copy.Click+=(s,e)=>Clipboard.SetText(PairingCode());dialog.Controls.Add(copy);dialog.ShowDialog(owner);}
+-    public async Task Disconnect(){if(Config==null)return;using var client=new HttpClient{Timeout=TimeSpan.FromSeconds(15)};using var request=new HttpRequestMessage(HttpMethod.Delete,Config.Service+"/rooms/"+Config.Room+"/delete?role=pc");request.Headers.Authorization=new AuthenticationHeaderValue("Bearer",Config.PcKey);using var response=await client.SendAsync(request);if(!response.IsSuccessStatusCode&&response.StatusCode!=System.Net.HttpStatusCode.NotFound)throw new InvalidOperationException("Cannot revoke access while the service is unavailable. Try again when online.");Stop();Config=null;File.Delete(path);File.Delete(path+".enroll");Changed?.Invoke("Remote access disabled and phone access revoked.");}
++    public async Task Disconnect(){await configGate.WaitAsync();try{if(Config==null){Wire.AtomicJson(path+".disabled",true);return;}using var client=new HttpClient(new HttpClientHandler{AllowAutoRedirect=false}){Timeout=TimeSpan.FromSeconds(15)};using var request=new HttpRequestMessage(HttpMethod.Delete,Config.Service+"/rooms/"+Config.Room+"/delete?role=pc");request.Headers.Authorization=new AuthenticationHeaderValue("Bearer",Config.PcKey);using var response=await client.SendAsync(request);if(!response.IsSuccessStatusCode&&response.StatusCode!=System.Net.HttpStatusCode.NotFound)throw new InvalidOperationException("Cannot revoke access while the service is unavailable. Try again when online.");Wire.AtomicJson(path+".disabled",true);Stop();Config=null;File.Delete(path);File.Delete(path+".enroll");Changed?.Invoke("Remote access disabled and phone access revoked.");}finally{configGate.Release();}}
+     public void Stop(){if(helper!=null){try{if(!helper.HasExited)helper.Kill(true);}catch{}helper.Dispose();helper=null;}}
+     public void Dispose()=>Stop();
+ }
+--- a/windows/ActionBridge.Windows/WindowsActions.cs
++++ b/windows/ActionBridge.Windows/WindowsActions.cs
+@@ -64,9 +64,9 @@
+                 if(pdf!=null) {
+                     using var page=pdf.GetPage(index); using var stream=new InMemoryRandomAccessStream();
+                     // Render at up to 300 dpi, capped to avoid huge allocations.
+-                    var width=(uint)Math.Clamp(page.Size.Width*300/96,1,5000);
+-                    page.RenderToStreamAsync(stream,new PdfPageRenderOptions{DestinationWidth=width}).AsTask().GetAwaiter().GetResult();
+-                    using var managed=stream.AsStreamForRead();using var loaded=Image.FromStream(managed);var rendered=new Bitmap(loaded);var dpi=width*96f/(float)page.Size.Width;rendered.SetResolution(dpi,dpi);current=rendered;dispose=true;
++                    var raster=PrintGeometry.PdfRaster(page.Size.Width,page.Size.Height);
++                    page.RenderToStreamAsync(stream,new PdfPageRenderOptions{DestinationWidth=raster.Width,DestinationHeight=raster.Height}).AsTask().GetAwaiter().GetResult();
++                    using var managed=stream.AsStreamForRead();using var loaded=Image.FromStream(managed);var rendered=new Bitmap(loaded);rendered.SetResolution(raster.Dpi,raster.Dpi);current=rendered;dispose=true;
+                 } else current=image!;
+                 try {
+                     var bounds=e.MarginBounds;var scaleX=bounds.Width/(float)current.Width;var scaleY=bounds.Height/(float)current.Height;

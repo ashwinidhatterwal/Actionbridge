@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.actionbridge.ProtocolTest" tests="5" skipped="0" failures="0" errors="0" timestamp="2026-10-03T07:02:00.486Z" hostname="97a464bb5ebe" time="0.003">
+  <properties/>
+  <testcase name="subnetMatchesOnlyItsOwnAddresses" classname="app.actionbridge.ProtocolTest" time="0.001"/>
+  <testcase name="linksAcceptOnlyRealWebUrls" classname="app.actionbridge.ProtocolTest" time="0.001"/>
+  <testcase name="signedByteIpv4AddressIsCorrect" classname="app.actionbridge.ProtocolTest" time="0.0"/>
+  <testcase name="peerRoundTripPreservesPinAndAddress" classname="app.actionbridge.ProtocolTest" time="0.0"/>
+  <testcase name="invalidSubnetPrefixDoesNotMatch" classname="app.actionbridge.ProtocolTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

@@ -1,0 +1,11 @@
+{
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "esbuild app.js --bundle --format=iife --minify --outfile=../../android/app/src/main/assets/remote/app.js",
+    "test": "node --test *.test.mjs"
+  },
+  "devDependencies": {
+    "esbuild": "0.25.11"
+  }
+}
