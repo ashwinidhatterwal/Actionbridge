@@ -1,6 +1,6 @@
-# ActionBridge for Ubuntu 0.7.0
+# ActionBridge for Ubuntu 0.8.0
 
-The Ubuntu companion works with the ActionBridge Android app, including the new v0.7 interface.
+The Ubuntu companion works with the ActionBridge Android app, including the new v0.8 discovery and connection status.
 It receives files, opens supported documents and links, copies received text,
 and prints through CUPS. It also sends files, text and links back to your phone.
 Both local HTTPS and internet WebRTC use the same activity and action engine.
@@ -13,7 +13,7 @@ Across the internet, copy the receiving computer's private code from **Settings 
 
 Pairings persist until removed. Files stay queued when a computer is offline and resume from committed offsets. Delivered files are saved under Downloads/ActionBridge and never automatically executed. Removing a saved destination cancels waiting sends; removing its receiving permission is a separate Home device-management action. If DHCP changes a saved local IP, find/add that computer again; the saved certificate must still match.
 
-See [the full update guide](../docs/UPDATE-v0.7.0.md).
+See [the full update guide](../docs/UPDATE-v0.8.0.md).
 
 ## Install and connect
 
@@ -24,7 +24,7 @@ Ubuntu 22.04 and 26.04 desktop compatibility has not been verified.
 Download the `.deb`, open a terminal in its folder, and run:
 
 ```sh
-sudo apt install ./ActionBridge-Ubuntu-v0.7.0-amd64.deb
+sudo apt install ./ActionBridge-Ubuntu-v0.8.0-amd64.deb
 ```
 
 Apt installs the GTK/Python/printing dependencies. You do not need Node/npm,

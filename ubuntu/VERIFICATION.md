@@ -1,32 +1,26 @@
-# ActionBridge 0.7.0 verification — 2026-10-05
+# ActionBridge 0.8.0 verification — 2026-10-05
 
-This update rebuilds the native Windows, GTK Ubuntu and Android interfaces around Home, Activity and Settings. Transfer engines, existing app-data paths, pairing identities and the deployed connection service are preserved.
-
-Build environment: Linux container; .NET SDK 10.0.401, Go 1.26.8, Java 17, Gradle 9.6.0, Android SDK/API 36. Desktop packages include .NET/ASP.NET runtime 10.0.12. Ubuntu targets amd64; Windows targets x64. Android targets API 36 and supports API 26 upward.
+Built in a Linux container using .NET SDK 10.0.401 / runtime 10.0.12, JDK 17, Gradle 9.6.0 and Android SDK 36. Windows targets x64; Ubuntu amd64. Android targets API 36 and supports API 26 upward.
 
 | Check | Result |
 | --- | --- |
 | Shared Core suite | 75 passed |
-| Audited disk-failure and retry regressions | 10 passed |
-| Computer transport suite, pinned localhost TLS | 22 passed |
+| Disk-failure, cancellation and retry audit | 10 passed |
+| Computer transport suite | 22 passed |
+| Presence expiry and real UDP discovery/invitation simulator | 8 passed |
 | Ubuntu actions / CUPS fixtures | 23 passed |
 | Published Ubuntu host integration | 25 passed |
-| Two running Ubuntu hosts, bidirectional local transfers and restart | 6 passed |
-| GTK interface with the real published host | 18 passed |
-| Go encrypted WebRTC / RPC tests with race detector | 8 passed; live Cloudflare test skipped |
-| Phone JavaScript regression suite | 5 passed |
-| Android unit tests, including 4 new activity UI tests | 24 passed |
-| Android debug APK and lint | Built; 0 lint errors, 48 warnings |
-| Ubuntu installer payload checks | 9 passed |
-| Extracted Ubuntu installer host integration | 25 passed |
-| Windows self-contained x64 publish | Succeeded |
+| Two native Ubuntu hosts: bidirectional transfer, persistence, restart | 6 passed |
+| Actual GTK interface and compact window | 18 passed |
+| Android unit/UI tests | 25 passed |
+| Android debug APK and lint | Built; 0 lint errors, 51 warnings |
+| Native Windows application and layout-test project | Compiled without warnings |
+| Windows x64 and Ubuntu amd64 self-contained packages | Published |
 
-GTK checks exercise the three pages, disabled sending before device selection, accurate empty device state, selection preservation and restoration, no silent recipient switch after removal, preparation controls, X11 clipboard verification, background receiving, launcher reopening, QR rendering and a compact desktop window. Screenshots are actual GTK renders using demonstration device labels with the real receiver process.
+The Go remote helper, phone JavaScript and Cloudflare backend are unchanged. Packages reuse the unchanged remote helpers from the previously built 0.7.0 packages; no new Go/WebRTC test run is claimed here.
 
-Android UI tests use Robolectric/API 28. They check the initial Save action and disabled Send button, Files/Text/Link controls, conditional print settings, Android Share link handling, draft preservation across navigation, and locking destination/payload controls during preparation. These tests are not an Android hardware or emulator session. Android lint still reports nonfatal warnings; this is not a zero-warning release.
+Windows GUI execution is unavailable in this Linux environment. Native Windows layout tests and screenshots for compact/default windows at simulated 100%, 125%, 150% and 200% scale, plus the new code/IP connection dialog, are included in GitHub Actions. They compile here but have not executed on Windows in this session. Actual Windows scaling, keyboard navigation and phone invitation approval require device testing before public release.
 
-Computer tests cover immutable staged bytes, approval and certificate checks, stable job IDs after lost acknowledgements, reverse transfers, saved destinations, cancellation, empty files and safe snapshots. Ubuntu process integration exchanges files in both directions and confirms pairing/identity persistence after restart. CUPS tests use a fixture command runner; no physical printer was tested.
+The discovery check uses a loopback UDP phone simulator, not a physical Android handset or router. GTK checks run in a virtual X11 display with the real host; they do not verify GNOME Wayland or a clean-machine installation. Local TLS integration tests verify persistence and bidirectional files. Internet network pairs and physical printing are not retested for this UI update.
 
-Windows was cross-published from Linux; its GUI has not been operated on a real Windows machine here. Ubuntu's GUI was exercised in GTK/X11 under Xvfb, not GNOME Wayland. The .deb was extracted and checked without installing system packages; a clean-machine apt installation remains unverified. Neither desktop installer is code-signed. The Android APK is debug-signed and requires a matching signing key to update an existing installation.
-
-The remote transport is unchanged. No new live production-room or independent internet/NAT transfer test was performed for this UI update. The current backend has one remote initiating-device slot per receiver. No TURN or paid relay was added. Before public distribution, test installation and a small transfer on real Windows and Android devices, Ubuntu Wayland, one physical printer and two independent internet networks.
+The supplied APK is a debug-signed test build. A stable release signing key and real-device acceptance are still needed for publishing. A different debug key can require removing the previous test APK and pairing again. The deployed service is not changed and no TURN relay is added.

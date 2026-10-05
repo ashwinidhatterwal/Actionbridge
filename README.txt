@@ -1,17 +1,17 @@
-ActionBridge v0.6.0 GitHub build fix
+ActionBridge 0.8.0
 
-Both Windows and Ubuntu jobs in run 37256028048 failed the same lost-final-acknowledgement test. Android passed.
+Windows, Android and Ubuntu companions for local and direct internet file transfers, links, clipboard text and desktop actions.
 
-The old test sampled the action counter after losing the finish reply, while the first receiver action might still be pending. Its normal completion during retry was then mistaken for duplicate execution.
+See docs/UPDATE-v0.8.0.md for the desktop redesign, live connection status, nearby-phone discovery and installation instructions.
 
-The replacement uses an explicitly held test action and checks: the sender stays queued while that action is pending; retry completes exactly one action; the receiver has one byte-identical file. This changes tests only. Existing application binaries and backend do not need updating.
+WINDOWS: Quit the old receiver from its tray menu, extract the Windows package and run Install.cmd.
+ANDROID: Install the new test APK for discovery from a computer. Keep the app visible and select the sending computer to receive files.
+UBUNTU: sudo apt install ./ActionBridge-Ubuntu-v0.8.0-amd64.deb
 
-INSTALL THE FIX
-1. Extract this ZIP.
-2. Replace tests/ActionBridge.Computers.Tests/Program.cs in your repository with the included file. Keep the folder path exactly as shown.
-3. Commit the change to main. The Build Android, Windows and Ubuntu workflow runs automatically. Simply rerunning the old failed commit will keep using the old file.
-4. Alternatively apply actionbridge-ci-fix.patch using git apply, then commit and push.
+No backend update is needed. Pairing identities and queued files are preserved by desktop upgrades. Android debug-key changes may require uninstalling the old test APK and pairing again.
 
-The corrected suite passed twice locally: 22 checks passed, 0 failed. Windows/GitHub verification requires a new Actions run after applying this file.
+GITHUB: Put this source archive's contents at the repository root, keeping android/, windows/, remote/, ubuntu/, tests/ and .github/. Commit and push to main. The Build Android, Windows and Ubuntu workflow builds the applications and runs checks. Native Windows UI checks also publish screenshots. This archive has not been pushed automatically to GitHub.
 
-Base commit: c46c81c05b64bc70127d135b8cc4b106a9adf91d
+BUILD: .NET 10 SDK, JDK 17, Android SDK 36, Gradle wrapper and Go 1.26. See the workflow for commands.
+
+VERIFICATION: ubuntu/VERIFICATION.md records this session's checks and limits. Windows GUI, real display scaling and phone Wi-Fi pairing require real-device acceptance testing before publishing.

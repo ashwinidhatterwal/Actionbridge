@@ -61,7 +61,7 @@ class App(Gtk.Application):
   self.window=Gtk.ApplicationWindow(application=self,title='ActionBridge');self.window.set_default_size(1120,780);self.window.set_size_request(840,620);self.window.connect('delete-event',lambda *_:self.hide_window())
   icon=BASE/'actionbridge.png'
   if icon.exists():self.window.set_icon_from_file(str(icon))
-  header=Gtk.HeaderBar(title='ActionBridge',subtitle='Your devices, connected',show_close_button=True);self.window.set_titlebar(header)
+  header=Gtk.HeaderBar(title='ActionBridge',subtitle='Files, text and links',show_close_button=True);self.window.set_titlebar(header)
   self.pair_button=button('Add device',self.add_device,True);header.pack_end(self.pair_button)
   menu=Gtk.Menu();item=Gtk.MenuItem(label='Quit ActionBridge');item.connect('activate',lambda *_:self.quit_app());menu.append(item);menu.show_all();hamburger=Gtk.MenuButton();hamburger.set_image(Gtk.Image.new_from_icon_name('open-menu-symbolic',Gtk.IconSize.BUTTON));hamburger.set_popup(menu);header.pack_end(hamburger)
   body=Gtk.Box(orientation=Gtk.Orientation.VERTICAL,spacing=8);self.window.add(body)
@@ -69,7 +69,7 @@ class App(Gtk.Application):
   notebook=Gtk.Notebook();body.pack_start(notebook,True,True,0);self.notebook=notebook
   home=Gtk.Box(spacing=18);home.set_border_width(20);notebook.append_page(home,Gtk.Label(label='Home'))
   devices=column();devices.set_size_request(265,-1);devices.get_style_context().add_class('card');home.pack_start(devices,False,False,0)
-  devices.pack_start(label('Your devices','section'),False,False,0);devices.pack_start(label('Select where you want to send.','subtitle'),False,False,0)
+  devices.pack_start(label('Your devices','section'),False,False,0);devices.pack_start(label('Select where you want to send.','subtitle'),False,False,0);devices.pack_start(button('Find nearby phone',self.discover_phones),False,False,0)
   self.phone_list,self.phone_store=self.table(devices,['Device','Route'],[170,85]);self.phone_list.set_headers_visible(False);self.phone_ids=[]
   self.phone_list.remove_column(self.phone_list.get_column(1));device_column=self.phone_list.get_column(0);device_column.set_expand(True);device_column.set_fixed_width(215)
   renderer=device_column.get_cells()[0];renderer.set_property('ypad',14)
@@ -105,7 +105,7 @@ class App(Gtk.Application):
   preferences.pack_start(label('Connections','section'),False,False,0);preferences.pack_start(label('Nearby: use the same Wi-Fi or Ethernet and approve the connection. Internet: connect using this computer’s private code. Keep both devices awake. An unavailable device stays saved.','subtitle'),False,False,0);preferences.pack_start(button('Show this computer’s QR code',self.pair),False,False,0);preferences.pack_start(button('Remove internet access',self.revoke_remote),False,False,0)
   preferences.pack_start(label('On Wayland, received text may need a click on Copy to clipboard before you can paste it.','subtitle'),False,False,0)
   details=Gtk.Expander(label='Connection details & troubleshooting');preferences.pack_start(details,False,False,0);detail_box=column();details.add(detail_box);self.remote_status=label('Internet connection is starting…','subtitle');detail_box.pack_start(self.remote_status,False,False,0);detail_box.pack_start(button('Restart receiver',self.restart),False,False,0)
-  preferences.pack_start(button('Privacy & licenses · 0.7.0',self.privacy),False,False,0)
+  preferences.pack_start(button('Privacy & licenses · 0.8.0',self.privacy),False,False,0)
   self.feedback=label('Choose a device to start sending.','subtitle');self.feedback.set_margin_start(24);self.feedback.set_margin_end(24);self.feedback.set_margin_bottom(12);body.pack_start(self.feedback,False,False,0);self.window.show_all();self.update_send_controls()
  def ui_path(self):
   base=os.environ.get('XDG_CONFIG_HOME','');return (pathlib.Path(base) if os.path.isabs(base) else pathlib.Path.home()/'.config')/'actionbridge'/'ui.json'
@@ -118,7 +118,7 @@ class App(Gtk.Application):
   if self.destination.get_active_id():self.feedback.set_text('Ready to send. Results appear in Activity.')
  def update_send_controls(self):
   id=self.destination.get_active_id();name=next((name for key,name in self.targets if key==id),None)
-  self.send_heading.set_text('Send to '+name.split(' · ')[0] if name else 'Ready to share');self.send_hint.set_text('Files, text and links go to the selected device.' if name else 'Add a device, then select it on the left.')
+  self.send_heading.set_text('Send to '+name.split(' · ')[0] if name else 'Ready to share');self.send_hint.set_text(name.rsplit(' · ',1)[-1]+' · Files wait safely if the device is disconnected.' if name else 'Add a device, then select it on the left.')
   for control in (self.file_button,self.text_button,self.clipboard_button):control.set_sensitive(bool(id) and not self.staging)
   self.manage_button.set_sensitive(bool(id));self.no_devices.set_visible(not self.targets)
  def update_cancel_controls(self):
@@ -127,7 +127,7 @@ class App(Gtk.Application):
   i=self.selected_index(self.sent);items=self.snapshot.get('outgoing',[]);self.cancel_out.set_sensitive(i is not None and i<len(items) and items[i]['state'] in ('queued','sending','retrying'))
  def add_device(self):
   d=Gtk.Dialog(title='Add a device',transient_for=self.window,modal=True);d.add_button('Cancel',Gtk.ResponseType.CANCEL);box=column();d.get_content_area().pack_start(box,True,True,0);box.pack_start(label('What are you connecting?','section'),False,False,0);box.pack_start(label('Install ActionBridge on the other device first.','subtitle'),False,False,0)
-  for title,fn in [('A phone · show QR code',self.pair),('A computer · find nearby',self.discover_computers),('A computer · enter address or code',self.add_computer),('Show my code to another computer',self.pair)]:
+  for title,fn in [('Find nearby phone',self.discover_phones),('A phone · show QR code',self.pair),('A computer · find nearby',self.discover_computers),('A computer · enter address or code',self.add_computer),('Show my code to another computer',self.pair)]:
    def choose(fn=fn):d.destroy();fn()
    box.pack_start(button(title,choose,title.startswith('A phone')),False,False,0)
   d.show_all();d.run();d.destroy()
@@ -181,9 +181,9 @@ class App(Gtk.Application):
    self.sent_store.clear();self.out_ids=[]
    for item in value.get('outgoing',[]):self.out_ids.append(item['id']);self.sent_store.append([when(item['updated']),item['name'],self.friendly(item['state']),f"{self.size(item.get('offset',0))} / {self.size(item['size'])}"])
    self.restore_selection(self.sent,self.out_ids,selected_id)
-  targets=[(p['id'],p['name']+' · '+p['connection']) for p in value.get('computers',[])]
-  if value.get('remoteReady') and value.get('remoteLinked'):targets.append((value['remoteRecipient'],'Linked internet device · QR connection'))
-  targets.extend((p['id'],p['name']+' · Local pairing') for p in value.get('phones',[]))
+  targets=[(p['id'],p['name']+' · '+('Connected' if p['status']=='Connected' else 'Disconnected')+' / '+p['connection']) for p in value.get('computers',[])]
+  if value.get('remoteReady') and value.get('remoteLinked'):targets.append((value['remoteRecipient'],'Linked internet device · '+('Connected / Internet' if value.get('remoteConnected') else 'Disconnected / Internet')))
+  targets.extend((p['id'],p['name']+' · '+('Connected / Nearby' if p.get('connected') else 'Disconnected / Nearby')) for p in value.get('phones',[]))
   if targets!=self.targets:
    old=self.destination.get_active_id() or self.selected_device;self.targets=targets;self.rebuilding_devices=True;self.destination.remove_all();self.phone_store.clear();self.phone_ids=[]
    for id,name in targets:
@@ -198,6 +198,19 @@ class App(Gtk.Application):
   if d.run()==Gtk.ResponseType.OK:
    value=entry.get_text().strip();data={'code':value} if mode.get_active_id()=='internet' else {'host':value};self.feedback.set_text('Connecting… Approve the request on the other computer.');self.call('addComputer',data,timeout=90)
   d.destroy()
+ def discover_phones(self):
+  self.feedback.set_text('Finding nearby phones… Open ActionBridge on your phone.')
+  def done(value,error):
+   if error:return
+   if not value:self.error('No phones found. Install the updated Android app, open it and use the same Wi-Fi.');return
+   d=Gtk.Dialog(title='Nearby phones',transient_for=self.window,modal=True);d.add_buttons('Cancel',Gtk.ResponseType.CANCEL,'Invite phone',Gtk.ResponseType.OK);box=d.get_content_area();box.set_border_width(18);choices=Gtk.ComboBoxText()
+   box.pack_start(label('Choose your phone. Confirm the invitation on the phone, then approve here.'),False,False,10)
+   for i,p in enumerate(value):choices.append(str(i),p['name']+' · '+p['host'])
+   choices.set_active(0);box.pack_start(choices,False,False,10);d.show_all()
+   if d.run()==Gtk.ResponseType.OK:
+    self.call('invitePhone',{'phone':value[int(choices.get_active_id())]});self.feedback.set_text('Invitation sent. Tap Connect on your phone, then approve here.')
+   d.destroy()
+  self.call('discoverPhones',callback=done,timeout=10)
  def discover_computers(self):
   self.feedback.set_text('Looking for nearby computers…')
   def done(value,error):

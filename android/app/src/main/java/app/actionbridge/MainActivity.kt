@@ -19,6 +19,8 @@ import com.google.zxing.integration.android.IntentIntegrator
 import java.net.URI
 
 class MainActivity:Activity() {
+    private var nearbyPhone:NearbyPhone?=null
+    private var foreground=false
     private val scope=CoroutineScope(SupervisorJob()+Dispatchers.Main)
     private val selected=mutableListOf<Uri>()
     private var peers=listOf<Peer>()
@@ -156,7 +158,7 @@ class MainActivity:Activity() {
         }
         send=button("Send files"){sendNow()};send.setTextColor(Color.WHITE);send.backgroundTintList=android.content.res.ColorStateList.valueOf(teal);content.addView(send,LinearLayout.LayoutParams(-1,dp(54)))
         content.addView(text("Your saved computers stay here, even when offline. Received items are in Activity.",12f))
-        remoteEngine=RemoteEngine(this,{message->if(selectedPeer()?.host==""||busy)status.text=message},{ready->remoteReady=ready;if(ready&&action=="print"&&!busy)remoteEngine.printers()},{data->showPrinters(data)},{value->setBusy(value)})
+        remoteEngine=RemoteEngine(this,{message->if(selectedPeer()?.host==""||busy)status.text=message},{ready->remoteReady=ready;if(selectedPeer()?.host==""&&!busy)status.text=if(ready)"Connected · Internet" else "Disconnected · Reconnecting over the internet…";if(ready&&action=="print"&&!busy)remoteEngine.printers()},{data->showPrinters(data)},{value->setBusy(value)})
         content.addView(remoteEngine.web,LinearLayout.LayoutParams(1,1));remoteEngine.web.visibility=View.INVISIBLE
         val old=getSharedPreferences("remote",MODE_PRIVATE);old.getString("code",null)?.let{runCatching{PeerStore(this).saveRemote(it);old.edit().clear().apply()}}
 
@@ -289,7 +291,7 @@ class MainActivity:Activity() {
                     };incoming.finish(id)
                 };api.request("/outbox/$id/ack","POST",JSONObject())}catch(e:Exception){incoming.failure(id,e.message?:"Receiving interrupted");throw e}
             }
-        }}catch(e:Exception){if(e is CancellationException)throw e;nextReceiveAttempt=System.currentTimeMillis()+30000
+        };if(selectedPeer()?.id==peer.id&&!busy)status.text="Connected · Nearby · ${peer.name}"}catch(e:Exception){if(e is CancellationException)throw e;if(selectedPeer()?.id==peer.id&&!busy)status.text="Disconnected · ${peer.name} stays saved";nextReceiveAttempt=System.currentTimeMillis()+30000
             if(selectedPeer()?.id==peer.id&&(e !is ApiException||e.code!=404)){PeerStore(this).remote(peer.id)?.getString("code")?.let{remoteEngine.connect(it)}}
         }finally{receiving=false}
     }
@@ -303,5 +305,15 @@ class MainActivity:Activity() {
             inbox.addView(view)
         }
     }
-    override fun onDestroy(){scope.cancel();if(::remoteEngine.isInitialized)remoteEngine.destroy();super.onDestroy()}
+    override fun onStart(){super.onStart();foreground=true
+        nearbyPhone=NearbyPhone(this){peer->runOnUiThread{
+            if(!foreground||isFinishing||busy)return@runOnUiThread
+            AlertDialog.Builder(this).setTitle("Connect to ${peer.name}?")
+                .setMessage("This nearby computer invited your phone. Continue only if you clicked Find nearby on this computer. You will also approve the connection on the computer.")
+                .setPositiveButton("Connect"){_,_->scope.launch{try{connected(peer);PeerStore(this@MainActivity).setLast(peer.id);showPage(0);scan(selectId=peer.id)}catch(e:Exception){status.text=e.message?:"Connection failed. Try again."}}}
+                .setNegativeButton("Decline",null).show()
+        }}.also{it.start()}
+    }
+    override fun onStop(){foreground=false;nearbyPhone?.stop();nearbyPhone=null;super.onStop()}
+    override fun onDestroy(){nearbyPhone?.stop();scope.cancel();if(::remoteEngine.isInitialized)remoteEngine.destroy();super.onDestroy()}
 }

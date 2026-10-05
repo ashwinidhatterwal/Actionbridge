@@ -24,6 +24,12 @@ jobs:
       - run: dotnet run --project tests/ActionBridge.Tests -c Release
       - run: dotnet run --project tests/ActionBridge.Audit -c Release
       - run: dotnet run --project tests/ActionBridge.Computers.Tests -c Release
+      - run: dotnet run --project tests/ActionBridge.Presence.Tests -c Release
+      - run: dotnet run --project tests/ActionBridge.Windows.Layout.Tests -c Release
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ActionBridge-Windows-UI-checks
+          path: output/ui-checks
       - run: dotnet publish windows/ActionBridge.Windows -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true -p:EnableCompressionInSingleFile=true -o output/windows
       - shell: pwsh
         run: Copy-Item ActionBridge.Remote.exe output/windows; Copy-Item scripts/Install* output/windows; Copy-Item scripts/Uninstall-Windows.ps1 output/windows
@@ -64,6 +70,7 @@ jobs:
           dotnet run --project tests/ActionBridge.Tests -c Release
           dotnet run --project tests/ActionBridge.Audit -c Release
           dotnet run --project tests/ActionBridge.Computers.Tests -c Release
+          dotnet run --project tests/ActionBridge.Presence.Tests -c Release
           dotnet run --project ubuntu/tests -c Release
           cd remote/receiver
           go test -race ./...

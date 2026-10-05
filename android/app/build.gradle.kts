@@ -2,7 +2,7 @@ plugins { id("com.android.application") }
 android {
     namespace = "app.actionbridge"
     compileSdk = 36
-    defaultConfig { applicationId = "app.actionbridge"; minSdk = 26; targetSdk = 36; versionCode = 70; versionName = "0.7.0"; buildConfigField("String", "SUPPORT_EMAIL", "\"${System.getenv("SUPPORT_EMAIL") ?: ""}\"") }
+    defaultConfig { applicationId = "app.actionbridge"; minSdk = 26; targetSdk = 36; versionCode = 80; versionName = "0.8.0"; buildConfigField("String", "SUPPORT_EMAIL", "\"${System.getenv("SUPPORT_EMAIL") ?: ""}\"") }
     compileOptions { sourceCompatibility = JavaVersion.VERSION_17; targetCompatibility = JavaVersion.VERSION_17 }
     buildFeatures { buildConfig = true }
     testOptions { unitTests.isReturnDefaultValues = true; unitTests.isIncludeAndroidResources = true }

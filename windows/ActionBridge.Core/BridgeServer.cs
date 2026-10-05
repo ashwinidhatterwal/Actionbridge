@@ -17,6 +17,8 @@ public sealed class BridgeServer : IAsyncDisposable {
     readonly SemaphoreSlim pairGate=new(1,1);
     readonly System.Collections.Concurrent.ConcurrentDictionary<string,DateTime> pairTimes = new();
     WebApplication? app; UdpClient? udp; readonly CancellationTokenSource stop=new();
+    public DevicePresence Presence {get;}=new();
+    public object Announcement(int port=Wire.ApiPort)=>new {version=1,id,name,port,fingerprint=Fingerprint};
     public string Fingerprint => Convert.ToHexString(SHA256.HashData(certificate.RawData)).ToLowerInvariant();
     public BridgeServer(string id,string name,X509Certificate2 certificate,TrustStore trust,Transfers transfers,IActionSink sink,Func<PairRequest,string,Task<bool>> approval,Func<string?>? remotePairing=null,Outbox? outbox=null) {
         this.id=id;this.name=name;this.certificate=certificate;this.trust=trust;this.transfers=transfers;this.sink=sink;this.approval=approval;this.remotePairing=remotePairing;this.outbox=outbox;
@@ -56,7 +58,7 @@ public sealed class BridgeServer : IAsyncDisposable {
             var auth=context.HttpContext.Request.Headers.Authorization.ToString();
             var client=auth.StartsWith("Bearer ",StringComparison.Ordinal) ? trust.Authenticate(auth[7..]) : null;
             if(client==null) return Results.Json(new{error="Approve this phone on the PC first."},statusCode:401);
-            context.HttpContext.Items["client"]=client;return await next(context);
+            Presence.Touch(client);context.HttpContext.Items["client"]=client;return await next(context);
         });
         api.MapGet("/status",()=>new {ready=true,id});
         api.MapGet("/connection",()=>new {code=remotePairing?.Invoke()});
