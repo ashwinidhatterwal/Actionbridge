@@ -1,0 +1,9 @@
+PASS: desktop connects to real receiver
+PASS: four native desktop tabs rendered
+PASS: native X11 clipboard verified
+PASS: paired phone target visible
+PASS: closing window preserves running receiver
+PASS: launcher activation restores existing window
+PASS: pairing QR renderer works
+PASS: actual GTK window screenshot captured
+8 GUI checks passed.

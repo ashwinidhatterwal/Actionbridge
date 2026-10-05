@@ -160,7 +160,7 @@ func attachJobs(dc *webrtc.DataChannel, call bridgeCall) {
 		if typ == "rpc" {
 			rid, _ := v["requestId"].(string)
 			method, _ := v["method"].(string)
-			if method != "printers" && method != "create" && method != "status" && method != "finish" && method != "cancel" && method != "outbox" && method != "download" && method != "received" {
+			if method != "append" && method != "printers" && method != "create" && method != "status" && method != "finish" && method != "cancel" && method != "outbox" && method != "download" && method != "received" {
 				reply(map[string]any{"type": "rpc", "requestId": rid, "error": "Unsupported action"})
 				return
 			}

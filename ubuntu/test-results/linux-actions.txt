@@ -1,0 +1,25 @@
+PASS: CUPS default printer discovered
+PASS: CUPS default paper marker removed
+PASS: CUPS color and duplex capabilities exposed
+PASS: file path remains one literal argument after option terminator
+PASS: duplex maps to CUPS long edge
+PASS: orientation and collation preserved
+PASS: scaling and paper preserved
+PASS: page range and copies preserved
+PASS: validated print submits once
+PASS: PDF range beyond document rejected before submission
+PASS: invalid range does not submit
+PASS: unknown paper rejected
+PASS: unknown printer rejected
+PASS: clipboard delivered through desktop pipe
+PASS: link uses desktop association without shell execution
+PASS: script URL blocked
+PASS: downloaded executable desktop entry never auto-opens
+PASS: file-opening whitelist is case-insensitive and excludes scripts
+PASS: ambiguous CUPS failure is surfaced rather than claimed successful
+PASS: concurrent finish retries cannot duplicate Linux printing
+PASS: Ubuntu print activity names the correct queue
+PASS: UI observer failure cannot interrupt durable acknowledgement or payload cleanup
+PASS: abandoned staging body cleaned on restart
+
+23 Ubuntu checks passed.

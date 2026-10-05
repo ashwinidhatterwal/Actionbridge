@@ -1,0 +1,3 @@
+PASS: live Cloudflare automatic enrollment and Android v2 QR contract
+PASS: remote QR credentials remain stable across restart
+PASS: revoked room remains disabled after restart

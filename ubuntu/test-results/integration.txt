@@ -1,0 +1,26 @@
+PASS: TLS receiver supplies certificate pin
+PASS: unapproved outbox access rejected
+PASS: actual UDP discovery identifies Ubuntu receiver
+PASS: pairing requires and receives desktop approval
+PASS: approved phone authenticates
+PASS: incoming file job created
+PASS: HTTPS file upload commits durable offset
+PASS: incoming file completes
+PASS: path is sanitized and received bytes match
+PASS: finish retry is idempotent
+PASS: copy action traverses private desktop IPC
+PASS: url action traverses private desktop IPC
+PASS: activity includes received files and actions
+PASS: GUI stages outgoing file
+PASS: outgoing content is a private immutable snapshot
+PASS: phone acknowledges outgoing file
+PASS: acknowledged staged body removed
+PASS: outgoing acknowledgement retry safe
+PASS: PC text appears in phone outbox
+PASS: pairing data and identity are private
+PASS: second host cannot take same user identity
+PASS: computer ID and certificate survive restart
+PASS: approved phone persists across restart
+PASS: activity survives receiver restart
+PASS: removed phone loses access
+25 Ubuntu integration checks passed.

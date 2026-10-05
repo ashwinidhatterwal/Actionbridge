@@ -1,4 +1,4 @@
-name: Build Android and Windows
+name: Build Android, Windows and Ubuntu
 on:
   workflow_dispatch:
   push:
@@ -22,6 +22,8 @@ jobs:
           go test ./...
           go build -buildvcs=false -trimpath -ldflags="-s -w" -o ../../ActionBridge.Remote.exe .
       - run: dotnet run --project tests/ActionBridge.Tests -c Release
+      - run: dotnet run --project tests/ActionBridge.Audit -c Release
+      - run: dotnet run --project tests/ActionBridge.Computers.Tests -c Release
       - run: dotnet publish windows/ActionBridge.Windows -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true -p:EnableCompressionInSingleFile=true -o output/windows
       - shell: pwsh
         run: Copy-Item ActionBridge.Remote.exe output/windows; Copy-Item scripts/Install* output/windows; Copy-Item scripts/Uninstall-Windows.ps1 output/windows
@@ -47,3 +49,36 @@ jobs:
         with:
           name: ActionBridge-Android-test-APK
           path: android/app/build/outputs/apk/debug/*.apk
+  ubuntu:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.26.x'
+      - name: Verify shared and Ubuntu behavior
+        run: |
+          dotnet run --project tests/ActionBridge.Tests -c Release
+          dotnet run --project tests/ActionBridge.Audit -c Release
+          dotnet run --project tests/ActionBridge.Computers.Tests -c Release
+          dotnet run --project ubuntu/tests -c Release
+          cd remote/receiver
+          go test -race ./...
+      - name: Publish Ubuntu runtime
+        run: |
+          dotnet publish ubuntu/ActionBridge.Ubuntu -c Release -r linux-x64 --self-contained true -o output/ubuntu/runtime
+          cd remote/receiver
+          go build -buildvcs=false -trimpath -ldflags="-s -w" -o ../../output/ubuntu/runtime/ActionBridge.Remote .
+      - name: Verify two running Ubuntu hosts
+        run: |
+          python3 ubuntu/tests/integration.py output/ubuntu/runtime/ActionBridge.Host
+          python3 ubuntu/tests/computer_integration.py output/ubuntu/runtime/ActionBridge.Host
+      - name: Build Ubuntu installer
+        run: python3 ubuntu/packaging/build-deb.py output/ubuntu/runtime output/ubuntu
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ActionBridge-Ubuntu-amd64
+          path: output/ubuntu/*.deb

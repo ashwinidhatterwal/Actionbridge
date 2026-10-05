@@ -3,13 +3,13 @@ using System.Security.Cryptography;
 using System.Text.Json;
 namespace ActionBridge.Core;
 public sealed class Transfers {
-    readonly string folder, downloads; readonly IActionSink sink;
+    readonly string folder, downloads; readonly string submittedMessage; readonly IActionSink sink;
     readonly ConcurrentDictionary<string, Job> jobs = new();
     readonly ConcurrentDictionary<string, SemaphoreSlim> gates = new();
     readonly SemaphoreSlim actionGate = new(1,1);
     public event Action<Job>? Changed;
-    public Transfers(string folder, string downloads, IActionSink sink) {
-        this.folder = folder; this.downloads = downloads; this.sink = sink;
+    public Transfers(string folder, string downloads, IActionSink sink, string submittedMessage="Submitted to Windows printer queue; physical printing is not confirmed.") {
+        this.folder = folder; this.downloads = downloads; this.sink = sink; this.submittedMessage=submittedMessage;
         Directory.CreateDirectory(folder); Directory.CreateDirectory(downloads);
         foreach(var f in Directory.EnumerateFiles(folder, "*.json")) {
             var j = JsonSerializer.Deserialize<Job>(File.ReadAllText(f), Wire.Json) ?? throw new InvalidDataException("Invalid transfer journal.");
@@ -120,7 +120,7 @@ public sealed class Transfers {
             finally { gate.Release(); }
             Notify(j);
             var result=Copy(j);
-            try { await sink.ExecuteAsync(j.Request,j.Request.Action is "copy" or "url" ? null : Destination(j)); result.State=j.Request.Action=="print" ? "submitted" : "completed"; result.Message=j.Request.Action=="print" ? "Submitted to Windows printer queue; physical printing is not confirmed." : "Action completed."; }
+            try { await sink.ExecuteAsync(j.Request,j.Request.Action is "copy" or "url" ? null : Destination(j)); result.State=j.Request.Action=="print" ? "submitted" : "completed"; result.Message=j.Request.Action=="print" ? submittedMessage : "Action completed."; }
             catch(Exception ex) { result.State=j.Request.Action=="print" ? "uncertain" : "failed"; result.Message=ex.Message; }
             Commit(j,result); Notify(j);
         } finally { actionGate.Release(); }

@@ -9,6 +9,7 @@ public sealed class Outbox {
  public Outbox(string root){this.root=root;Directory.CreateDirectory(root);foreach(var p in Directory.GetFiles(root,"*.json")){try{var item=JsonSerializer.Deserialize<Outgoing>(File.ReadAllText(p),Wire.Json)!;items[item.Id]=item;}catch{}}foreach(var payload in Directory.GetFiles(root,"*.payload")){var id=Path.GetFileNameWithoutExtension(payload);if(Guid.TryParseExact(id,"D",out _)&&!items.ContainsKey(id)&&!File.Exists(Path.Combine(root,id+".json")))File.Delete(payload);}}
  void Notify(){try{Changed?.Invoke();}catch{/* UI observers cannot interrupt durable delivery. */}}
  void Save(Outgoing item){Wire.AtomicJson(Path.Combine(root,item.Id+".json"),item);items[item.Id]=item;Notify();}
+ public Outgoing[] ListAll(string recipient){lock(gate)return items.Values.Where(x=>x.Recipient==recipient).ToArray();}
  public Outgoing[] History(){lock(gate)return items.Values.OrderByDescending(x=>x.Updated).Take(100).ToArray();}
  public Outgoing[] List(string recipient){lock(gate)return items.Values.Where(x=>x.Recipient==recipient&&x.State=="queued").OrderBy(x=>x.Updated).Take(1).ToArray();}
  public async Task<Outgoing> Stage(string recipient,string? file,string? text=null,string kind="file"){

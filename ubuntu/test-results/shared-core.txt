@@ -1,0 +1,72 @@
+PASS: approved token authenticates
+PASS: unknown phone denied
+PASS: raw token never persisted on PC
+PASS: trust survives restart
+PASS: revocation immediate
+PASS: path traversal and reserved filename sanitized
+PASS: Windows separators sanitized
+PASS: public addresses rejected
+PASS: new transfer starts at zero
+PASS: duplicate create is idempotent
+PASS: ID cannot change payload
+PASS: transfer ownership enforced
+PASS: incomplete file cannot execute
+PASS: wrong offset rejected
+PASS: interrupted upload rejected
+PASS: interrupted upload does not advance checkpoint
+PASS: recovery truncates uncommitted bytes
+PASS: received file byte-identical
+PASS: finish retry executes only once
+PASS: checksum mismatch blocks action
+PASS: oversized file rejected
+PASS: unsupported print format rejected
+PASS: non-web URL rejected
+PASS: printing reports submitted, not printed
+PASS: in-flight print is never replayed after restart
+PASS: imported identity key works after generator disposal
+PASS: identity reload preserves phone certificate pin
+PASS: API blocks unauthenticated printer access
+PASS: PC approval endpoint accepts approved phone
+PASS: authenticated printer listing
+PASS: HTTPS job creation
+PASS: HTTPS chunk upload
+PASS: HTTPS finish action
+PASS: API revocation enforced on next request
+PASS: concurrent finish retries initiate one print
+PASS: slow action completes after concurrent retries
+PASS: zero-byte file transfer succeeds
+PASS: missing JSON fields rejected safely
+PASS: cancelled partial cannot execute on retry
+PASS: cancellation removes PC partial file
+PASS: noncanonical UUID rejected to prevent Windows path aliasing
+PASS: invalid duplex rejected
+PASS: reversed PDF range rejected
+PASS: image page range rejected
+PASS: valid PDF range and duplex accepted
+PASS: remote finish retries print only once
+PASS: remote print retains all local printer options
+PASS: remote print appears in shared activity journal
+PASS: remote printer discovery uses the local printer sink
+PASS: remote room cannot inspect another room's job
+PASS: remote dispatcher has no arbitrary command operation
+PASS: remote copy completes through shared action sink
+PASS: remote url completes through shared action sink
+PASS: outbox snapshots source file before sending
+PASS: another phone cannot list outgoing files
+PASS: another phone cannot read outgoing file
+PASS: outgoing download chunks bounded
+PASS: outgoing file bytes match staged snapshot
+PASS: outbox survives PC restart
+PASS: received acknowledgement is idempotent and removes staged bytes
+PASS: cancelled outgoing file cannot be downloaded
+PASS: outgoing link cannot execute script
+PASS: outgoing Unicode text byte bound enforced
+PASS: remote phone sees addressed PC outbox
+PASS: remote dispatcher returns outgoing snapshot bytes
+PASS: remote receive completes PC sent history
+PASS: HTTPS outgoing listing requires pairing
+PASS: HTTPS phone lists addressed outgoing file
+PASS: HTTPS phone downloads outgoing content
+PASS: HTTPS receive acknowledgement completes outgoing file
+
+70 checks passed.

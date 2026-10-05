@@ -28,6 +28,7 @@ import (
 )
 
 type Config struct {
+	Mode    string `json:"mode"`
 	Parent  int    `json:"parent"`
 	Service string `json:"service"`
 	Room    string `json:"room"`
@@ -103,6 +104,10 @@ func main() {
 			cancel()
 		}()
 	}
+	if c.Mode == "client" {
+		runDesktopClient(ctx, c, scanner)
+		return
+	}
 	r := newReceiver(c.Folder)
 	pipe := &pipeBridge{pending: make(map[string]chan pipeReply)}
 	if c.Jobs {
@@ -135,7 +140,10 @@ func main() {
 	}
 }
 func getICE(ctx context.Context, c Config) ([]webrtc.ICEServer, error) {
-	req, _ := http.NewRequestWithContext(ctx, "GET", strings.TrimRight(c.Service, "/")+"/rooms/"+c.Room+"/ice?role=pc", nil)
+	return getICEFor(ctx, c, "pc")
+}
+func getICEFor(ctx context.Context, c Config, role string) ([]webrtc.ICEServer, error) {
+	req, _ := http.NewRequestWithContext(ctx, "GET", strings.TrimRight(c.Service, "/")+"/rooms/"+c.Room+"/ice?role="+role, nil)
 	req.Header.Set("Authorization", "Bearer "+c.PcKey)
 	resp, e := (&http.Client{Timeout: 15 * time.Second}).Do(req)
 	if e != nil {
@@ -151,6 +159,11 @@ func getICE(ctx context.Context, c Config) ([]webrtc.ICEServer, error) {
 	e = json.NewDecoder(io.LimitReader(resp.Body, 65536)).Decode(&b)
 	return b.ICEServers, e
 }
+
+var newReceiverPeer = func(settings webrtc.SettingEngine, config webrtc.Configuration) (*webrtc.PeerConnection, error) {
+	return webrtc.NewAPI(webrtc.WithSettingEngine(settings)).NewPeerConnection(config)
+}
+
 func connect(parent context.Context, c Config, r *receiver) error {
 	ctx, cancel := context.WithCancel(parent)
 	defer cancel()
@@ -235,7 +248,7 @@ func connect(parent context.Context, c Config, r *receiver) error {
 			if e = settings.SetEphemeralUDPPortRange(45840, 45860); e != nil {
 				return e
 			}
-			pc, e = webrtc.NewAPI(webrtc.WithSettingEngine(settings)).NewPeerConnection(webrtc.Configuration{ICEServers: ice})
+			pc, e = newReceiverPeer(settings, webrtc.Configuration{ICEServers: ice})
 			if e != nil {
 				return e
 			}

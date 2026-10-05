@@ -36,7 +36,7 @@ public sealed class BridgeServer : IAsyncDisposable {
         });
         app.MapGet("/v1/hello",()=>new {version=1,id,name,fingerprint=Fingerprint,maxFile=Wire.MaxFile,chunkSize=Wire.ChunkSize});
         app.MapPost("/v1/pair",async (PairRequest request,HttpContext c)=> {
-            if(!Guid.TryParse(request.ClientId,out _) || string.IsNullOrEmpty(request.Name) || string.IsNullOrEmpty(request.Token) || request.Name.Length is <1 or >80 || request.Token.Length!=64 || !request.Token.All(Uri.IsHexDigit)) return Results.BadRequest(new{error="Invalid phone identity."});
+            if(!Guid.TryParse(request.ClientId,out _) || string.IsNullOrEmpty(request.Name) || request.Name.Length>80 || string.IsNullOrEmpty(request.Token) || request.Token.Length!=64 || !request.Token.All(Uri.IsHexDigit)) return Results.BadRequest(new{error="Invalid phone identity."});
             if(trust.AlreadyApproved(request)) return Results.Ok(new{approved=true});
             var ip=c.Connection.RemoteIpAddress!.ToString();
             if(pairTimes.TryGetValue(ip,out var last) && DateTime.UtcNow-last<TimeSpan.FromSeconds(10)) return Results.Json(new{error="Please wait before requesting approval again."},statusCode:429);
@@ -80,9 +80,14 @@ public sealed class BridgeServer : IAsyncDisposable {
     void StartDiscovery(int port) {
         udp=new UdpClient(AddressFamily.InterNetwork); udp.ExclusiveAddressUse=false; udp.Client.SetSocketOption(SocketOptionLevel.Socket,SocketOptionName.ReuseAddress,true);
         udp.Client.Bind(new IPEndPoint(IPAddress.Any,Wire.DiscoveryPort));
-        foreach(var nic in NetworkInterface.GetAllNetworkInterfaces().Where(n=>n.OperationalStatus==OperationalStatus.Up)) foreach(var a in nic.GetIPProperties().UnicastAddresses.Where(a=>a.Address.AddressFamily==AddressFamily.InterNetwork)) {
-            try { udp.JoinMulticastGroup(IPAddress.Parse(Wire.Group),a.Address); } catch(SocketException) { }
-        }
+        // Interface enumeration can be blocked in restricted Linux sessions. Keep
+        // unicast/broadcast discovery and HTTPS working if multicast joins fail.
+        try {
+            foreach(var nic in NetworkInterface.GetAllNetworkInterfaces().Where(n=>n.OperationalStatus==OperationalStatus.Up)) foreach(var a in nic.GetIPProperties().UnicastAddresses.Where(a=>a.Address.AddressFamily==AddressFamily.InterNetwork)) {
+                try { udp.JoinMulticastGroup(IPAddress.Parse(Wire.Group),a.Address); } catch(SocketException) { }
+            }
+        } catch (NetworkInformationException) { }
+
         _=Task.Run(async()=> {
             while(!stop.IsCancellationRequested) try {
                 var packet=await udp.ReceiveAsync(stop.Token);

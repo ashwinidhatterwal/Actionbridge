@@ -1,0 +1,9 @@
+PASS: all packaged payload checksums match
+PASS: packaged files have root ownership
+PASS: ActionBridge.Host executable mode correct
+PASS: ActionBridge.Remote executable mode correct
+PASS: desktop launcher executable mode correct
+PASS: patched runtime included
+PASS: desktop entry targets packaged launcher
+PASS: optional firewall profile installed
+PASS: installer hook syntax valid

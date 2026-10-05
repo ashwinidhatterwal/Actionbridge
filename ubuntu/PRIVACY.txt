@@ -1,0 +1,29 @@
+ActionBridge Ubuntu companion — privacy
+
+No advertising or analytics are included. Approved phones can send files,
+clipboard text, links and print/open actions, and can retrieve items explicitly
+queued for them. Pair only phones you trust; keep the QR and pairing code private.
+
+Local connections use HTTPS and the Android app pins the computer certificate.
+Internet connections use the existing ActionBridge Cloudflare signaling service
+and encrypted direct WebRTC. The service receives connection metadata and
+signaling; this version does not upload file contents to a central file store.
+TURN relay is not enabled by this package. Restrictive networks can prevent
+an internet connection; local transfers still work.
+
+Pairing credentials, certificate, jobs and outgoing snapshots are stored in a
+private user folder (~/.local/share/actionbridge, or XDG_DATA_HOME/actionbridge).
+Received files are kept in Downloads/ActionBridge. Clipboard text can remain in
+local action journals. Your operating system and printer spooler may retain data.
+Do not share the private app folder. Protect it with your normal account security
+and disk encryption. Uninstalling the app does not delete your files or pairing.
+
+Use Devices to remove local phones or revoke remote access (internet required).
+Closing the window keeps receiving; menu → Quit stops the companion. Login
+startup is optional. No system-wide background daemon is installed.
+
+Wayland may require an explicit Copy to clipboard click. CUPS queue acceptance
+is shown as submitted; it does not establish that pages physically printed.
+
+Open-source component licenses are in THIRD-PARTY-NOTICES.txt beside this file
+and /usr/share/doc/actionbridge/copyright after installation.

@@ -1,0 +1,6 @@
+  Determining projects to restore...
+  Restored /workspace/scratch/6ad8a987abc5/ubuntu-source/windows/ActionBridge.Core/ActionBridge.Core.csproj (in 17.36 sec).
+  Restored /workspace/scratch/6ad8a987abc5/ubuntu-source/ubuntu/ActionBridge.Ubuntu/ActionBridge.Ubuntu.csproj (in 17.37 sec).
+  ActionBridge.Core -> /workspace/scratch/6ad8a987abc5/ubuntu-source/windows/ActionBridge.Core/bin/Release/net10.0/ActionBridge.Core.dll
+  ActionBridge.Ubuntu -> /workspace/scratch/6ad8a987abc5/ubuntu-source/ubuntu/ActionBridge.Ubuntu/bin/Release/net10.0/linux-x64/ActionBridge.Host.dll
+  ActionBridge.Ubuntu -> /workspace/scratch/6ad8a987abc5/ubuntu-output/runtime/

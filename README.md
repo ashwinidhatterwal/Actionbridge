@@ -1,6 +1,6 @@
-# ActionBridge v0.5.0 — Windows/Android audit checkpoint
+# ActionBridge desktop v0.6.0
 
-This checkpoint includes reliability fixes and regression tests from the [Windows/Android code audit](docs/AUDIT-WINDOWS-ANDROID.md). App version numbers remain unchanged. See that report for validation and remaining issues before building a release.
+New in desktop v0.6: bidirectional Ubuntu ↔ Windows and Ubuntu ↔ Ubuntu transfers, saved computer destinations, and audited reliability fixes. See [desktop update guide](docs/UPDATE-v0.6.0.md). Android remains v0.5.0 and the backend does not need redeployment.
 
 New in v0.5: Android text selection → Send to PC, and Windows Send to phone with files, links and clipboard text. See [update guide](docs/UPDATE-v0.5.0.md). The existing v0.4 backend does not need redeployment.
 
@@ -15,3 +15,11 @@ The Android main page owns all controls, staged files and history. A bundled inv
 Remote transfers require the main Android screen open and the PC awake. LAN transfers keep the background worker queue. One active remote phone per PC, multiple remembered PCs on the phone, 2 GB per file. Submitted printing means accepted by Windows, not confirmed physical output. Real-device and printer acceptance testing is required for the updated build.
 
 Source includes Android, Windows, the remote service and helper, CI workflows, tests and deployment notes. See remote/VERIFICATION.md for the current automated checks and limitations.
+
+## Ubuntu desktop companion
+
+An Ubuntu amd64 companion is included in `ubuntu/`. It shares the existing
+Android/Windows transport and durable action engine, with a native GTK desktop,
+CUPS printing, local discovery, direct remote connectivity, persistent pairing
+and two-way files/text/links. See `ubuntu/README.md` for installation and build
+instructions, and `ubuntu/VERIFICATION.md` for the tested scope.

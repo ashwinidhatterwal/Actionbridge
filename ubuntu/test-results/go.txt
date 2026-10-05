@@ -1,0 +1,17 @@
+=== RUN   TestSignalAuthentication
+--- PASS: TestSignalAuthentication (0.00s)
+=== RUN   TestConfigAndPathSafety
+--- PASS: TestConfigAndPathSafety (0.00s)
+=== RUN   TestWebRTCTransferResumeAndDuplicate
+{"detail":"71c2584ef587-_.._test.pdf","state":"received"}
+--- PASS: TestWebRTCTransferResumeAndDuplicate (0.24s)
+=== RUN   TestChecksumFailureAndOversizeRejected
+--- PASS: TestChecksumFailureAndOversizeRejected (0.62s)
+=== RUN   TestJobsChannelCommittedResumeAndPrinters
+--- PASS: TestJobsChannelCommittedResumeAndPrinters (0.90s)
+=== RUN   TestUnicodeActionFragmentation
+--- PASS: TestUnicodeActionFragmentation (0.26s)
+=== RUN   TestOutgoingRPC
+--- PASS: TestOutgoingRPC (0.22s)
+PASS
+ok  	actionbridge/remote	3.259s
