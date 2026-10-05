@@ -1,30 +1,32 @@
-# Desktop v0.6.0 verification — 2026-10-05
+# ActionBridge 0.7.0 verification — 2026-10-05
 
-Ubuntu/Linux amd64 build; Ubuntu 24.04 container, Python 3.12, GTK 3/Xvfb/X11. Build tools: .NET SDK 10.0.401 and Go 1.26.8. Bundled .NET/ASP.NET runtimes: 10.0.12. Windows x64 is cross-published from the same source. Android remains the preceding audited v0.5.0 source, with its API-36 GitHub workflow fix preserved; Android was not rebuilt in this task.
+This update rebuilds the native Windows, GTK Ubuntu and Android interfaces around Home, Activity and Settings. Transfer engines, existing app-data paths, pairing identities and the deployed connection service are preserved.
+
+Build environment: Linux container; .NET SDK 10.0.401, Go 1.26.8, Java 17, Gradle 9.6.0, Android SDK/API 36. Desktop packages include .NET/ASP.NET runtime 10.0.12. Ubuntu targets amd64; Windows targets x64. Android targets API 36 and supports API 26 upward.
 
 | Check | Result |
 | --- | --- |
-| Shared Core regression suite | 75 passed |
-| Audited disk-failure/retry regressions | 10 passed |
-| Shared computer transport suite, real pinned localhost TLS | 20 passed |
-| Ubuntu action/CUPS fixture suite | 23 passed |
+| Shared Core suite | 75 passed |
+| Audited disk-failure and retry regressions | 10 passed |
+| Computer transport suite, pinned localhost TLS | 22 passed |
+| Ubuntu actions / CUPS fixtures | 23 passed |
 | Published Ubuntu host integration | 25 passed |
-| Two published Ubuntu hosts, bidirectional LAN transfers and restart | 6 passed |
-| Native GTK UI with published host | 10 passed |
-| Go WebRTC/fragmentation/concurrency suite, race detector | 8 passed; opt-in live test skipped in ordinary run |
-| Opt-in live Cloudflare signaling/WebRTC test, race detector | Passed |
-| Ubuntu .deb metadata, ownership, modes and payload validation | Passed |
-| Extracted .deb host integration | 25 passed |
-| Windows x64 publish | Succeeded |
+| Two running Ubuntu hosts, bidirectional local transfers and restart | 6 passed |
+| GTK interface with the real published host | 18 passed |
+| Go encrypted WebRTC / RPC tests with race detector | 8 passed; live Cloudflare test skipped |
+| Phone JavaScript regression suite | 5 passed |
+| Android unit tests, including 4 new activity UI tests | 24 passed |
+| Android debug APK and lint | Built; 0 lint errors, 48 warnings |
+| Ubuntu installer payload checks | 9 passed |
+| Extracted Ubuntu installer host integration | 25 passed |
+| Windows self-contained x64 publish | Succeeded |
 
-Computer checks cover immutable staged file bytes, receiving approval, wrong certificates and credentials, stable job IDs after lost chunk/finish acknowledgements, reverse downloads, restart-persistent destinations, empty files, cancellation, destination removal and safe public snapshots. Two real Ubuntu processes exchanged an 800-KB file in both directions over pinned HTTPS and resumed reverse delivery after restart. The shared suite runs on Linux; it is not evidence of a real Windows GUI session.
+GTK checks exercise the three pages, disabled sending before device selection, accurate empty device state, selection preservation and restoration, no silent recipient switch after removal, preparation controls, X11 clipboard verification, background receiving, launcher reopening, QR rendering and a compact desktop window. Screenshots are actual GTK renders using demonstration device labels with the real receiver process.
 
-The live test enrolls a temporary room at the existing production service, connects the PC and phone-role desktop endpoints through authenticated WebSockets, requests ICE for both roles, completes signed offer/answer negotiation, opens an encrypted jobs-v2 channel, exchanges an RPC and deletes the room. Pion virtual UDP peers substitute for restricted native interface enumeration in this environment. The separate fragmented-transfer test sends 262,144 bytes and performs 16 simultaneous reverse chunk requests over real encrypted Pion channels on a virtual network, under the race detector.
+Android UI tests use Robolectric/API 28. They check the initial Save action and disabled Send button, Files/Text/Link controls, conditional print settings, Android Share link handling, draft preservation across navigation, and locking destination/payload controls during preparation. These tests are not an Android hardware or emulator session. Android lint still reports nonfatal warnings; this is not a zero-warning release.
 
-A full remote transfer attempt between the two published hosts timed out in this environment. Therefore no completed desktop-to-desktop transfer across independent real internet/NAT networks is claimed. That remains a required check on real computers, especially without TURN. The live signaling test and virtual UDP transport tests passed independently.
+Computer tests cover immutable staged bytes, approval and certificate checks, stable job IDs after lost acknowledgements, reverse transfers, saved destinations, cancellation, empty files and safe snapshots. Ubuntu process integration exchanges files in both directions and confirms pairing/identity persistence after restart. CUPS tests use a fixture command runner; no physical printer was tested.
 
-GTK checks launch the actual published receiver, render all four tabs, verify X11 clipboard content, phone and computer destination selection, hide/reopen behavior, QR generation and screenshot capture. They do not cover GNOME Wayland or a real desktop login. The package is extracted and checked without changing system packages; its host is rerun through the local integration suite. This does not constitute a clean-machine apt installation.
+Windows was cross-published from Linux; its GUI has not been operated on a real Windows machine here. Ubuntu's GUI was exercised in GTK/X11 under Xvfb, not GNOME Wayland. The .deb was extracted and checked without installing system packages; a clean-machine apt installation remains unverified. Neither desktop installer is code-signed. The Android APK is debug-signed and requires a matching signing key to update an existing installation.
 
-CUPS tests use a fixture command runner and cover capabilities, paper, copies, orientation, color, duplex, scaling, collation, PDF ranges, argument handling and uncertain queue outcomes. No physical printer was tested. The preserved Android protocol supports the existing actions, but an Android device was not connected in this task.
-
-Before public distribution: install on clean Ubuntu and Windows machines; test Ubuntu ↔ Windows, Ubuntu ↔ Ubuntu, your Android app locally/remotely, Wayland clipboard behavior, one physical print and separate internet networks. Windows and Ubuntu artifacts are unsigned. Only amd64/x64 installers are included. The existing backend has one active remote initiating-device slot; a phone and a desktop share it. No TURN or paid relay was added.
+The remote transport is unchanged. No new live production-room or independent internet/NAT transfer test was performed for this UI update. The current backend has one remote initiating-device slot per receiver. No TURN or paid relay was added. Before public distribution, test installation and a small transfer on real Windows and Android devices, Ubuntu Wayland, one physical printer and two independent internet networks.

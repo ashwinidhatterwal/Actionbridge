@@ -1,19 +1,19 @@
-# ActionBridge for Ubuntu 0.6.0
+# ActionBridge for Ubuntu 0.7.0
 
-The Ubuntu companion works with the existing ActionBridge Android v0.5 app.
+The Ubuntu companion works with the ActionBridge Android app, including the new v0.7 interface.
 It receives files, opens supported documents and links, copies received text,
 and prints through CUPS. It also sends files, text and links back to your phone.
 Both local HTTPS and internet WebRTC use the same activity and action engine.
 
 ## Computer-to-computer transfers
 
-Works in both directions: Ubuntu ↔ Windows, Ubuntu ↔ Ubuntu and Windows ↔ Windows. Update both computers to desktop v0.6.0. Open the **Send** tab, click **Add computer**, then enter the other computer’s local IP address and approve the request on its screen. Alternatively choose **Find nearby** in Devices. Select the saved destination and choose **Choose files**. On the receiving computer, select the approved source computer to send files back through the same pairing.
+Works in both directions: Ubuntu ↔ Windows, Ubuntu ↔ Ubuntu and Windows ↔ Windows. On **Home**, choose **Add device → A computer · find nearby**, then approve the request on the receiving computer. Alternatively use **enter address or code** with its local IP address. Select the saved device on Home and choose **Send files**.
 
-Across the internet, copy the receiving computer’s private code from **Connect device → Copy code**, then choose **Add computer → Internet pairing code** on the sender. To send back, select **Device paired by QR** on the receiver. Keep both apps running. This uses the existing signaling service and direct encrypted WebRTC; no backend deployment is required. Without TURN, some network pairs cannot connect. One remote slot supports one active initiating device; a phone and computer cannot occupy that slot simultaneously.
+Across the internet, copy the receiving computer's private code from **Settings → Show this computer’s QR code**, then paste it into **Add device → enter address or code** on the sender. To send back, select **Linked internet device** on the receiver after its first successful connection. Keep both apps running. This uses the existing service and direct encrypted WebRTC; no backend deployment is required. Without TURN, some network pairs cannot connect. One remote slot supports one active initiating device.
 
-Pairings persist until removed. Files stay queued when a computer is offline and resume from committed offsets. Delivered files are saved under Downloads/ActionBridge and never automatically executed. Removing a saved destination cancels waiting sends; removing its receiving permission is a separate Devices action. If DHCP changes a saved local IP, find/add that computer again; the saved certificate must still match.
+Pairings persist until removed. Files stay queued when a computer is offline and resume from committed offsets. Delivered files are saved under Downloads/ActionBridge and never automatically executed. Removing a saved destination cancels waiting sends; removing its receiving permission is a separate Home device-management action. If DHCP changes a saved local IP, find/add that computer again; the saved certificate must still match.
 
-See [the full update guide](../docs/UPDATE-v0.6.0.md).
+See [the full update guide](../docs/UPDATE-v0.7.0.md).
 
 ## Install and connect
 
@@ -24,7 +24,7 @@ Ubuntu 22.04 and 26.04 desktop compatibility has not been verified.
 Download the `.deb`, open a terminal in its folder, and run:
 
 ```sh
-sudo apt install ./ActionBridge-Ubuntu-v0.6.0-amd64.deb
+sudo apt install ./ActionBridge-Ubuntu-v0.7.0-amd64.deb
 ```
 
 Apt installs the GTK/Python/printing dependencies. You do not need Node/npm,
@@ -32,7 +32,7 @@ Go, .NET, a domain, an enrollment key or an additional networking app.
 The installer does not change your firewall or start a root daemon.
 
 1. Open **ActionBridge** from Ubuntu's application launcher.
-2. With internet available, click **Connect device**. Automatic enrollment uses
+2. With internet available, click **Add device → A phone · show QR code**. Automatic enrollment uses
    `https://actionbridge-connect.actionbridge.workers.dev`.
 3. On Android, choose **Add computer → Scan QR code** and scan the private QR.
    Use the copy/manual-entry option if camera access is unavailable.
@@ -43,18 +43,14 @@ The installer does not change your firewall or start a root daemon.
 
 Keep the pairing QR private: it grants access to file and desktop actions.
 The remote slot supports one active phone or initiating computer at a time. Pairings and the computer
-identity remain stored across restarts and upgrades. Devices lets you remove
-local phones or revoke remote access. Remote revocation requires internet;
-revoked access stays disabled until you click Connect device again.
+identity remain stored across restarts and upgrades. Home lets you manage local devices; Settings lets you revoke internet access. Remote revocation requires internet;
+revoked access stays disabled until you show your QR code again.
 
 ## Desktop behavior
 
-- **Activity:** received files and actions, progress, result and cancellation.
-- **Send to phone:** choose/drop up to 20 files, send text/link or clipboard.
-  Keep the Android app open and select this computer to receive. The desktop
-  stages its own copies; changing the original cannot alter a queued transfer.
-- **Devices:** inspect local pairing and remove/revoke access.
-- **Preferences:** optional start on login, printer check and receiver restart.
+- **Home:** choose a device and send files, text, links or clipboard contents. You can drop up to 20 files onto the sending area. For a phone to receive, keep its Android app open and select this computer. The desktop stages private copies so edits to the original cannot alter a queued transfer.
+- **Activity:** Sent and Received filters with progress, results and contextual actions.
+- **Settings:** startup, printing, QR code, connection help, privacy and receiver troubleshooting.
 
 Closing the window keeps the receiver running in your signed-in session.
 Reopen the launcher to return. Menu → Quit stops it; `actionbridge --quit` also
@@ -111,7 +107,7 @@ phones, quit, then move the private folder aside. Your phone must pair again.
 
 If startup fails, check another ActionBridge instance is not running and that
 TCP 45833 is free. If a file/action fails, review Activity before retrying. If a
-printer is uncertain, check CUPS before resending. Use Preferences → Restart
+printer is uncertain, check CUPS before resending. Use Settings → Restart
 receiver after resolving the issue. An unavailable document opener does not
 remove the received file. Unsupported executable/script types are saved but
 never automatically opened.

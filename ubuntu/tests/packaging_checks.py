@@ -6,7 +6,7 @@ def check(v,message):
  assert v,message
  count+=1;print('PASS:',message)
 meta=subprocess.check_output(['dpkg-deb','-f',str(package)]).decode()
-check('Package: actionbridge' in meta and 'Version: 0.6.0-1' in meta,'package identity and version')
+check('Package: actionbridge' in meta and 'Version: 0.7.0-1' in meta,'package identity and version')
 check('Architecture: amd64' in meta,'amd64 architecture')
 check(all(p in meta for p in ['python3-gi','gir1.2-gtk-3.0','cups-client','poppler-utils']),'desktop and printing dependencies declared')
 listing=subprocess.check_output(['dpkg-deb','-c',str(package)]).decode().splitlines()
@@ -19,6 +19,6 @@ for line in (root/'DEBIAN/md5sums').read_text().splitlines():
  expected,name=line.split('  ',1);assert hashlib.md5((root/name).read_bytes()).hexdigest()==expected,name
 check(True,'every packaged payload checksum matches')
 check('/usr/bin/python3 /usr/lib/actionbridge/app.py' in (root/'usr/bin/actionbridge').read_text() and 'Exec=actionbridge' in (root/'usr/share/applications/app.actionbridge.Ubuntu.desktop').read_text(),'launcher and desktop entry route to embedded app')
-check((root/'usr/share/doc/actionbridge/UPDATE-v0.6.0.md').is_file() and '10.0.12' in (base/'ActionBridge.Host.runtimeconfig.json').read_text(),'update guide and bundled runtime version present')
+check((root/'usr/share/doc/actionbridge/UPDATE-v0.7.0.md').is_file() and '10.0.12' in (base/'ActionBridge.Host.runtimeconfig.json').read_text(),'update guide and bundled runtime version present')
 for name in ['app.py','bridge.py']:py_compile.compile(str(base/name),doraise=True)
 print(count,'package checks passed.')

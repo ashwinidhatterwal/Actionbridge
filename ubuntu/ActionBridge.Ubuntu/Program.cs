@@ -27,7 +27,7 @@ public sealed class Host: IAsyncDisposable {
   server=new(id,Environment.MachineName,cert,trust,transfers,actions,Approve,()=>remote.Config==null||!remote.Enabled?null:remote.PairingCode(),outbox);
   var port=Wire.ApiPort;var portOption=Array.IndexOf(args,"--port");if(portOption>=0)port=int.Parse(args[portOption+1]);await server.StartAsync(port,!args.Contains("--no-discovery"));
   transfers.Changed+=job=>{ui.Event("changed",new{});if(job.State is "completed" or "submitted" or "failed" or "uncertain")ui.Event("notification",new{message=job.State=="completed"?"Phone action completed":job.Message});};outbox.Changed+=()=>ui.Event("changed",new{});
-  ui.Event("ready",new{name=Environment.MachineName,id,received,version="0.6.0",port});if(autoEnroll)_=Enroll();_=RemoteLoop();
+  ui.Event("ready",new{name=Environment.MachineName,id,received,version="0.7.0",port});if(autoEnroll)_=Enroll();_=RemoteLoop();
  }
  async Task<bool> Approve(PairRequest request,string ip){try{var result=await ui.Request("approval",new{name=request.Name,ip});return result.GetProperty("allowed").GetBoolean();}catch{return false;}}
  async Task Enroll(){try{await remote!.Configure();retrySeconds=30;}catch{retrySeconds=Math.Min(retrySeconds*2,300);}}
@@ -37,7 +37,7 @@ public sealed class Host: IAsyncDisposable {
   if(method=="snapshot")result=Snapshot();else{await mutations.WaitAsync(stop.Token);try{result=await Command(method!,message);}finally{mutations.Release();}}
   ui.Send(new{requestId,result});
  }catch(Exception e){ui.Send(new{requestId,error=e is ArgumentException or InvalidOperationException or IOException or KeyNotFoundException?e.Message:"Computer could not complete this request."});}}
- object Snapshot()=>new{phones=trust.List().Select(p=>new{id=p.ClientId,name=p.Name}),computers=computers.Snapshot(),remoteReady=remote?.Config!=null&&remote.Enabled,remoteRecipient=remote?.Config==null?null:"remote:"+remote.Config.Room,remoteStatus=remote?.Config==null&&!autoEnroll?"Internet access is off · Connect phone to enable":remote?.Status,jobs=transfers.History().Select(j=>new{request=new{id=j.Request.Id,name=j.Request.Name,action=j.Request.Action,size=j.Request.Size},j.ClientId,j.Offset,j.State,message=j.Message is {Length:>1000}?j.Message[..1000]:j.Message,j.Updated}),outgoing=outbox.History().Select(o=>new{o.Id,o.Name,o.Kind,o.Size,o.State,o.Updated,o.Offset}),received};
+ object Snapshot()=>new{phones=trust.List().Select(p=>new{id=p.ClientId,name=p.Name}),computers=computers.Snapshot(),remoteReady=remote?.Config!=null&&remote.Enabled,remoteLinked=remote?.HasLinkedDevice==true,remoteRecipient=remote?.Config==null?null:"remote:"+remote.Config.Room,remoteStatus=remote?.Config==null&&!autoEnroll?"Internet access is off · Connect phone to enable":remote?.Status,jobs=transfers.History().Select(j=>new{request=new{id=j.Request.Id,name=j.Request.Name,action=j.Request.Action,size=j.Request.Size},j.ClientId,j.Offset,j.State,message=j.Message is {Length:>1000}?j.Message[..1000]:j.Message,j.Updated}),outgoing=outbox.History().Select(o=>new{o.Id,o.Name,o.Kind,o.Size,o.State,o.Updated,o.Offset}),received};
  async Task<object> Command(string method,JsonElement m){switch(method){
   case "pairing":await remote!.Configure(true);autoEnroll=true;return new{code=remote.PairingCode()};
   case "revokeRemote":await remote!.Disconnect();autoEnroll=false;Wire.AtomicJson(Path.Combine(root,"remote.disabled"),true);return new{done=true};

@@ -2,10 +2,10 @@ plugins { id("com.android.application") }
 android {
     namespace = "app.actionbridge"
     compileSdk = 36
-    defaultConfig { applicationId = "app.actionbridge"; minSdk = 26; targetSdk = 36; versionCode = 50; versionName = "0.5.0"; buildConfigField("String", "SUPPORT_EMAIL", "\"${System.getenv("SUPPORT_EMAIL") ?: ""}\"") }
+    defaultConfig { applicationId = "app.actionbridge"; minSdk = 26; targetSdk = 36; versionCode = 70; versionName = "0.7.0"; buildConfigField("String", "SUPPORT_EMAIL", "\"${System.getenv("SUPPORT_EMAIL") ?: ""}\"") }
     compileOptions { sourceCompatibility = JavaVersion.VERSION_17; targetCompatibility = JavaVersion.VERSION_17 }
     buildFeatures { buildConfig = true }
-    testOptions { unitTests.isReturnDefaultValues = true }
+    testOptions { unitTests.isReturnDefaultValues = true; unitTests.isIncludeAndroidResources = true }
     signingConfigs {
         create("publish") {
             val keyPath=System.getenv("UPLOAD_KEYSTORE_PATH")
@@ -26,6 +26,7 @@ dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.10.2")
     testImplementation("junit:junit:4.13.2")
     testImplementation("org.json:json:20240303")
+    testImplementation("org.robolectric:robolectric:4.15.1")
 }
 // Keep the transitive AndroidX families on a consistent generation.
 configurations.configureEach {

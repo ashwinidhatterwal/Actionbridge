@@ -1,25 +1,30 @@
-# ActionBridge desktop v0.6.0
+# ActionBridge 0.7.0
 
-New in desktop v0.6: bidirectional Ubuntu ↔ Windows and Ubuntu ↔ Ubuntu transfers, saved computer destinations, and audited reliability fixes. See [desktop update guide](docs/UPDATE-v0.6.0.md). Android remains v0.5.0 and the backend does not need redeployment.
+Files, text and links between Android, Windows and Ubuntu, nearby or over the internet. All three native interfaces now use **Home**, **Activity** and **Settings**. Home focuses on choosing a device and sending. Activity holds incoming and outgoing transfers. Settings holds startup, printing, connections and help.
 
-New in v0.5: Android text selection → Send to PC, and Windows Send to phone with files, links and clipboard text. See [update guide](docs/UPDATE-v0.5.0.md). The existing v0.4 backend does not need redeployment.
+See [the v0.7 setup and update guide](docs/UPDATE-v0.7.0.md), [Ubuntu installation](ubuntu/README.md), and [current verification results and limitations](ubuntu/VERIFICATION.md).
 
-One Android main page for remembered Windows computers, local discovery and encrypted remote connections. Save files, open supported files, print PDF/images with printer settings, copy text and open web links. Windows uses one durable job journal and activity view for both routes.
+## Features
 
-The Windows build automatically uses https://actionbridge-connect.actionbridge.workers.dev. New installations need no service URL or enrollment key. The operator must deploy the updated backend once; see [remote/DEPLOY.md](remote/DEPLOY.md). Existing paired PCs retain their credentials. Nearby approved phones receive remote pairing automatically; QR pairing also works for phones away from the LAN.
+- Saved device selection and pairings that remain available while devices are offline.
+- Files, links and clipboard text in both directions; computer-to-computer transfers across Windows and Ubuntu.
+- Android Save, Open, Print, Copy and Link actions, with conditional printer settings.
+- Android Share and text-selection **Send to PC** actions.
+- Durable staged file copies, resumable transfers, activity history and cancellation.
+- Local pinned HTTPS and encrypted direct WebRTC through the existing signaling service.
 
-Windows packages must keep ActionBridge.exe and ActionBridge.Remote.exe together. Install.cmd configures startup and scoped firewall rules. Android APK updates use the original private release signing key; do not publish its backup or cloud credentials.
+Internet setup uses `https://actionbridge-connect.actionbridge.workers.dev`. New installations need no domain, enrollment key or extra networking app. The already deployed backend needs no update for v0.7. Pairing codes are private credentials; share them only with devices you trust.
 
-The Android main page owns all controls, staged files and history. A bundled invisible WebView supplies WebRTC. The Go helper transports requests over encrypted data channels and inherited private pipes to the existing .NET Transfers and WindowsActions implementations. Cloudflare handles enrollment and connection signaling, with optional TURN forwarding. File bodies never pass through the signaling Worker.
+Keep receiving computers awake and ActionBridge running. For a phone to receive, open ActionBridge and select the sending computer. Internet phone transfers need its screen open; local sending uses the existing background queue. Closing a desktop window keeps receiving until Quit.
 
-Remote transfers require the main Android screen open and the PC awake. LAN transfers keep the background worker queue. One active remote phone per PC, multiple remembered PCs on the phone, 2 GB per file. Submitted printing means accepted by Windows, not confirmed physical output. Real-device and printer acceptance testing is required for the updated build.
+The current remote slot accepts one active initiating phone or computer at a time. This build adds no TURN relay. Some network pairs cannot establish a direct connection. Submitted printing means accepted by the print system, not physically verified output.
 
-Source includes Android, Windows, the remote service and helper, CI workflows, tests and deployment notes. See remote/VERIFICATION.md for the current automated checks and limitations.
+## Build
 
-## Ubuntu desktop companion
+The repository contains native Android, WinForms Windows and GTK Ubuntu interfaces; shared .NET transfer/action engines; a Go WebRTC helper; the deployed Cloudflare service source; tests and GitHub Actions.
 
-An Ubuntu amd64 companion is included in `ubuntu/`. It shares the existing
-Android/Windows transport and durable action engine, with a native GTK desktop,
-CUPS printing, local discovery, direct remote connectivity, persistent pairing
-and two-way files/text/links. See `ubuntu/README.md` for installation and build
-instructions, and `ubuntu/VERIFICATION.md` for the tested scope.
+- Android: Java 17, Android SDK 36, then `cd android && ./gradlew :app:assembleDebug :app:testDebugUnitTest :app:lintDebug`.
+- Windows: .NET 10 and Go 1.26; the workflow publishes a self-contained x64 executable and its remote helper. Package both executables with the installer scripts.
+- Ubuntu: .NET 10 and Go 1.26; `ubuntu/build.sh` publishes and packages the self-contained amd64 host and GTK desktop. See the Ubuntu README for dependencies.
+
+Use the existing private production signing key for Android updates and Play Store publishing. The supplied test APK is debug-signed. The desktop packages are unsigned; clean-machine and real-device acceptance checks remain necessary before public release.

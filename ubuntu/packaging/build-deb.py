@@ -15,7 +15,7 @@ write('usr/share/applications/app.actionbridge.Ubuntu.desktop','[Desktop Entry]\
 icon=stage/'usr/share/icons/hicolor/512x512/apps/app.actionbridge.Ubuntu.png';icon.parent.mkdir(parents=True);shutil.copy2(dest/'actionbridge.png',icon)
 write('etc/ufw/applications.d/actionbridge','[ActionBridge]\ntitle=ActionBridge device companion\ndescription=Local discovery, secure file transfer and direct WebRTC\nports=45833/tcp|45832,45840:45860/udp\n')
 write('DEBIAN/control','''Package: actionbridge
-Version: 0.6.0-1
+Version: 0.7.0-1
 Section: net
 Priority: optional
 Architecture: amd64
@@ -32,8 +32,8 @@ if command -v update-desktop-database >/dev/null 2>&1; then update-desktop-datab
 if command -v gtk-update-icon-cache >/dev/null 2>&1; then gtk-update-icon-cache -q -t -f /usr/share/icons/hicolor || true; fi
 exit 0
 ''',0o755)
-write('usr/share/doc/actionbridge/README.md',(source/'ubuntu/README.md').read_text().replace('(../docs/UPDATE-v0.6.0.md)','(UPDATE-v0.6.0.md)'));write('usr/share/doc/actionbridge/copyright',(source/'ubuntu/THIRD-PARTY-NOTICES.txt').read_text())
-write('usr/share/doc/actionbridge/UPDATE-v0.6.0.md',(source/'docs/UPDATE-v0.6.0.md').read_text())
+write('usr/share/doc/actionbridge/README.md',(source/'ubuntu/README.md').read_text().replace('(../docs/UPDATE-v0.7.0.md)','(UPDATE-v0.7.0.md)'));write('usr/share/doc/actionbridge/copyright',(source/'ubuntu/THIRD-PARTY-NOTICES.txt').read_text())
+write('usr/share/doc/actionbridge/UPDATE-v0.7.0.md',(source/'docs/UPDATE-v0.7.0.md').read_text())
 write('usr/share/doc/actionbridge/VERIFICATION.md',(source/'ubuntu/VERIFICATION.md').read_text())
 # Normalize reproducible ownership/permissions. Do not ship build intermediates.
 for p in stage.rglob('*'):
@@ -43,4 +43,4 @@ for name in ('ActionBridge.Host','ActionBridge.Remote'):
  assert (dest/name).exists(),name+' missing';(dest/name).chmod(0o755)
 files=[p for p in stage.rglob('*') if p.is_file() and 'DEBIAN' not in p.relative_to(stage).parts]
 write('DEBIAN/md5sums',''.join(hashlib.md5(p.read_bytes()).hexdigest()+'  '+str(p.relative_to(stage))+'\n' for p in sorted(files)))
-artifact=output/'ActionBridge-Ubuntu-v0.6.0-amd64.deb';subprocess.run(['dpkg-deb','--root-owner-group','-Zxz','--build',str(stage),str(artifact)],check=True);print(artifact)
+artifact=output/'ActionBridge-Ubuntu-v0.7.0-amd64.deb';subprocess.run(['dpkg-deb','--root-owner-group','-Zxz','--build',str(stage),str(artifact)],check=True);print(artifact)
