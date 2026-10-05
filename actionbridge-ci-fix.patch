@@ -1,0 +1,37 @@
+diff --git a/tests/ActionBridge.Computers.Tests/Program.cs b/tests/ActionBridge.Computers.Tests/Program.cs
+index 69ccabd..2acd83b 100644
+--- a/tests/ActionBridge.Computers.Tests/Program.cs
++++ b/tests/ActionBridge.Computers.Tests/Program.cs
+@@ -14,7 +14,18 @@ try {
+  Check(!JsonSerializer.Serialize(computers.Snapshot()).Contains(peer.Token),"public desktop snapshot excludes authentication token");computers.Dispose();computers=new Computers(aRoot,aId,"Windows sender",aBox,aJobs);Check(computers.List().Single().Token==peer.Token,"destination and credentials persist across restart");
+  var wrong=peer with{Fingerprint=new string('0',64)};using(var bad=new LanComputerTransport(wrong)){Check(await Fails(()=>bad.Call("hello")),"saved certificate mismatch is rejected");}using(var bad=new LanComputerTransport(peer with{Token=new string('b',64)})){Check(await Fails(()=>bad.Call("outbox")),"unapproved credential cannot read receiver outbox");}
+  var faulted=false;computers.Dispose();computers=new Computers(aRoot,aId,"Windows sender",aBox,aJobs,factory:p=>new Fault(new LanComputerTransport(p),async(method,result)=>{if(method=="append"&&!faulted){faulted=true;throw new IOException("lost chunk acknowledgement");}await Task.CompletedTask;}));var resumed=await aBox.Stage(peer.Recipient,source);await computers.Pump(peer);Check(bJobs.Get(resumed.Id,aId).Offset==262144&&aBox.List(peer.Recipient).Single().Id==resumed.Id,"lost upload acknowledgement preserves committed offset and queued source");await computers.Pump(peer);Check(bJobs.Get(resumed.Id,aId).State=="completed"&&aBox.History().Single(x=>x.Id==resumed.Id).State=="delivered","retry resumes same job identity after lost acknowledgement");
+- computers.Dispose();var lostFinish=false;computers=new Computers(aRoot,aId,"Windows sender",aBox,aJobs,factory:p=>new Fault(new LanComputerTransport(p),async(method,result)=>{if(method=="finish"&&!lostFinish){lostFinish=true;throw new IOException("lost finish acknowledgement");}await Task.CompletedTask;}));var finish=await aBox.Stage(peer.Recipient,source);await computers.Pump(peer);var before=sinkB.Count;await computers.Pump(peer);Check(sinkB.Count==before&&aBox.History().Single(x=>x.Id==finish.Id).State=="delivered","lost final reply does not repeat destination action on retry");
++ computers.Dispose();var lostFinish=false;computers=new Computers(aRoot,aId,"Windows sender",aBox,aJobs,factory:p=>new Fault(new LanComputerTransport(p),async(method,result)=>{if(method=="finish"&&!lostFinish){lostFinish=true;throw new IOException("lost finish acknowledgement");}await Task.CompletedTask;}));var finish=await aBox.Stage(peer.Recipient,source);
++ // A finish reply can be lost before its asynchronous destination action runs.
++ // Hold that action deliberately instead of relying on the runner's scheduling.
++ var before=sinkB.Count;var heldAction=sinkB.HoldNextAction();
++ try {
++  await computers.Pump(peer);
++  Check(lostFinish&&aBox.History().Single(x=>x.Id==finish.Id).State=="queued"&&sinkB.Count==before,"lost final reply retains source while destination action is still pending");
++ } finally {heldAction.TrySetResult();}
++ await computers.Pump(peer);
++ Check(sinkB.Count==before+1&&aBox.History().Single(x=>x.Id==finish.Id).State=="delivered","lost final reply executes destination action exactly once across retry");
++ var finished=bJobs.Get(finish.Id,aId);
++ Check(finished.State=="completed"&&File.ReadAllBytes(bJobs.Destination(finished)).SequenceEqual(bytes)&&Directory.GetFiles(Path.Combine(bRoot,"received"),finish.Id+"-*").Length==1,"lost final reply leaves one checksum-verified destination file");
+  computers.Dispose();Outgoing? cancelled=null;computers=new Computers(aRoot,aId,"Windows sender",aBox,aJobs,factory:p=>new Fault(new LanComputerTransport(p),async(method,result)=>{if(method=="append"&&cancelled!=null)aBox.Cancel(cancelled.Id);await Task.CompletedTask;}));cancelled=await aBox.Stage(peer.Recipient,source);await computers.Pump(peer);Check(bJobs.Get(cancelled.Id,aId).State=="cancelled"&&aBox.History().Single(x=>x.Id==cancelled.Id).State=="cancelled","cancellation between chunks stops destination job and does not resurrect queue");
+  var zero=Path.Combine(root,"empty.txt");File.WriteAllBytes(zero,[]);var empty=await aBox.Stage(peer.Recipient,zero);await computers.Pump(peer);Check(bJobs.Get(empty.Id,aId).State=="completed"&&new FileInfo(bJobs.Destination(bJobs.Get(empty.Id,aId))).Length==0,"empty computer file is saved and acknowledged");
+  var waiting=await aBox.Stage(peer.Recipient,source);computers.Remove(peer.Recipient);Check(computers.List().Length==0&&aBox.History().Single(x=>x.Id==waiting.Id).State=="cancelled","removing saved computer cancels waiting transfers");computers.Dispose();
+@@ -26,5 +37,11 @@ try {
+ Console.WriteLine($"{passed} computer checks passed; {failed} failed.");return failed==0?0:1;
+ static async Task<bool> Fails(Func<Task> task){try{await task();return false;}catch{return true;}}
+ static bool Reject(Action action){try{action();return false;}catch(ArgumentException){return true;}}
+-sealed class Sink:IActionSink{public int Count;public Task ExecuteAsync(JobRequest r,string? file){Interlocked.Increment(ref Count);return Task.CompletedTask;}public IReadOnlyList<PrintChoice> Printers()=>[];}
++sealed class Sink:IActionSink {
++ int count;TaskCompletionSource? held;
++ public int Count=>Volatile.Read(ref count);
++ public TaskCompletionSource HoldNextAction(){var next=new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);if(Interlocked.CompareExchange(ref held,next,null)!=null)throw new InvalidOperationException("An action is already held.");return next;}
++ public async Task ExecuteAsync(JobRequest r,string? file){var wait=Interlocked.Exchange(ref held,null);if(wait!=null)await wait.Task.WaitAsync(TimeSpan.FromSeconds(15));Interlocked.Increment(ref count);}
++ public IReadOnlyList<PrintChoice> Printers()=>[];
++}
+ sealed class Fault(IComputerTransport inner,Func<string,JsonElement,Task> after):IComputerTransport{public int DownloadSize=>inner.DownloadSize;public async Task<JsonElement> Call(string method,object? values=null,CancellationToken ct=default){var result=await inner.Call(method,values,ct);await after(method,result);return result;}public void Dispose()=>inner.Dispose();}
